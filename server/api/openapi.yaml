@@ -1,0 +1,30 @@
+$schema: "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.json"
+
+info:
+  version: 0.0.1
+  title: "shifttree API"
+
+openapi: 3.1.0
+
+paths:
+  /hello:
+    get:
+      summary: "Test endpoint"
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Name to greet"
+      responses:
+        200:
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    example: "Hello World"
