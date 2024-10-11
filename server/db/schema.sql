@@ -2,10 +2,10 @@
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS schedule;
 DROP TABLE IF EXISTS shift;
-DROP TABLE IF EXISTS finalShift;
-DROP TABLE IF EXISTS signUp;
+DROP TABLE IF EXISTS final_shift;
+DROP TABLE IF EXISTS sign_up;
 DROP TABLE IF EXISTS organization;
-DROP TABLE IF EXISTS scheduleMembership;
+DROP TABLE IF EXISTS schedule_membership;
 
 --UserData
 --TODO: Decide on what else we want to store related to users, while keeping in mind that schedules/orgs and such are tracked through foreign keys so shouldn't be a part of user.
@@ -29,13 +29,13 @@ CREATE TABLE shift
 , TIMESTAMP end_time
 );
 
-CREATE TABLE finalShift
+CREATE TABLE final_shift
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
 , user_id UUID REFERENCES user (id)
 , shift_id UUID REFERENCES shift (id)
 )
 
-CREATE TABLE signUp
+CREATE TABLE sign_up
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
 , user_id UUID REFERENCES user (id)
 , shift_id UUID REFERENCES shift (id)
@@ -48,7 +48,7 @@ CREATE TABLE organization
 , owner_id REFERENCES user (id)
 )
 
-CREATE TABLE scheduleMembership
+CREATE TABLE schedule_membership
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
 , org_id REFERENCES organization (id)
 , schedule_id REFERENCES schedule (id)
