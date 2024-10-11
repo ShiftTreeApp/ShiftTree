@@ -17,16 +17,15 @@ export const buildOpts = {
 
 console.log("esbuild opts:");
 console.log({
-  SHIFTTREE_BUILD_DEV: process.env.SHIFTTREE_BUILD_DEV,
   ...buildOpts,
 });
 
-if (process.env.SHIFTTREE_BUILD_DEV) {
-  await esbuild.build({ ...buildOpts, sourcemap: true });
-} else {
+if (process.env.SHIFTTREE_BUILD_PROD) {
   await esbuild.build({
     ...buildOpts,
     minify: true,
     treeShaking: true,
   });
+} else {
+  await esbuild.build({ ...buildOpts, sourcemap: true });
 }
