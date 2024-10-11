@@ -1,15 +1,16 @@
 import process from "node:process";
-import cors from 'cors';
+const cors = require('cors')
 import "dotenv/config";
 import express from "express";
-import yaml from 'js-yaml';
+const yaml = require('js-yaml')
 import fs from 'fs';
-import swaggerUI from 'swagger-ui-express';
+const swaggerUI = require('swagger-ui-express')
 import path from 'path';
 import OpenApiValidator from 'express-openapi-validator';
 
 // IMPORT FILES HERE
 import { router } from "@/router";
+const auth = require('./auth');
 
 //Setup
 const app = express();
@@ -39,7 +40,7 @@ app.use(
 // Add routes here
 // app.REQUESTTYPE('endpoint',{put middleware(authentication) here}, file.FunctionName)
 app.get("/*", router);
-
+app.post('/login', auth.login);
 
 app.use((err, req, res, next) => {
   res.status(err.status).json({
@@ -51,7 +52,8 @@ app.use((err, req, res, next) => {
 })
 
 
+
 const port = process.env.SHIFTTREE_PORT || 3000;
 app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`);
+  console.log(`Server listening on http://localhost:${port}/api-docs`);
 });
