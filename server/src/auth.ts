@@ -38,6 +38,9 @@ export const login = async (req, res) => {
   }
   if (rows[0]) {
     console.log('hello');
+    // If we want to make this secure we should change the 'ShiftTree' to be
+    // randomly generated key that is stored with our server instance on startup in environment.
+    // This works for now though
     const accessToken = jwt.sign(
       {email: rows[0].email, name: rows[0].username},
       'ShiftTree', {
@@ -47,4 +50,19 @@ export const login = async (req, res) => {
     res.status(200).json({name: rows[0].username, accessToken: accessToken});
     return;
 };
+}
+
+// Verifys that the token provided is valid
+export const authorizationCheck = (req,res,next) => {
+  const authorizationHeader = req.headers.authorization;
+  const token = authorizationHeader.split(' ')[1];
+  jwt.verify(token, 'ShiftTree', (err,user) => {
+    if (err) {
+      return res.sendStatus(403);
+    }
+    req.user = user;
+    next();
+  })
+
+
 }
