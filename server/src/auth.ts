@@ -25,7 +25,11 @@ export const login = async (req, res) => {
   const {email, password} = req.body;
   console.log(email);
   console.log(password);
-  const statement =   'SELECT username, email FROM user_account WHERE email = $1 AND password_hash = crypt($2, password_hash)';
+  const statement = `
+  SELECT username, email
+  FROM user_account
+  WHERE email = $1 AND password_hash = encode(digest($2, 'sha256'), 'hex')
+`;
   const query = {
     text: statement,
     values: [email, password],
