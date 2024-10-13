@@ -13,7 +13,7 @@ CREATE TABLE user_account
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
 , username VARCHAR(64) NOT NULL
 , email VARCHAR(64) NOT NULL
-, passoword_hash VARCHAR(255) NOT NULL
+, password_hash VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE schedule
