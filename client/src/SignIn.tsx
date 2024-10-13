@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -12,8 +12,9 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useApi } from "@/client";
 import { useNavigate, useParams } from "react-router";
+
+import { useAuth } from "@/auth";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -23,36 +24,31 @@ export type SignInParams = {
 };
 
 export default function SignIn() {
-  const api = useApi();
   const navigate = useNavigate();
   const routeParams = useParams<SignInParams>();
 
-  const { mutateAsync: submitLogin, error: loginError } = api.useMutation(
-    "post",
-    "/login",
-  );
-
-  function onLogin(accessToken: string) {
-    console.table({ accessToken });
-    localStorage.setItem("accessToken", accessToken);
-    navigate(routeParams.from ?? "/");
-  }
+  const auth = useAuth();
 
   const [remember, setRemember] = useState(false);
 
   // TODO: Ensure server error messages are good enough to show to the user
-  const errorMessage = useMemo(() => loginError?.toString(), [loginError]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const email = data.get("email") as string;
     const password = data.get("password") as string;
-    // TODO: Disable logging password in production
-    console.table({ email, password });
-    submitLogin({ body: { email, password } }).then(({ accessToken }) =>
-      onLogin(accessToken),
-    );
+    auth
+      .login({ email, password })
+      .then(() => {
+        setErrorMessage(null);
+        navigate(routeParams.from ?? "/");
+      })
+      .catch(e => {
+        console.error(e);
+        setErrorMessage(e.toString());
+      });
   };
 
   return (
