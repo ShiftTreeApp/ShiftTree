@@ -1,14 +1,16 @@
 const jwt = require('jsonwebtoken');
 const {Pool} = require('pg');
+import * as process from "node:process";
 
 //Pool to send DB queries to.
 const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  database: 'dev',
-  user: 'admin',
-  password: '1234',
+  host: process.env.SHIFTTREE_PG_HOST,
+  port: process.env.SHIFTTREE_PG_PORT,
+  database: process.env.SHIFTTREE_PG_DATABASE,
+  user: process.env.SHIFTTREE_PG_USER,
+  password: process.env.SHIFTTREE_PG_PASSWORD,
 });
+// TODO: Validate env vars
 
 // Might not need this
 // const getUsernameByEmail = async (email) => {
