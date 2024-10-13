@@ -23,6 +23,11 @@ const pool = new Pool({
 //   return rows[0];
 // };
 
+const jwtKey = process.env.SHIFTTREE_JWT_PK;
+if (!jwtKey) {
+  throw new Error("Environment variable SHIFTTREE_JWT_PK is not set");
+}
+
 export const login = async (req, res) => {
   const {email, password} = req.body;
   console.log(email);
@@ -49,7 +54,7 @@ export const login = async (req, res) => {
     // This works for now though
     const accessToken = jwt.sign(
       {email: rows[0].email, name: rows[0].username},
-      'ShiftTree', {
+      jwtKey, {
         expiresIn: '30m',
         algorithm: 'HS256',
       });
