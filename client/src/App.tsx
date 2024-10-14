@@ -14,7 +14,7 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
+            <Route path="/register" element={<SignUp />} />
             {/* Put authenticated routes below */}
             <Route
               path="/"
