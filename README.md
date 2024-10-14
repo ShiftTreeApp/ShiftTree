@@ -23,6 +23,9 @@ dev server and reload the page in your browser.
 
 ### Server
 
+Copy `.env.example` to `.env` and change the values to match your local setup. If you use the same
+`compose.yaml` you don't need to change anything.
+
 In `/server`, install the dependencies in the same was as client, then run `pnpm dev` to start the server.
 Unfortunately this doesn't have auto reloading so every time you change something you have to restart the server.
 You can do this quickly by pressing `ctrl+c` and then up arrow and enter.
