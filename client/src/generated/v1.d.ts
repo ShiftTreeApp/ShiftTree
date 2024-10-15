@@ -28,13 +28,66 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Succesful */
+                /** @description Successful */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": components["schemas"]["User"];
+                    };
+                };
+                /** @description Unexpected Error */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UnexpectedError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Registration */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Request Body */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RegistrationCredentials"];
+                };
+            };
+            responses: {
+                /** @description Successful Registration */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example Registration Sucessful */
+                            message?: string;
+                        };
                     };
                 };
                 /** @description Unexpected Error */
@@ -106,6 +159,11 @@ export interface components {
             message: string;
         };
         Credentials: {
+            email: string;
+            password: string;
+        };
+        RegistrationCredentials: {
+            username: string;
             email: string;
             password: string;
         };

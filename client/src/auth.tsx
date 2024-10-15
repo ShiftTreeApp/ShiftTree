@@ -8,6 +8,7 @@ function useAuthInner() {
   const api = useApi();
 
   const { mutateAsync: submitLogin } = api.useMutation("post", "/login");
+  const { mutateAsync: submitRegistration } = api.useMutation("post", "/register");
 
   return {
     async login({
@@ -22,6 +23,22 @@ function useAuthInner() {
       });
       localStorage.setItem("accessToken", accessToken);
       console.log("Logged in");
+    },
+
+    async register({
+      username,
+      email,
+      password
+    }: {
+      username : string;
+      email : string;
+      password : string;
+    }): Promise<void> {
+      const { accessToken } = await submitRegistration({
+        body: { username, email, password },
+      });
+      localStorage.setItem("accessToken", accessToken);
+      console.log("Registered User");
     },
 
     logout() {
