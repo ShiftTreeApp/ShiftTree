@@ -11,6 +11,15 @@ const fetchClient = createFetchClient<paths>({
   baseUrl: "http://localhost:3000/",
 });
 
+fetchClient.use({
+  onRequest({ request }) {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      request.headers.set("Authorization", `Bearer ${token}`);
+    }
+  },
+});
+
 export const api = createClient(fetchClient);
 
 export type Api = typeof api;
