@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
 import * as process from "node:process";
+import * as fs from "node:fs/promises";
 
 import * as esbuild from "esbuild";
 
-import packageJson from "./package.json" assert { type: "json" };
+const packageJson = JSON.parse(
+  await fs.readFile("./package.json", { encoding: "utf-8" }),
+);
 
 /** @type{import("esbuild").BuildOptions} */
 export const buildOpts = {
@@ -14,11 +17,6 @@ export const buildOpts = {
   outfile: "dist/index.cjs",
   external: [...Object.keys(packageJson.dependencies)],
 };
-
-console.log("esbuild opts:");
-console.log({
-  ...buildOpts,
-});
 
 if (process.env.SHIFTTREE_BUILD_PROD) {
   await esbuild.build({
