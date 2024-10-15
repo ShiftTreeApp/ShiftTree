@@ -1,6 +1,6 @@
 
 info:
-  version: 0.0.1
+  version: 0.0.2
   title: "shifttree API"
 
 openapi: 3.0.3
@@ -20,11 +20,38 @@ paths:
               $ref: '#/components/schemas/Credentials'
       responses:
         200:
-          description: Succesful
+          description: Successful
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /register:
+    post:
+      description: Registration
+      requestBody:
+        description: Request Body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationCredentials'
+      responses:
+        201:
+          description: Successful Registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Registration Sucessful"
         default:
           description: Unexpected Error
           content:
@@ -72,6 +99,19 @@ components:
         password:
           type: string
       required:
+        - email
+        - password
+     RegistrationCredentials:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - username
         - email
         - password
      User:

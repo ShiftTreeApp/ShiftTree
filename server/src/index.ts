@@ -41,6 +41,7 @@ app.use(
 // app.REQUESTTYPE('endpoint',{put middleware(authentication) here}, file.FunctionName)
 app.get("/*", router);
 app.post('/login', auth.login);
+app.post('/register', auth.registerUser)
 
 app.use((err, req, res, next) => {
   res.status(err.status).json({
