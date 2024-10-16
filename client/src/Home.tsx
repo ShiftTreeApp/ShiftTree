@@ -7,7 +7,7 @@ import {
   Box,
   Link,
 } from "@mui/material";
-import { green, amber } from '@mui/material/colors';
+import { green, amber } from "@mui/material/colors";
 import { useNavigate } from "react-router";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
@@ -17,72 +17,87 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { useAuth } from "@/auth";
 
-
 export default function Home() {
   // https://mui.com/x/react-date-pickers/date-calendar/#dynamic-data
 
   const navigate = useNavigate();
 
   const shiftTreeCreate = () => {
-    // Navigate to the '/about' route
-    navigate('/MyTrees');
-  }
+    // Navigate to the '/MyTrees' route
+    navigate("/MyTrees");
+  };
+  const shiftTreeJoin = () => {
+    // Navigate to join a shiftTree page
+    navigate("/JoinTree");
+  };
 
   return (
-    
     <Grid container direction="column" spacing={2}>
       {/* Contians everything */}
       <Navbar />
 
       {/* Grid for the Calendar and Organizations */}
       <Grid container spacing={2}>
-
         {/* Grid contains Calendar */}
-        <Grid size={4} style={{ outline: '2px solid black', backgroundColor: "silver" }}>
-
+        <Grid
+          size={4}
+          style={{ outline: "2px solid black", backgroundColor: "silver" }}
+        >
           {/* Weird Calendar Shit */}
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DateCalendar renderLoading={() => <DayCalendarSkeleton />} />
           </LocalizationProvider>
-          
+
           {/* Grid that contains Organizations */}
-          <Grid style={{outline: '2px solid black', backgroundColor: 'gray' }}>
-            <Typography sx={{ textAlign: 'center'}}>Organizations</Typography>
-            
+          <Grid style={{ outline: "2px solid black", backgroundColor: "gray" }}>
+            <Typography sx={{ textAlign: "center" }}>Organizations</Typography>
+
             {/* Button for creating an organization */}
-            <Button color="inherit">
-              Create
-            </Button>
+            <Button color="inherit">Create</Button>
           </Grid>
         </Grid>
 
         {/* Grid that contains shiftTrees */}
-        <Grid size={8} style={{ backgroundColor: "lightgreen", outline: "2px solid black" }}>
-          <Typography sx={{ textAlign: 'center'}}>Your ShiftTrees</Typography>
+        <Grid
+          size={8}
+          style={{ backgroundColor: "lightgreen", outline: "2px solid black" }}
+        >
+          <Typography sx={{ textAlign: "center" }}>Your ShiftTrees</Typography>
           {/* Grid that contains actual shiftTree cards */}
-          <Grid>
-          </Grid>
+          <Grid></Grid>
           {/* Grids that contains shiftTree buttons, first one for formatting */}
-          <Grid container spacing={2} style={{ backgroundColor: "green", outline: "2px solid black" }}>
-            
+          <Grid
+            container
+            spacing={2}
+            style={{ backgroundColor: "green", outline: "2px solid black" }}
+          >
             {/* Grid that contains Buttons */}
             <Grid spacing={2}>
-              <Button sx={{ backgroundColor: green[500], '&:hover': { backgroundColor: green[700] } }} onClick={shiftTreeCreate}>
+              <Button
+                sx={{
+                  backgroundColor: green[500],
+                  "&:hover": { backgroundColor: green[700] },
+                }}
+                onClick={shiftTreeCreate}
+              >
                 <Typography sx={{ color: "black" }}>Create</Typography>
               </Button>
-              <Button sx={{ backgroundColor: amber[500], '&:hover': { backgroundColor: amber[700] } }}>
+            </Grid>
+            <Grid spacing={2}>
+              <Button
+                sx={{
+                  backgroundColor: amber[500],
+                  "&:hover": { backgroundColor: amber[700] },
+                }}
+                onClick={shiftTreeJoin}
+              >
                 <Typography sx={{ color: "black" }}>Join</Typography>
               </Button>
             </Grid>
-
-
           </Grid>
         </Grid>
       </Grid>
-
-
     </Grid>
-    
   );
 }
 
@@ -100,7 +115,9 @@ export function Navbar() {
     <Grid container>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
-          <Toolbar sx={{ justifyContent: "space-between", backgroundColor: "green" }}>
+          <Toolbar
+            sx={{ justifyContent: "space-between", backgroundColor: "green" }}
+          >
             <Link href="/">
               <Typography fontSize={24} color={"white"}>
                 ShiftTree
@@ -110,7 +127,6 @@ export function Navbar() {
               Log out
             </Button>
           </Toolbar>
-
         </AppBar>
       </Box>
     </Grid>
