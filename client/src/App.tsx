@@ -6,6 +6,7 @@ import { ApiProvider } from "@/client.tsx";
 
 import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
+import Create from "@/Create.tsx";
 
 export default function App() {
   return (
@@ -21,6 +22,14 @@ export default function App() {
               element={
                 <Authenticated>
                   <Home />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/create"
+              element={
+                <Authenticated>
+                  <Create />
                 </Authenticated>
               }
             />
