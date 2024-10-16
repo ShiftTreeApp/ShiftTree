@@ -58,6 +58,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnexpectedError'
+  /schedules:
+    post:
+      description: Create a new schedule
+      security:
+        - Bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                owner:
+                  type: string
+                  nullable: true
+                name:
+                  type: string
+                description:
+                  type: string
+                  nullable: true
+      responses:
+        201:
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - scheduleId
+                properties:
+                  scheduleId:
+                    type: string
+                    format: uuid
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
   /hello:
     get:
       summary: "Test endpoint"
@@ -80,6 +122,10 @@ paths:
                     type: "string"
                     example: "Hello World"
 components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
   schemas:
      UnexpectedError:
       required:
