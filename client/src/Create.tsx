@@ -12,6 +12,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router";
+
+import { useApi } from "@/client";
 
 export default function Create() {
   const NO_ORG = "none";
@@ -20,8 +23,22 @@ export default function Create() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
+  const api = useApi();
+  const { mutateAsync: createSchedule } = api.useMutation("post", "/schedules");
+
+  const navigate = useNavigate();
+
   function submit() {
     console.log("Create", { organization, name, description });
+    createSchedule({ body: { name, description } })
+      .then(res => {
+        console.log("Created");
+        navigate(`/schedules/${res.scheduleId}`);
+      })
+      .catch(err => {
+        // TODO: Show error message with a notification or something
+        console.error("Failed to create schedule", err);
+      });
   }
 
   return (
