@@ -7,6 +7,8 @@ import { ApiProvider } from "@/client.tsx";
 import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import MyTrees from "@/MyTrees.tsx";
+import JoinTree from "@/JoinTree.tsx";
+
 
 export default function App() {
   return (
@@ -37,7 +39,7 @@ export default function App() {
               path="/JoinTree"
               element={
                 <Authenticated>
-                  <MyTrees />
+                  <JoinTree />
                 </Authenticated>
               }
             />
