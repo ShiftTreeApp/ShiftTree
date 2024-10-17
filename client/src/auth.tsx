@@ -34,10 +34,9 @@ function useAuthInner() {
       email : string;
       password : string;
     }): Promise<void> {
-      const { accessToken } = await submitRegistration({
+      await submitRegistration({
         body: { username, email, password },
       });
-      localStorage.setItem("accessToken", accessToken);
       console.log("Registered User");
     },
 
