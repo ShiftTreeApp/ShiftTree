@@ -39,40 +39,68 @@ export default function Home() {
       {/* Grid for the Calendar and Organizations */}
       <Grid container spacing={2}>
         {/* Grid contains Calendar */}
-        <Grid
-          size={4}
-          style={{ outline: "2px solid black", backgroundColor: "silver" }}
-        >
+        <Grid style={{ outline: "2px solid black", backgroundColor: "silver" }}>
           {/* Weird Calendar Shit */}
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DateCalendar renderLoading={() => <DayCalendarSkeleton />} />
           </LocalizationProvider>
 
           {/* Grid that contains Organizations */}
-          <Grid style={{ outline: "2px solid black", backgroundColor: "gray" }}>
-            <Typography sx={{ textAlign: "center" }}>Organizations</Typography>
-
-            {/* Button for creating an organization */}
-            <Button color="inherit">Create</Button>
+          <Grid
+            container
+            style={{ backgroundColor: "green", outline: "2px solid black" }}
+            sx={{ pt: 1, pb: 1 }}
+          >
+            <Grid size={6}>
+              <Typography
+                sx={{ marginLeft: 1, pt: 0.5, pb: 0.5, textAlign: "center" }}
+                variant="h6"
+              >
+                Organizations
+              </Typography>
+            </Grid>
+            <Grid
+              container
+              size={6}
+              justifyContent={"flex-end"}
+              sx={{ pt: 0.5, pb: 0.5, px: 2 }}
+            >
+              {/* Button for creating an organization */}
+              <Button
+                sx={{
+                  backgroundColor: green[500],
+                  "&:hover": { backgroundColor: green[700] },
+                }}
+              >
+                <Typography sx={{ color: "black" }}>Create</Typography>
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
 
-        {/* Grid that contains shiftTrees */}
+        {/* Grid that contains shiftTrees info */}
         <Grid
           size={8}
           style={{ backgroundColor: "lightgreen", outline: "2px solid black" }}
         >
-          <Typography sx={{ textAlign: "center" }}>Your ShiftTrees</Typography>
-          {/* Grid that contains actual shiftTree cards */}
-          <Grid></Grid>
           {/* Grids that contains shiftTree buttons, first one for formatting */}
           <Grid
             container
-            spacing={2}
+            spacing={1}
             style={{ backgroundColor: "green", outline: "2px solid black" }}
+            sx={{ pt: 1, pb: 1 }}
           >
+            <Grid size={6}>
+              <Typography
+                variant="h4"
+                sx={{ marginLeft: 1, textAlign: "center", pt: 0.5, pb: 0.5 }}
+              >
+                Your ShiftTrees
+              </Typography>
+            </Grid>
             {/* Grid that contains Buttons */}
-            <Grid spacing={2}>
+
+            <Grid container size={6} justifyContent="flex-end" sx={{ px: 2 }}>
               <Button
                 sx={{
                   backgroundColor: green[500],
@@ -82,8 +110,6 @@ export default function Home() {
               >
                 <Typography sx={{ color: "black" }}>Create</Typography>
               </Button>
-            </Grid>
-            <Grid spacing={2}>
               <Button
                 sx={{
                   backgroundColor: amber[500],
@@ -95,6 +121,9 @@ export default function Home() {
               </Button>
             </Grid>
           </Grid>
+
+          {/* Grid that contains actual shiftTree cards */}
+          <Grid></Grid>
         </Grid>
       </Grid>
     </Grid>
