@@ -46,7 +46,14 @@ function useAuthInner() {
     },
 
     isLoggedIn() {
-      return localStorage.getItem("accessToken") !== null;
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken === null) {
+        return false;
+      }
+      const decoded = JSON.parse(atob(accessToken.split(".")[1])) as {
+        exp: number;
+      };
+      return Date.now() / 1000 < decoded.exp;
     },
   };
 }
@@ -82,5 +89,5 @@ export function Authenticated(props: { children: React.ReactNode }) {
     }
   });
 
-  return <>{props.children}</>;
+  return <>{auth.isLoggedIn() && props.children}</>;
 }
