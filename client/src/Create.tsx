@@ -1,5 +1,4 @@
 import {
-  AppBar,
   Button,
   Container,
   FormControl,
@@ -8,13 +7,13 @@ import {
   MenuItem,
   Select,
   TextField,
-  Toolbar,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
 import { useApi } from "@/client";
+import Navbar from "@/Navbar";
 
 export default function Create() {
   const NO_ORG = "none";
@@ -42,10 +41,8 @@ export default function Create() {
   }
 
   return (
-    <Grid container spacing={4}>
-      <AppBar position="sticky" color="primary">
-        <Toolbar>Navbar placeholder</Toolbar>
-      </AppBar>
+    <Grid container spacing={4} direction="column">
+      <Navbar />
       <Container component="main" maxWidth="sm">
         <Grid container spacing={4} direction="column">
           <Grid container spacing={1} direction="column">
