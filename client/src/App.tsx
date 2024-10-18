@@ -36,14 +36,6 @@ export default function App() {
               }
             />
             <Route
-              path="/MyTrees"
-              element={
-                <Authenticated>
-                  <MyTrees />
-                </Authenticated>
-              }
-            />
-            <Route
               path="/JoinTree"
               element={
                 <Authenticated>

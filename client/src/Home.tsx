@@ -23,8 +23,8 @@ export default function Home() {
   const navigate = useNavigate();
 
   const shiftTreeCreate = () => {
-    // Navigate to the '/MyTrees' route
-    navigate("/MyTrees");
+    // Navigate to the create a shift tree page
+    navigate("/Create");
   };
   const shiftTreeJoin = () => {
     // Navigate to join a shiftTree page
