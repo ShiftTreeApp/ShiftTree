@@ -18,7 +18,7 @@ export default function Home() {
       <Navbar />
 
       {/* Grid for the Calendar and Organizations */}
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{ paddingLeft: 2, paddingRight: 2 }}>
         {/* Grid contains Calendar */}
         <Grid style={{ outline: "2px solid black", backgroundColor: "silver" }}>
           {/* Weird Calendar Shit */}
@@ -62,7 +62,7 @@ export default function Home() {
 
         {/* Grid that contains shiftTrees info */}
         <Grid
-          size={8}
+          sx={{ flexGrow: 1 }}
           style={{ backgroundColor: "lightgreen", outline: "2px solid black" }}
         >
           {/* Grids that contains shiftTree buttons, first one for formatting */}
@@ -70,9 +70,9 @@ export default function Home() {
             container
             spacing={1}
             style={{ backgroundColor: "green", outline: "2px solid black" }}
-            sx={{ pt: 1, pb: 1 }}
+            sx={{ pt: 1, pb: 1, justifyContent: "space-between" }}
           >
-            <Grid size={6}>
+            <Grid>
               <Typography
                 variant="h4"
                 color={"white"}
@@ -83,7 +83,7 @@ export default function Home() {
             </Grid>
             {/* Grid that contains Buttons */}
 
-            <Grid container size={6} justifyContent="flex-end" sx={{ px: 2 }}>
+            <Grid container justifyContent="flex-end" sx={{ px: 2 }}>
               <Button
                 sx={{
                   backgroundColor: green[500],
