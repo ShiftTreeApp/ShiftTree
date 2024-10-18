@@ -7,7 +7,7 @@ import {
   TextField,
 } from "@mui/material";
 import { amber, } from "@mui/material/colors";
-import { Navbar } from "./Home";
+import Navbar from "@/Navbar";
 //import Home from "./Home";
 
 export default function JoinTree() {
