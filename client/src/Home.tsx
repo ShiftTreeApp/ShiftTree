@@ -54,6 +54,7 @@ export default function Home() {
             <Grid size={6}>
               <Typography
                 sx={{ marginLeft: 1, pt: 0.5, pb: 0.5, textAlign: "center" }}
+                color={"white"}
                 variant="h6"
               >
                 Organizations
@@ -72,7 +73,7 @@ export default function Home() {
                   "&:hover": { backgroundColor: green[700] },
                 }}
               >
-                <Typography sx={{ color: "black" }}>Create</Typography>
+                <Typography color="black">Create</Typography>
               </Button>
             </Grid>
           </Grid>
@@ -93,6 +94,7 @@ export default function Home() {
             <Grid size={6}>
               <Typography
                 variant="h4"
+                color={"white"}
                 sx={{ marginLeft: 1, textAlign: "center", pt: 0.5, pb: 0.5 }}
               >
                 Your ShiftTrees
@@ -108,7 +110,7 @@ export default function Home() {
                 }}
                 onClick={shiftTreeCreate}
               >
-                <Typography sx={{ color: "black" }}>Create</Typography>
+                <Typography color="black">Create</Typography>
               </Button>
               <Button
                 sx={{
@@ -117,7 +119,7 @@ export default function Home() {
                 }}
                 onClick={shiftTreeJoin}
               >
-                <Typography sx={{ color: "black" }}>Join</Typography>
+                <Typography color="black">Join</Typography>
               </Button>
             </Grid>
           </Grid>
