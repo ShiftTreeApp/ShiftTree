@@ -1,6 +1,6 @@
 import { Button, Grid2 as Grid, Typography } from "@mui/material";
 import { green, amber } from "@mui/material/colors";
-import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -11,17 +11,6 @@ import Navbar from "@/Navbar";
 
 export default function Home() {
   // https://mui.com/x/react-date-pickers/date-calendar/#dynamic-data
-
-  const navigate = useNavigate();
-
-  const shiftTreeCreate = () => {
-    // Navigate to the create a shift tree page
-    navigate("/Create");
-  };
-  const shiftTreeJoin = () => {
-    // Navigate to join a shiftTree page
-    navigate("/JoinTree");
-  };
 
   return (
     <Grid container direction="column" spacing={2}>
@@ -100,7 +89,8 @@ export default function Home() {
                   backgroundColor: green[500],
                   "&:hover": { backgroundColor: green[700] },
                 }}
-                onClick={shiftTreeCreate}
+                component={Link}
+                to="/create"
               >
                 <Typography color="black">Create</Typography>
               </Button>
@@ -109,7 +99,8 @@ export default function Home() {
                   backgroundColor: amber[500],
                   "&:hover": { backgroundColor: amber[700] },
                 }}
-                onClick={shiftTreeJoin}
+                component={Link}
+                to="/join"
               >
                 <Typography color="black">Join</Typography>
               </Button>
