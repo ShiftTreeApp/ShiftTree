@@ -7,7 +7,6 @@ import { ApiProvider } from "@/client.tsx";
 import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
-import MyTrees from "@/MyTrees.tsx";
 import JoinTree from "@/JoinTree.tsx";
 
 export default function App() {
@@ -36,7 +35,7 @@ export default function App() {
               }
             />
             <Route
-              path="/JoinTree"
+              path="/join"
               element={
                 <Authenticated>
                   <JoinTree />
