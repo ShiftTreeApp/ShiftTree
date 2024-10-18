@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { Link as RouterLink } from "react-router-dom";
 import {
   AppBar,
   Box,
@@ -28,7 +29,7 @@ export default function Navbar() {
           <Toolbar
             sx={{ justifyContent: "space-between", backgroundColor: "green" }}
           >
-            <Link href="/">
+            <Link component={RouterLink} to="/">
               <Typography fontSize={24} color={"white"}>
                 ShiftTree
               </Typography>
