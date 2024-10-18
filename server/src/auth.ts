@@ -48,7 +48,7 @@ export const login = async (req, res) => {
     const accessToken = jwt.sign(
       {email: rows[0].email, name: rows[0].username},
       jwtKey, {
-        expiresIn: '30m',
+        expiresIn: '8h',
         algorithm: 'HS256',
       });
     res.status(200).json({name: rows[0].username, accessToken: accessToken});
