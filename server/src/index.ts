@@ -11,6 +11,7 @@ import OpenApiValidator from 'express-openapi-validator';
 // IMPORT FILES HERE
 import { router } from "@/router";
 const auth = require('./auth');
+import * as schedules from "@/schedules";
 
 //Setup
 const app = express();
@@ -42,6 +43,7 @@ app.use(
 app.get("/*", router);
 app.post('/login', auth.login);
 app.post('/register', auth.registerUser)
+app.post('/schedules', auth.authorizationCheck, schedules.create);
 
 app.use((err, req, res, next) => {
   res.status(err.status).json({
