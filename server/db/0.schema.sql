@@ -22,6 +22,12 @@ CREATE TABLE schedule
 , schedule_name VARCHAR(64) NOT NULL
 );
 
+CREATE TABLE user_schedule_membership
+( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+, user_id UUID NOT NULL REFERENCES user_account (id)
+, schedule_id UUID NOT NULL REFERENCES schedule (id)
+);
+
 CREATE TABLE shift
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
 , schedule_id UUID NOT NULL REFERENCES schedule (id)
@@ -29,13 +35,13 @@ CREATE TABLE shift
 , end_time TIMESTAMP NOT NULL
 );
 
-CREATE TABLE final_shift
+CREATE TABLE user_shift_assignment
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
 , user_id UUID NOT NULL REFERENCES user_account (id)
 , shift_id UUID NOT NULL REFERENCES shift (id)
 );
 
-CREATE TABLE sign_up
+CREATE TABLE user_shift_signup
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
 , user_id UUID NOT NULL REFERENCES user_account (id)
 , shift_id UUID NOT NULL REFERENCES shift (id)
@@ -48,7 +54,7 @@ CREATE TABLE organization
 , owner_id UUID NOT NULL REFERENCES user_account (id)
 );
 
-CREATE TABLE schedule_membership
+CREATE TABLE schedule_org_membership
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
 , org_id UUID NOT NULL REFERENCES organization (id)
 , schedule_id UUID NOT NULL REFERENCES schedule (id)
