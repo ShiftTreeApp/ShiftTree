@@ -114,7 +114,51 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** @description Get all schedules owned by the current user and the schedules the user is a member of */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Filter schedules by role */
+                    role?: ("owner" | "member" | "manager")[];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successful */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            id: string;
+                            name: string;
+                            description: string;
+                            owner: components["schemas"]["UserInfoPreview"];
+                            /** Format: date-time */
+                            startTime: string | null;
+                            /** Format: date-time */
+                            endTime: string | null;
+                            /** @enum {string} */
+                            state: "open" | "closed";
+                        }[];
+                    };
+                };
+                /** @description Unexpected Error */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UnexpectedError"];
+                    };
+                };
+            };
+        };
         put?: never;
         /** @description Create a new schedule */
         post: {
@@ -226,6 +270,13 @@ export interface components {
         User: {
             name: string;
             accessToken: string;
+        };
+        UserInfoPreview: {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            email: string;
+            profileImageUrl?: string;
         };
     };
     responses: never;
