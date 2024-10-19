@@ -27,7 +27,7 @@ export default function Navbar() {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
           <Toolbar
-            sx={{ justifyContent: "space-between", backgroundColor: "green" }}
+            sx={{ justifyContent: "space-between", backgroundColor: "primary" }}
           >
             <Link component={RouterLink} to="/">
               <Typography fontSize={24} color={"white"}>
