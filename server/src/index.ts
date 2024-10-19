@@ -44,6 +44,7 @@ app.get("/*", router);
 app.post('/login', auth.login);
 app.post('/register', auth.registerUser)
 app.post('/schedules', auth.authorizationCheck, schedules.create);
+app.get('/schedules', auth.authorizationCheck, schedules.list);
 
 app.use((err, req, res, next) => {
   res.status(err.status).json({
