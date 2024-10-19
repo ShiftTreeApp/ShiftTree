@@ -1,4 +1,11 @@
-import { Button, Grid2 as Grid, Typography, Paper, Divider } from "@mui/material";
+import {
+  Button,
+  Grid2 as Grid,
+  Typography,
+  Paper,
+  Card,
+  Divider,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
@@ -18,23 +25,21 @@ export default function Home() {
 
       {/* Grid for everything below navbar */}
       <Grid container spacing={2} sx={{ paddingLeft: 2, paddingRight: 2 }}>
-        {/* Grid contains Calendar and org */}  
+        {/* Grid contains Calendar and org */}
         <Grid>
-          <Paper sx={{ 
-            backgroundColor: (theme) => theme.palette.background.default,
-            minHeight: 600,
-            }}>
+          <Paper
+            sx={{
+              backgroundColor: theme => theme.palette.background.default,
+              minHeight: 600,
+            }}
+          >
             {/* Weird Calendar Shit */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateCalendar renderLoading={() => <DayCalendarSkeleton />} />
             </LocalizationProvider>
 
             {/* Grid that contains Organizations */}
-            <Grid
-              container
-              color="primary"
-              sx={{ pt: 1, pb: 1 }}
-            >
+            <Grid container color="primary" sx={{ pt: 1, pb: 1 }}>
               <Grid size={6}>
                 <Typography
                   sx={{ marginLeft: 1, pt: 0.5, pb: 0.5, textAlign: "center" }}
@@ -66,23 +71,23 @@ export default function Home() {
             >
               <Typography sx={{ padding: 2 }}> Sample Organization</Typography>
             </Paper>
-
           </Paper>
         </Grid>
 
         {/* Grid that contains shiftTrees info */}
         <Grid sx={{ flexGrow: 1 }}>
           {/* Grids that contains shiftTree buttons, first one for formatting */}
-          <Paper 
-            sx={{ 
-              backgroundColor: (theme) => theme.palette.background.default, 
+          <Paper
+            sx={{
+              backgroundColor: theme => theme.palette.background.default,
               minHeight: 600, // Adjust this value to set initial space
               display: "flex",
               flexDirection: "column",
               justifyContent: "flex-start",
             }}
-            >
-            <Grid container
+          >
+            <Grid
+              container
               spacing={1}
               sx={{ pt: 1, pb: 2, justifyContent: "space-between" }}
             >
@@ -90,18 +95,24 @@ export default function Home() {
                 <Typography
                   variant="h4"
                   color={"black"}
-                  sx={{ marginLeft: 5, pt: 2, }}
+                  sx={{ marginLeft: 5, pt: 2 }}
                 >
                   Your ShiftTrees
                 </Typography>
               </Grid>
               {/* Grid that contains Buttons */}
 
-              <Grid size={4} justifyContent="flex-end" sx={{ px: 2, pt:2, display: 'flex',alignItems: 'center' }}>
+              <Grid
+                size={4}
+                justifyContent="flex-end"
+                sx={{ px: 2, pt: 2, display: "flex", alignItems: "center" }}
+              >
                 <Button
                   sx={{
-                    backgroundColor: (theme) => theme.palette.primary.main,
-                    "&:hover": { backgroundColor: (theme) => theme.palette.primary.dark },
+                    backgroundColor: theme => theme.palette.primary.main,
+                    "&:hover": {
+                      backgroundColor: theme => theme.palette.primary.dark,
+                    },
                     minWidth: 90, // Set the minimum width to the size of the larger button
                     mr: 2, // Add margin-right to space the buttons apart
                     minHeight: 40,
@@ -114,8 +125,10 @@ export default function Home() {
                 </Button>
                 <Button
                   sx={{
-                    backgroundColor: (theme) => theme.palette.secondary.main,
-                    "&:hover": { backgroundColor: (theme) => theme.palette.secondary.dark},
+                    backgroundColor: theme => theme.palette.secondary.main,
+                    "&:hover": {
+                      backgroundColor: theme => theme.palette.secondary.dark,
+                    },
                     minWidth: 90, // Set the minimum width to the size of the larger button
                     minHeight: 40,
                     px: 2, // Add padding inside the button for consistency
@@ -127,8 +140,23 @@ export default function Home() {
                 </Button>
               </Grid>
             </Grid>
-            <Divider variant="middle" /> 
-
+            <Divider variant="middle" />
+            {/* ShiftTrees Cards Grid */}
+            <Grid container spacing={2} sx={{ padding: 2 }}>
+              {/* Example cards for ShiftTrees */}
+              <Grid size={3}>
+                <Card>ShiftTree 1</Card>
+              </Grid>
+              <Grid size={3}>
+                <Card>ShiftTree 2</Card>
+              </Grid>
+              <Grid size={3}>
+                <Card>ShiftTree 3</Card>
+              </Grid>
+              <Grid size={3}>
+                <Card>ShiftTree 4</Card>
+              </Grid>
+            </Grid>
           </Paper>
           {/* Grid that contains actual shiftTree cards */}
           <Grid></Grid>
