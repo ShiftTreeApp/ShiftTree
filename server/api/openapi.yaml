@@ -99,7 +99,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnexpectedError'
-
+    get:
+      description: Get all schedules owned by the current user and the schedules the user is a member of
+      security:
+        - Bearer: []
+      parameters:
+        - name: role
+          in: query
+          description: Filter schedules by role
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - owner
+                - member
+                - manager
+            default: [owner, member, manager]
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - name
+                    - description
+                    - owner
+                    - startTime
+                    - endTime
+                    - state
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    owner:
+                      $ref: '#/components/schemas/UserInfoPreview'
+                    startTime:
+                      type: string
+                      format: date-time
+                      nullable: true
+                    endTime:
+                      type: string
+                      format: date-time
+                      nullable: true
+                    state:
+                      type: string
+                      enum:
+                        - open
+                        - closed
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
   /hello:
     get:
       summary: "Test endpoint"
@@ -170,3 +233,19 @@ components:
       required:
         - name
         - accessToken
+     UserInfoPreview:
+      type: object
+      required:
+        - id
+        - displayName
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        email:
+          type: string
+        profileImageUrl:
+          type: string
