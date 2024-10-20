@@ -14,6 +14,7 @@ import "dayjs/locale/en";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import Navbar from "@/Navbar";
+import ShiftTreeCard from "./ShiftTreeCard";
 
 export default function Home() {
   // https://mui.com/x/react-date-pickers/date-calendar/#dynamic-data
@@ -109,9 +110,9 @@ export default function Home() {
               >
                 <Button
                   sx={{
-                    backgroundColor: theme => theme.palette.primary.main,
+                    backgroundColor: theme => theme.palette.secondary.main,
                     "&:hover": {
-                      backgroundColor: theme => theme.palette.primary.dark,
+                      backgroundColor: theme => theme.palette.secondary.dark,
                     },
                     minWidth: 90, // Set the minimum width to the size of the larger button
                     mr: 2, // Add margin-right to space the buttons apart
@@ -125,9 +126,9 @@ export default function Home() {
                 </Button>
                 <Button
                   sx={{
-                    backgroundColor: theme => theme.palette.secondary.main,
+                    backgroundColor: theme => theme.palette.primary.main,
                     "&:hover": {
-                      backgroundColor: theme => theme.palette.secondary.dark,
+                      backgroundColor: theme => theme.palette.primary.dark,
                     },
                     minWidth: 90, // Set the minimum width to the size of the larger button
                     minHeight: 40,
@@ -145,16 +146,31 @@ export default function Home() {
             <Grid container spacing={2} sx={{ padding: 2 }}>
               {/* Example cards for ShiftTrees */}
               <Grid size={3}>
-                <Card>ShiftTree 1</Card>
+                <ShiftTreeCard
+                  name="Open Shift"
+                  status="open"
+                  dates="Oct 1 - Oct 31"
+                  description="description description description"
+                />
               </Grid>
               <Grid size={3}>
-                <Card>ShiftTree 2</Card>
+                <ShiftTreeCard
+                  name="Closed Shift"
+                  status="closed"
+                  dates="Sept 1 - Sept 30"
+                  description="This shift is closed. Hours schedlued: 120."
+                />
               </Grid>
               <Grid size={3}>
-                <Card>ShiftTree 3</Card>
+                <ShiftTreeCard
+                  name="Your Shift"
+                  status="owned"
+                  dates="Aug 1 - Aug 31"
+                  description="You own this shift. Description, maybe a button to close the schedule as well"
+                />
               </Grid>
               <Grid size={3}>
-                <Card>ShiftTree 4</Card>
+                {/* Another column for shiftTree card */}
               </Grid>
             </Grid>
           </Paper>
