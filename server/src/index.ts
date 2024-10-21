@@ -11,6 +11,7 @@ import OpenApiValidator from 'express-openapi-validator';
 // IMPORT FILES HERE
 import { router } from "@/router";
 const auth = require('./auth');
+const registration = require('./registration')
 import * as schedules from "@/schedules";
 
 //Setup
@@ -42,7 +43,7 @@ app.use(
 // app.REQUESTTYPE('endpoint',{put middleware(authentication) here}, file.FunctionName)
 app.get("/*", router);
 app.post('/login', auth.login);
-app.post('/register', auth.registerUser)
+app.post('/register', registration.registerUser)
 app.post('/schedules', auth.authorizationCheck, schedules.create);
 app.get('/schedules', auth.authorizationCheck, schedules.list);
 
