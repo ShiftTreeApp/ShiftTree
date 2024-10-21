@@ -163,6 +163,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnexpectedError'
+  /shiftTreeID:
+    get:
+      security:
+        - Bearer: []
+      description: Gets the ID Code for a shiftTree, if the user making request is Owner
+      responses: 
+        401:
+          description: Unauthorised
+        404: 
+          description: Not found
+        200: 
+          description: ID Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UUID'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+      parameters:
+        - name: ShiftTree
+          in: query
+          schema:
+            type: string
+          description: The ShiftTree to generate code for
+          required: true
+  /join:
+    put:
+      security:
+        - Bearer: []
+      description: Adds a user to the queue for shiftTree membership
+      responses:
+        404:
+          description: UUID does not have corresponding ShiftTree
+        200:
+          description: Request To Join Successful
+        500:
+          description: Unable to add User to Schedule
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+      parameters:
+        - name: ShiftTreeID
+          in: query
+          schema:
+            $ref: '#/components/schemas/UUID'
   /hello:
     get:
       summary: "Test endpoint"
@@ -249,3 +301,6 @@ components:
           type: string
         profileImageUrl:
           type: string
+     UUID:
+      type: string
+      pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
