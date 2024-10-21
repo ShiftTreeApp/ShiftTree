@@ -99,70 +99,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnexpectedError'
+  /shiftTreeID:
     get:
-      description: Get all schedules owned by the current user and the schedules the user is a member of
       security:
         - Bearer: []
-      parameters:
-        - name: role
-          in: query
-          description: Filter schedules by role
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-              enum:
-                - owner
-                - member
-                - manager
-            default: [owner, member, manager]
-      responses:
-        200:
-          description: Successful
+      description: Gets the ID Code for a shiftTree, if the user making request is Owner
+      responses: 
+        401:
+          description: Unauthorised
+        404: 
+          description: Not found
+        200: 
+          description: ID Found
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  required:
-                    - id
-                    - name
-                    - description
-                    - owner
-                    - startTime
-                    - endTime
-                    - state
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                    name:
-                      type: string
-                    description:
-                      type: string
-                    owner:
-                      $ref: '#/components/schemas/UserInfoPreview'
-                    startTime:
-                      type: string
-                      format: date-time
-                      nullable: true
-                    endTime:
-                      type: string
-                      format: date-time
-                      nullable: true
-                    state:
-                      type: string
-                      enum:
-                        - open
-                        - closed
+                $ref: '#/components/schemas/UUID'
         default:
           description: Unexpected Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnexpectedError'
+      parameters:
+        - name: ShiftTree
+          in: query
+          schema:
+            type: string
+          description: The ShiftTree to generate code for
+          required: true
+  /join:
+    put:
+      security:
+        - Bearer: []
+      description: Adds a user to the queue for shiftTree membership
+      responses:
+        404:
+          description: UUID does not have corresponding ShiftTree
+        200:
+          description: Request To Join Successful
+        500:
+          description: Unable to add User to Schedule
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+      parameters:
+        - name: ShiftTreeID
+          in: query
+          schema:
+            $ref: '#/components/schemas/UUID'
   /hello:
     get:
       summary: "Test endpoint"
@@ -249,3 +237,6 @@ components:
           type: string
         profileImageUrl:
           type: string
+     UUID:
+      type: string
+      pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
