@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate, useParams } from "react-router";
 
 import { useAuth } from "@/auth";
+import { Alert, Snackbar } from "@mui/material";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -48,11 +49,27 @@ export default function SignIn() {
       .catch(e => {
         console.error(e);
         setErrorMessage(e.toString());
+        setSnackbarOpen(true);
       });
   };
 
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
   return (
     <ThemeProvider theme={defaultTheme}>
+      {errorMessage && (
+        <Snackbar
+          open={snackbarOpen}
+          onClose={() => setSnackbarOpen(false)}
+          autoHideDuration={6000}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert color="error" onClose={() => setSnackbarOpen(false)}>
+            {errorMessage}
+          </Alert>
+        </Snackbar>
+      )}
+
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
@@ -110,11 +127,6 @@ export default function SignIn() {
             <Button type="submit" fullWidth variant="contained">
               Sign In
             </Button>
-            <Box>
-              {errorMessage && (
-                <Typography color="error">{errorMessage}</Typography>
-              )}
-            </Box>
             <Grid
               container
               spacing={2}
