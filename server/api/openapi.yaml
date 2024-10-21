@@ -125,44 +125,14 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  required:
-                    - id
-                    - name
-                    - description
-                    - owner
-                    - startTime
-                    - endTime
-                    - state
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                    name:
-                      type: string
-                    description:
-                      type: string
-                    owner:
-                      $ref: '#/components/schemas/UserInfoPreview'
-                    startTime:
-                      type: string
-                      format: date-time
-                      nullable: true
-                    endTime:
-                      type: string
-                      format: date-time
-                      nullable: true
-                    state:
-                      type: string
-                      enum:
-                        - open
-                        - closed
+                  $ref: '#/components/schemas/ScheduleInfoPreview'
         default:
           description: Unexpected Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnexpectedError'
+
   /shiftTreeID:
     get:
       security:
@@ -215,6 +185,344 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/UUID'
+
+  /schedules/{scheduleId}:
+    get:
+      security:
+        - Bearer: []
+      summary: Get schedule
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Get detailed info about a schedule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleInfo'
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      security:
+        - Bearer: []
+      summary: Delete schedule
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Schedule deleted
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: User does not have permission to delete the schedule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /schedules/{scheduleId}/members:
+    get:
+      security:
+        - Bearer: []
+      summary: Get schedule members
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserInfoPreview'
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: User does not have permission to view the members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /schedules/{scheduleId}/shifts:
+    get:
+      security:
+        - Bearer: []
+      summary: Get schedule shifts
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShiftInfo'
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      security:
+        - Bearer: []
+      summary: Add shift to schedule
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShiftCreateInfo'
+      responses:
+        201:
+          description: Created shift
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftInfo'
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: User does not have permission to modify the schedule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /schedules/{scheduleId}/signups:
+    get:
+      security:
+        - Bearer: []
+      summary: Get schedule signups
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShiftWithSignups'
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: User does not have permission to view the signups
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /shifts/{shiftId}:
+    put:
+      security:
+        - Bearer: []
+      summary: Edit shfit
+      parameters:
+        - name: shiftId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                startTime:
+                  type: string
+                  format: date-time
+                endTime:
+                  type: string
+                  format: date-time
+      responses:
+        204:
+          description: Shift updated
+        404:
+          description: Shift with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: User does not have permission to modify the shift
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      security:
+        - Bearer: []
+      summary: Delete shift
+      parameters:
+        - name: shiftId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Shift deleted
+        404:
+          description: Shift with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: User does not have permission to modify the shift
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /signups/{shiftId}:
+    post:
+      security:
+        - Bearer: []
+      summary: Sign up user for shift
+      description: |
+        If `userId` is provided and the current user is a manager of the schedule, the specified user
+        will be signed up for the shift.
+      parameters:
+        - name: shiftId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          description: User to sign up, can only be another user if the current user is a manager
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: User added to shift
+        404:
+          description: Shift with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: User does not have permission to modify the shift
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        400:
+          description: User does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      security:
+        - Bearer: []
+      summary: Remove sign up for shift
+      description: |
+        If `userId` is provided and the current user is a manager of the schedule, the specified user
+        will have their sign up cancelled.
+      parameters:
+        - name: shiftId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          description: User to remove, can only be another user if the current user is a manager
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: User removed from shift
+        404:
+          description: Shift with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: User does not have permission to modify the shift
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        400:
+          description: User does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /hello:
     get:
       summary: "Test endpoint"
@@ -251,6 +559,14 @@ components:
           type: integer
           format: int32
         message:
+          type: string
+     Error:
+      required:
+        - error
+      properties:
+        error:
+          type: string
+        detail:
           type: string
      Credentials:
       type: object
@@ -301,6 +617,104 @@ components:
           type: string
         profileImageUrl:
           type: string
+
      UUID:
       type: string
       pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+     
+     ScheduleInfo:
+      allOf:
+        - $ref: '#/components/schemas/ScheduleInfoPreview'
+
+     ScheduleInfoPreview:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - owner
+        - startTime
+        - endTime
+        - role
+        - state
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        owner:
+          $ref: '#/components/schemas/UserInfoPreview'
+        startTime:
+          type: string
+          format: date-time
+          nullable: true
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        role:
+          type: string
+          enum:
+            - owner
+            - member
+            - manager
+        state:
+          type: string
+          enum:
+            - open
+            - closed
+
+     ShiftInfo:
+      type: object
+      required:
+        - id
+        - name
+        - startTime
+        - endTime
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+
+     ShiftCreateInfo:
+      type: object
+      required:
+        - name
+        - startTime
+        - endTime
+      properties:
+        name:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+
+     SignupInfo:
+      properties:
+        user:
+          $ref: '#/components/schemas/UserInfoPreview'
+        weight:
+          type: integer
+
+     ShiftWithSignups:
+      allOf:
+        - $ref: '#/components/schemas/ShiftInfo'
+      properties:
+        signups:
+          type: array
+          items:
+            $ref: '#/components/schemas/SignupInfo'
