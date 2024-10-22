@@ -74,7 +74,7 @@ export default function App() {
         <Grid
           container
           size={9}
-          justifyContent={"right"}
+          justifyContent={"center"}
           sx={{ marginTop: 8, pt: 0.5, pb: 0.5, px: 2 }}
         >
           {/* Going to need to add functionality for saving profile here */}

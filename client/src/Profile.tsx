@@ -89,7 +89,7 @@ export default function App() {
         <Grid
           container
           size={9}
-          justifyContent={"right"}
+          justifyContent={"center"}
           sx={{ marginTop: 8, pt: 0.5, pb: 0.5, px: 2 }}
         >
           <Button sx={{ backgroundColor: "red" }} component={Link} to="/edit_profile">
