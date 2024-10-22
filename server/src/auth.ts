@@ -62,7 +62,7 @@ export const authorizationCheck = (req,res,next) => {
   const token = authorizationHeader.split(' ')[1];
   jwt.verify(token, 'ShiftTree', (err,user) => {
     if (err) {
-      return res.sendStatus(403);
+      return res.sendStatus(401);
     }
     req.user = user;
     next();
