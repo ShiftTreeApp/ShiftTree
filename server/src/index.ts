@@ -1,3 +1,4 @@
+import "@/patch-express";
 import process from "node:process";
 const cors = require('cors')
 import "dotenv/config";
@@ -7,6 +8,7 @@ import fs from 'fs';
 const swaggerUI = require('swagger-ui-express')
 import path from 'path';
 import OpenApiValidator from 'express-openapi-validator';
+import { Request, Response, NextFunction } from "express";
 
 // IMPORT FILES HERE
 import { router } from "@/router";
@@ -47,13 +49,9 @@ app.post('/register', registration.registerUser)
 app.post('/schedules', auth.authorizationCheck, schedules.create);
 app.get('/schedules', auth.authorizationCheck, schedules.list);
 
-app.use((err, req, res, next) => {
-  res.status(err.status).json({
-    message: err.message,
-    errors: err.errors,
-    status: err.status,
-  })
-
+app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
+  console.error(err);
+  res.status(500).send('Internal Server Error');
 })
 
 
