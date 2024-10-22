@@ -40,6 +40,11 @@ app.use(
     validateResponses: true,
   })
 )
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  res.status(400).json({
+    error: err.message,
+  });
+})
 
 // Add routes here
 // app.REQUESTTYPE('endpoint',{put middleware(authentication) here}, file.FunctionName)
