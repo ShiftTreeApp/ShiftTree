@@ -8,6 +8,8 @@ import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
 import JoinTree from "@/JoinTree.tsx";
+import Profile from "@/Profile.tsx"
+import EditProfile from "@/EditProfile.tsx"
 
 export default function App() {
   return (
@@ -39,6 +41,22 @@ export default function App() {
               element={
                 <Authenticated>
                   <JoinTree />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <Authenticated>
+                  <Profile />
+                </Authenticated>
+              }
+            />
+                        <Route
+              path="/edit_profile"
+              element={
+                <Authenticated>
+                  <EditProfile />
                 </Authenticated>
               }
             />
