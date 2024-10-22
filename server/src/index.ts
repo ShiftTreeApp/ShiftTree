@@ -53,6 +53,7 @@ app.post('/login', auth.login);
 app.post('/register', registration.registerUser)
 app.post('/schedules', auth.authorizationCheck, schedules.create);
 app.get('/schedules', auth.authorizationCheck, schedules.list);
+app.get('/schedules/:scheduleId', auth.authorizationCheck, schedules.getSchedule);
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);

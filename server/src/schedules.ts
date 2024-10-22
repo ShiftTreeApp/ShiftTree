@@ -104,3 +104,48 @@ export async function list(req: Request, res: Response) {
 
   res.json(result.rows[0].json);
 }
+
+export async function getSchedule(req: Request, res: Response) {
+  const scheduleId = req.params.scheduleId;
+  const userId = await getUserId(req);
+
+  const query = /* sql */ `
+    with selected_schedule as (
+      select info.*, se.start_time, se.end_time
+      from schedule_info as info
+      join schedule_start_end as se on info.schedule_id = se.schedule_id
+      where info.user_id = $1 and info.id = $2
+    )
+    select json_build_object(
+      'id', s.schedule_id,
+      'name', s.schedule_name,
+      'description', '',
+      'owner', (
+        select json_build_object(
+          'id', ua.id,
+          'displayName', ua.username,
+          'email', ua.email,
+          'profileImageUrl', '' -- TODO: Add profile image url
+        )
+        from user_account as ua
+        where ua.id = s.owner_id
+      ),
+      'role', s.user_role,
+      'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+      'endTime', (to_json(s.end_time)#>>'{}')||'Z',
+      'state', 'open'
+    ) as json
+    from selected_schedule as s
+  `;
+
+  const results = await pool.query({
+    text: query,
+    values: [userId, scheduleId],
+  });
+
+  if (results.rows.length < 1) {
+    res.status(404).json({ error: "Schedule not found" });
+  } else {
+    res.status(200).json(results.rows[0].json);
+  }
+}
