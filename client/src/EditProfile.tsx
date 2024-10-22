@@ -55,10 +55,10 @@ export default function App() {
         {/* Job Title Text Field */}
         <TextField
           multiline
-          rows={5}
+          rows={2}
           variant="outlined"
           fullWidth
-          placeholder="Biography"
+          placeholder="Job Title"
           sx={{ width: "60vh" }}
         />
         {/* Biography Text Field */}
