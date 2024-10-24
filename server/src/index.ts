@@ -55,6 +55,7 @@ app.post('/schedules', auth.authorizationCheck, schedules.create);
 app.get('/schedules', auth.authorizationCheck, schedules.list);
 app.get('/schedules/:scheduleId', auth.authorizationCheck, schedules.getSchedule);
 app.delete('/schedules/:scheduleId', auth.authorizationCheck, schedules.deleteSchedule);
+app.get('/schedules/:scheduleId/shifts', auth.authorizationCheck, schedules.getShifts);
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);
