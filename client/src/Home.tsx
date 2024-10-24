@@ -50,17 +50,6 @@ export default function Home() {
                   Organizations
                 </Typography>
               </Grid>
-              <Grid
-                container
-                size={6}
-                justifyContent={"flex-end"}
-                sx={{ pt: 0.5, pb: 0.5, px: 2 }}
-              >
-                {/* Button for creating an organization */}
-                <Button color="secondary" variant="contained">
-                  <Typography color="black">Create</Typography>
-                </Button>
-              </Grid>
             </Grid>
             <Divider variant="middle" />
             <Paper
