@@ -233,3 +233,50 @@ export async function getShifts(req: Request, res: Response) {
 
   res.status(200).json(results.rows[0].json);
 }
+
+export async function createShift(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  // Check that user can access the schedule and has permission to create shifts
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select *
+        from schedule_info as info
+        where info.user_id = $1 and info.schedule_id = $2
+      `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to create shifts for this schedule",
+      });
+      return;
+    }
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      insert into shift (schedule_id, start_time, end_time)
+      values ($1, $2, $3)
+      returning json_build_object(
+        'id', shift.id,
+        'name', '', -- TODO: Add shift name to the schema
+        'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+        'endTime', (to_json(shift.end_time)#>>'{}')||'Z'
+      ) as json
+    `,
+    values: [scheduleId, req.body.startTime, req.body.endTime],
+  });
+
+  res.status(201).json(results.rows[0].json);
+}
