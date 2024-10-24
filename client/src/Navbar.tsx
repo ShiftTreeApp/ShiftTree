@@ -22,6 +22,7 @@ import {
   ListItemText,
   ListItemButton,
   ListItemIcon,
+  Dialog,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -30,6 +31,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import { useAuth } from "@/auth";
+import JoinTree from "./JoinTree";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -67,6 +69,14 @@ export default function Navbar() {
   };
   const handleDrawerClose = () => {
     setDrawerOpen(false);
+  };
+
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const handleModalOpen = () => {
+    setModalOpen(true);
+  };
+  const handleModalClose = () => {
+    setModalOpen(false);
   };
 
   return (
@@ -112,9 +122,7 @@ export default function Navbar() {
                 </MenuItem>
                 <MenuItem onClick={handleClose}>Create Organization</MenuItem>
                 <MenuItem onClick={handleClose}>
-                  <Button component={RouterLink} to="/join">
-                    Join ShiftTree
-                  </Button>
+                  <Button onClick={handleModalOpen}>Join ShiftTree</Button>
                 </MenuItem>
                 <MenuItem onClick={handleClose}>Join Organization</MenuItem>
               </Menu>
@@ -168,6 +176,9 @@ export default function Navbar() {
             </List>
           </Box>
         </Drawer>
+        <Dialog open={modalOpen} onClose={handleModalClose}>
+          <JoinTree />
+        </Dialog>
       </Box>
     </Grid>
   );
