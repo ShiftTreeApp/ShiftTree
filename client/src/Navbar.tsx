@@ -12,12 +12,35 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Tooltip,
+  TooltipProps,
+  tooltipClasses,
+  styled,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
+  ListItemIcon,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 import { useAuth } from "@/auth";
+
+const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
+}));
 
 export default function Navbar() {
   const auth = useAuth();
@@ -38,6 +61,14 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const handleDrawerOpen = () => {
+    setDrawerOpen(true);
+  };
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
+
   return (
     <Grid container>
       <Box sx={{ flexGrow: 1 }}>
@@ -52,17 +83,19 @@ export default function Navbar() {
             </Link>
 
             <Grid>
-              <IconButton
-                id="add-button"
-                aria-controls={open ? "basic-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-                onClick={handleClick}
-                aria-label="add"
-                size="small"
-              >
-                <AddIcon fontSize="medium" />
-              </IconButton>
+              <CustomTooltip title="Create/Join" placement="bottom">
+                <IconButton
+                  id="add-button"
+                  aria-controls={open ? "basic-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? "true" : undefined}
+                  onClick={handleClick}
+                  aria-label="add"
+                  size="small"
+                >
+                  <AddIcon fontSize="medium" />
+                </IconButton>
+              </CustomTooltip>
               <Menu
                 id="basic-menu"
                 anchorEl={anchorEl}
@@ -72,23 +105,69 @@ export default function Navbar() {
                   "aria-labelledby": "add-button",
                 }}
               >
-                <MenuItem onClick={handleClose}>Create ShiftTree</MenuItem>
+                <MenuItem onClick={handleClose}>
+                  <Button component={RouterLink} to="/create">
+                    Create ShiftTree
+                  </Button>
+                </MenuItem>
                 <MenuItem onClick={handleClose}>Create Organization</MenuItem>
-                <MenuItem onClick={handleClose}>Join ShiftTree</MenuItem>
+                <MenuItem onClick={handleClose}>
+                  <Button component={RouterLink} to="/join">
+                    Join ShiftTree
+                  </Button>
+                </MenuItem>
                 <MenuItem onClick={handleClose}>Join Organization</MenuItem>
               </Menu>
-              <IconButton aria-label="notif" size="small">
-                <NotificationsIcon fontSize="medium" />
-              </IconButton>
-              <IconButton aria-label="profile" size="small">
-                <AccountCircleIcon fontSize="medium" />
-              </IconButton>
-              <Button color="inherit" onClick={onLogout}>
+              <CustomTooltip title="Notifications" placement="bottom">
+                <IconButton aria-label="notif" size="small" sx={{ ml: 2 }}>
+                  <NotificationsIcon fontSize="medium" />
+                </IconButton>
+              </CustomTooltip>
+              <CustomTooltip title="Profile" placement="bottom">
+                <IconButton
+                  aria-label="profile"
+                  size="small"
+                  sx={{ ml: 2 }}
+                  onClick={handleDrawerOpen}
+                >
+                  <AccountCircleIcon fontSize="medium" />
+                </IconButton>
+              </CustomTooltip>
+              {/* <Button color="inherit" onClick={onLogout}>
                 Log out
-              </Button>
+              </Button> */}
             </Grid>
           </Toolbar>
         </AppBar>
+        <Drawer anchor="right" open={drawerOpen} onClose={handleDrawerClose}>
+          <Box
+            sx={{ width: 250 }}
+            role="presentation"
+            onClick={handleDrawerClose}
+            onKeyDown={handleDrawerClose}
+          >
+            <List>
+              <ListItemButton>
+                <ListItemIcon>
+                  <AccountCircleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Edit Profile" />
+              </ListItemButton>
+              <ListItemButton>
+                <ListItemIcon>
+                  <SettingsIcon />
+                </ListItemIcon>
+                <ListItemText primary="Settings" />
+              </ListItemButton>
+              <ListItemButton onClick={onLogout}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItemButton>
+            </List>
+          </Box>
+        </Drawer>
       </Box>
     </Grid>
   );
