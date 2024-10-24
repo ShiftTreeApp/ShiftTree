@@ -149,3 +149,43 @@ export async function getSchedule(req: Request, res: Response) {
     res.status(200).json(results.rows[0].json);
   }
 }
+
+export async function deleteSchedule(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  const schedulesQuery = /* sql */ `
+    select * from schedule_info
+    where schedule_info.user_id = $1 and schedule_info.id = $2
+  `;
+
+  const schedulesResult = await pool.query({
+    text: schedulesQuery,
+    values: [userId, scheduleId],
+  });
+
+  if (schedulesResult.rows.length < 1) {
+    res.status(404).json({ error: "Schedule not found" });
+    return;
+  }
+
+  const schedule = schedulesResult.rows[0];
+
+  if (!(schedule.user_role === "owner" || schedule.user_role === "manager")) {
+    res
+      .status(403)
+      .json({ error: "You do not have permission to delete this schedule" });
+    return;
+  }
+
+  await pool.query({
+    text: /* sql */ `
+      update schedule
+      set removed = current_timestamp
+      where id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  res.status(204).send();
+}
