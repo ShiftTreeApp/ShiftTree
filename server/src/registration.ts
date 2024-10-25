@@ -1,6 +1,8 @@
+import { Request, Response } from "express";
+
 import { pool } from "@/pool";
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
 
   const statement = `
