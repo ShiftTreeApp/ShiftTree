@@ -322,3 +322,65 @@ export async function getMembers(req: Request, res: Response) {
 
   res.status(200).json(results.rows[0].json);
 }
+
+export async function getSignups(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  // Check that user can access the schedule
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select * from schedule_info as info
+        where info.user_id = $1 and info.schedule_id = $2
+      `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to view signups for this schedule",
+      });
+      return;
+    }
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      select json_agg(json_build_object(
+        'id', shift.id,
+        'name', '',
+        'description', '',
+        'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+        'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
+        'signups', (
+          select coalesce(json_agg(json_build_object(
+            'id', signup.id,
+            'weight', signup.user_weighting,
+            'user', json_build_object(
+              'id', ua.id,
+              'displayName', ua.username,
+              'email', ua.email,
+              'profileImageUrl', ''
+            )
+          )), json_array())
+          from user_shift_signup as signup
+          join user_account as ua on signup.user_id = ua.id
+          where signup.shift_id = shift.id
+        )
+      )) as json
+      from shift
+      join schedule on shift.schedule_id = schedule.id
+      where schedule.id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  res.status(200).json(results.rows[0].json);
+}

@@ -65,6 +65,11 @@ app.get(
   auth.authorizationCheck,
   schedules.getMembers,
 );
+app.get(
+  "/schedules/:scheduleId/signups",
+  auth.authorizationCheck,
+  schedules.getSignups,
+);
 app.post(
   "/schedules/:scheduleId/shifts",
   auth.authorizationCheck,
