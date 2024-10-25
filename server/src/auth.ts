@@ -1,27 +1,15 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 import * as process from "node:process";
+import { NextFunction, Request, Response } from "express";
 
 import { pool } from "@/pool";
-
-// TODO: Validate env vars
-
-// Might not need this
-// const getUsernameByEmail = async (email) => {
-//   const statement = 'SELECT username FROM user_account WHERE email = $1';
-//   const query = {
-//     text: statement,
-//     values: [email],
-//   };
-//   const {rows} = await pool.query(query);
-//   return rows[0];
-// };
 
 const jwtKey = process.env.SHIFTTREE_JWT_PK;
 if (!jwtKey) {
   throw new Error("Environment variable SHIFTTREE_JWT_PK is not set");
 }
 
-export const login = async (req, res) => {
+export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   console.log(email);
   console.log(password);
@@ -59,14 +47,22 @@ export const login = async (req, res) => {
 };
 
 // Verifys that the token provided is valid
-export const authorizationCheck = (req, res, next) => {
-  const authorizationHeader = req.headers.authorization;
+export const authorizationCheck = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const authorizationHeader = req.headers.authorization as string;
   const token = authorizationHeader.split(" ")[1];
+  if (!token) {
+    res.sendStatus(401).json({ error: "Missing token" });
+    return;
+  }
   jwt.verify(token, "ShiftTree", (err, user) => {
     if (err) {
-      return res.sendStatus(401);
+      res.sendStatus(401).json({ error: "Invalid token" });
     }
-    req.user = user;
+    (req as any).user = user;
     next();
   });
 };
