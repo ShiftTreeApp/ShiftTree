@@ -60,6 +60,11 @@ app.get(
   auth.authorizationCheck,
   schedules.getShifts,
 );
+app.get(
+  "/schedules/:scheduleId/members",
+  auth.authorizationCheck,
+  schedules.getMembers,
+);
 app.post(
   "/schedules/:scheduleId/shifts",
   auth.authorizationCheck,

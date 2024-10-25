@@ -275,3 +275,50 @@ export async function createShift(req: Request, res: Response) {
 
   res.status(201).json(results.rows[0].json);
 }
+
+export async function getMembers(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  // Check that user can access the schedule
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select * from schedule_info as info
+        where info.user_id = $1 and info.schedule_id = $2
+      `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    // TODO: Allow for members to view other members if the permission is set
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to view members of this schedule",
+      });
+      return;
+    }
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      select json_agg(json_build_object(
+        'id', ua.id,
+        'displayName', ua.username,
+        'email', ua.email,
+        'profileImageUrl', ''
+      )) as json
+      from user_schedule_membership as usm
+      join user_account as ua on usm.user_id = ua.id
+      where usm.schedule_id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  res.status(200).json(results.rows[0].json);
+}
