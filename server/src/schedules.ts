@@ -423,5 +423,49 @@ export async function deleteShift(req: Request, res: Response) {
     values: [shiftId],
   });
 
-  return res.status(204).send();
+  res.status(204).send();
+}
+
+export async function editShift(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const shiftId = req.params.shiftId as string;
+
+  // TODO: Validate that the start date is before the end date
+
+  // Check that user can access the shift
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select *
+        from shift
+        join schedule_info as info on shift.schedule_id = info.schedule_id
+        where info.user_id = $1 and shift.id = $2
+      `,
+      values: [userId, shiftId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to edit this shift",
+      });
+      return;
+    }
+  }
+
+  await pool.query({
+    text: /* sql */ `
+      update shift
+      set start_time = $1, end_time = $2
+      where id = $3
+    `,
+    values: [req.body.startTime, req.body.endTime, shiftId],
+  });
+
+  res.status(204).send();
 }
