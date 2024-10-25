@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate:openapi": "openapi-typescript ../server/api/openapi.yaml -o ./src/generated/v1.d.ts"
+    "generate:openapi": "openapi-typescript ../server/api/openapi.yaml -o ./src/generated/v1.d.ts",
+    "check": "tsc --noEmit && eslint . && prettier --check src"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
