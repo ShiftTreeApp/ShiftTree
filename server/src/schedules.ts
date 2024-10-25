@@ -384,3 +384,44 @@ export async function getSignups(req: Request, res: Response) {
 
   res.status(200).json(results.rows[0].json);
 }
+
+export async function deleteShift(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const shiftId = req.params.shiftId as string;
+
+  // Check that user can access the shift
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select *
+        from shift
+        join schedule_info as info on shift.schedule_id = info.schedule_id
+        where info.user_id = $1 and shift.id = $2
+      `,
+      values: [userId, shiftId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to delete this shift",
+      });
+      return;
+    }
+  }
+
+  await pool.query({
+    text: /* sql */ `
+      delete from shift
+      where id = $1
+    `,
+    values: [shiftId],
+  });
+
+  return res.status(204).send();
+}

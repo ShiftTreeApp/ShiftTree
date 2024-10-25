@@ -75,6 +75,7 @@ app.post(
   auth.authorizationCheck,
   schedules.createShift,
 );
+app.delete("/shifts/:shiftId", auth.authorizationCheck, schedules.deleteShift);
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);
