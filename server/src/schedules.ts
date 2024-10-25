@@ -114,7 +114,7 @@ export async function getSchedule(req: Request, res: Response) {
       select info.*, se.start_time, se.end_time
       from schedule_info as info
       join schedule_start_end as se on info.schedule_id = se.schedule_id
-      where info.user_id = $1 and info.id = $2
+      where info.user_id = $1 and info.schedule_id = $2
     )
     select json_build_object(
       'id', s.schedule_id,
@@ -156,7 +156,7 @@ export async function deleteSchedule(req: Request, res: Response) {
 
   const schedulesQuery = /* sql */ `
     select * from schedule_info
-    where schedule_info.user_id = $1 and schedule_info.id = $2
+    where schedule_info.user_id = $1 and schedule_info.schedule_id = $2
   `;
 
   const schedulesResult = await pool.query({
