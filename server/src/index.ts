@@ -77,6 +77,12 @@ app.post(
 );
 app.delete("/shifts/:shiftId", auth.authorizationCheck, schedules.deleteShift);
 app.put("/shifts/:shiftId", auth.authorizationCheck, schedules.editShift);
+app.post("/signups/:shiftId", auth.authorizationCheck, schedules.addSignup);
+app.delete(
+  "/signups/:shiftId",
+  auth.authorizationCheck,
+  schedules.deleteSignup,
+);
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);

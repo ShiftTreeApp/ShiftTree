@@ -451,13 +451,19 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: userId
-          description: User to sign up, can only be another user if the current user is a manager
-          in: query
-          required: false
-          schema:
-            type: string
-            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  description: User to sign up, can only be another user if the current user is a manager
+                  type: string
+                  format: uuid
+                weight:
+                  type: number
+                  description: Weight of the user's preference for this shift
       responses:
         204:
           description: User added to shift
