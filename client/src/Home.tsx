@@ -50,17 +50,6 @@ export default function Home() {
                   Organizations
                 </Typography>
               </Grid>
-              <Grid
-                container
-                size={6}
-                justifyContent={"flex-end"}
-                sx={{ pt: 0.5, pb: 0.5, px: 2 }}
-              >
-                {/* Button for creating an organization */}
-                <Button color="secondary" variant="contained">
-                  <Typography color="black">Create</Typography>
-                </Button>
-              </Grid>
             </Grid>
             <Divider variant="middle" />
             <Paper
@@ -102,50 +91,12 @@ export default function Home() {
                 </Typography>
               </Grid>
               {/* Grid that contains Buttons */}
-
-              <Grid
-                size={4}
-                justifyContent="flex-end"
-                sx={{ px: 2, pt: 2, display: "flex", alignItems: "center" }}
-              >
-                <Button
-                  sx={{
-                    backgroundColor: theme => theme.palette.secondary.main,
-                    "&:hover": {
-                      backgroundColor: theme => theme.palette.secondary.dark,
-                    },
-                    minWidth: 90, // Set the minimum width to the size of the larger button
-                    mr: 2, // Add margin-right to space the buttons apart
-                    minHeight: 40,
-                    px: 2, // Add padding inside the button for better appearance
-                  }}
-                  component={Link}
-                  to="/create"
-                >
-                  <Typography color="black">Create</Typography>
-                </Button>
-                <Button
-                  sx={{
-                    backgroundColor: theme => theme.palette.primary.main,
-                    "&:hover": {
-                      backgroundColor: theme => theme.palette.primary.dark,
-                    },
-                    minWidth: 90, // Set the minimum width to the size of the larger button
-                    minHeight: 40,
-                    px: 2, // Add padding inside the button for consistency
-                  }}
-                  component={Link}
-                  to="/join"
-                >
-                  <Typography color="black">Join</Typography>
-                </Button>
-              </Grid>
             </Grid>
             <Divider variant="middle" />
             {/* ShiftTrees Cards Grid */}
             <Grid container spacing={2} sx={{ padding: 2 }}>
               {/* Example cards for ShiftTrees */}
-              <Grid size={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <ShiftTreeCard
                   name="Open Shift"
                   status="open"
@@ -153,7 +104,7 @@ export default function Home() {
                   description="description description description"
                 />
               </Grid>
-              <Grid size={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <ShiftTreeCard
                   name="Closed Shift"
                   status="closed"
@@ -161,7 +112,7 @@ export default function Home() {
                   description="This shift is closed. Hours schedlued: 120."
                 />
               </Grid>
-              <Grid size={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <ShiftTreeCard
                   name="Your Shift"
                   status="owned"
@@ -169,7 +120,7 @@ export default function Home() {
                   description="You own this shift. Description, maybe a button to close the schedule as well"
                 />
               </Grid>
-              <Grid size={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 {/* Another column for shiftTree card */}
               </Grid>
             </Grid>
