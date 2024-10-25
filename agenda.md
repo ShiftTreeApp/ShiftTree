@@ -13,3 +13,6 @@
 - Plan layout of shifttree viewing/editing/signup page (`/schedule/{id}`)
 - Format all code, change `require` to `import`, add type annotations. Set up linting and maybe set up GitHub Actions to check for formatting before allowing
   merging into `main`
+- Implement linter to JSON package
+- Assign Tasks/Get task updates
+ -Implement Git CI(merges of unformmated code
