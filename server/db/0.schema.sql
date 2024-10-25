@@ -11,54 +11,72 @@ DROP TABLE IF EXISTS schedule_membership;
 --TODO: Decide on what else we want to store related to users, while keeping in mind that schedules/orgs and such are tracked through foreign keys so shouldn't be a part of user.
 CREATE TABLE user_account
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+, removed TIMESTAMP DEFAULT NULL
 , username VARCHAR(64) NOT NULL
-, email VARCHAR(64) NOT NULL
+, email VARCHAR(64) NOT NULL UNIQUE
 , password_hash VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE schedule
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
 , removed TIMESTAMP DEFAULT NULL
-, owner_id UUID NOT NULL REFERENCES user_account (id)
-, schedule_name VARCHAR(64) NOT NULL
+, owner_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
+, schedule_name VARCHAR(64) NOT NULL DEFAULT ''
+, schedule_description VARCHAR(255) NOT NULL DEFAULT ''
 );
 
 CREATE TABLE user_schedule_membership
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
-, user_id UUID NOT NULL REFERENCES user_account (id)
-, schedule_id UUID NOT NULL REFERENCES schedule (id)
+, user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
+, schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
 );
 
 CREATE TABLE shift
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
-, schedule_id UUID NOT NULL REFERENCES schedule (id)
+, schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
 , start_time TIMESTAMP NOT NULL
 , end_time TIMESTAMP NOT NULL
+, shift_name VARCHAR(64) NOT NULL DEFAULT ''
+, shift_description VARCHAR(255) NOT NULL DEFAULT ''
 );
 
 CREATE TABLE user_shift_assignment
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
-, user_id UUID NOT NULL REFERENCES user_account (id)
-, shift_id UUID NOT NULL REFERENCES shift (id)
+, user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
+, shift_id UUID NOT NULL REFERENCES shift (id) ON DELETE CASCADE
 );
 
 CREATE TABLE user_shift_signup
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
-, user_id UUID NOT NULL REFERENCES user_account (id)
-, shift_id UUID NOT NULL REFERENCES shift (id)
+, user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
+, shift_id UUID NOT NULL REFERENCES shift (id) ON DELETE CASCADE
 , user_weighting INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE organization
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+, removed TIMESTAMP DEFAULT NULL
 , organization_name VARCHAR(64) NOT NULL
-, owner_id UUID NOT NULL REFERENCES user_account (id)
+, organization_description VARCHAR(255) NOT NULL DEFAULT ''
+, owner_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
 );
 
 CREATE TABLE schedule_org_membership
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
-, org_id UUID NOT NULL REFERENCES organization (id)
-, schedule_id UUID NOT NULL REFERENCES schedule (id)
+, org_id UUID NOT NULL REFERENCES organization (id) ON DELETE CASCADE
+, schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
+);
+
+CREATE TABLE join_code
+( code UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+, removed TIMESTAMP DEFAULT NULL
+, schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
+, expiration TIMESTAMP DEFAULT NULL
+);
+
+CREATE TABLE profile_image_data
+( user_id UUID NOT NULL PRIMARY KEY REFERENCES user_account (id) ON DELETE CASCADE
+, image_data BYTEA NOT NULL
 );
 
 CREATE VIEW schedule_info AS
