@@ -1,19 +1,17 @@
 import "@/patch-express";
 import process from "node:process";
-const cors = require("cors");
+import cors from "cors";
 import "dotenv/config";
 import express from "express";
-const yaml = require("js-yaml");
+import yaml from "js-yaml";
 import fs from "fs";
-const swaggerUI = require("swagger-ui-express");
+import swaggerUI from "swagger-ui-express";
 import path from "path";
 import OpenApiValidator from "express-openapi-validator";
 import { Request, Response, NextFunction } from "express";
 
-// IMPORT FILES HERE
-import { router } from "@/router";
-const auth = require("./auth");
-const registration = require("./registration");
+import * as auth from "@/auth";
+import * as registration from "@/registration";
 import * as schedules from "@/schedules";
 
 //Setup
@@ -26,7 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 const apiSpec = path.join(__dirname, "../api/openapi.yaml");
 const apidoc = yaml.load(fs.readFileSync(apiSpec, "utf8"));
 //Backend configuration for swagger/automatic validation
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(apidoc));
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(apidoc as any));
 
 app.use(
   OpenApiValidator.middleware({
@@ -43,7 +41,6 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
 // Add routes here
 // app.REQUESTTYPE('endpoint',{put middleware(authentication) here}, file.FunctionName)
-app.get("/*", router);
 app.post("/login", auth.login);
 app.post("/register", registration.registerUser);
 app.post("/schedules", auth.authorizationCheck, schedules.create);
