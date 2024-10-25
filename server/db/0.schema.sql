@@ -18,6 +18,7 @@ CREATE TABLE user_account
 
 CREATE TABLE schedule
 ( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+, removed TIMESTAMP DEFAULT NULL
 , owner_id UUID NOT NULL REFERENCES user_account (id)
 , schedule_name VARCHAR(64) NOT NULL
 );
@@ -59,3 +60,51 @@ CREATE TABLE schedule_org_membership
 , org_id UUID NOT NULL REFERENCES organization (id)
 , schedule_id UUID NOT NULL REFERENCES schedule (id)
 );
+
+CREATE VIEW schedule_info AS
+WITH
+    member_info AS (
+        SELECT
+            schedule.id AS schedule_id,
+            schedule.owner_id,
+            schedule.schedule_name,
+            usm.user_id,
+            'member' AS user_role
+        FROM schedule
+        JOIN user_schedule_membership AS usm ON schedule.id = usm.schedule_id
+        WHERE schedule.removed IS NULL
+    ),
+    owner_info AS (
+        SELECT
+            schedule.id AS schedule_id,
+            schedule.owner_id,
+            schedule.schedule_name,
+            schedule.owner_id AS user_id,
+            'owner' AS user_role
+        FROM schedule
+        WHERE schedule.removed IS NULL
+    ) 
+SELECT *
+FROM member_info
+UNION ALL
+SELECT *
+FROM owner_info;
+
+CREATE VIEW schedule_start_end AS
+SELECT
+    schedule.id as schedule_id,
+    (
+        SELECT shift.start_time
+        FROM shift
+        JOIN schedule ON shift.schedule_id = schedule.id
+        ORDER BY shift.start_time ASC
+        LIMIT 1
+    ) AS start_time,
+    (
+        SELECT shift.end_time
+        FROM shift
+        JOIN schedule ON shift.schedule_id = schedule.id
+        ORDER BY shift.end_time DESC
+        LIMIT 1
+    ) AS end_time
+FROM schedule;

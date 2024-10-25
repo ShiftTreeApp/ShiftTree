@@ -66,43 +66,18 @@ export async function list(req: Request, res: Response) {
   const userId = await getUserId(req);
 
   const query = /* sql */ `
-    with all_schedules as (
-      select *
-      from (
-        select schedule.*, 'owner' as user_role from schedule
-        where owner_id = $1
-      )
-      union (
-        select sch.*, 'member' as user_role from schedule as sch
-        join user_schedule_membership as us on us.schedule_id = sch.id
-        join user_account as ua on us.user_id = ua.id
-        where ua.id = $1
-      )
-    ),
-    filtered as (
-      select
-        sch.*, 
-        (
-          select shift.start_time
-          from shift
-          where shift.schedule_id = sch.id
-          order by shift.start_time asc
-          limit 1
-        ) as start_time,
-        (
-          select shift.end_time
-          from shift
-          where shift.schedule_id = sch.id
-          order by shift.end_time desc
-          limit 1
-        ) as end_time
-      from all_schedules as sch
-      where sch.user_role in (select json_array_elements($2) #>> '{}' as r)
-      order by start_time asc, sch.schedule_name asc
+    with filtered as (
+      select info.*, se.start_time, se.end_time
+      from schedule_info as info
+      join schedule_start_end as se on info.schedule_id = se.schedule_id
+      where true
+        and info.user_id = $1
+        and info.user_role in (select json_array_elements($2) #>> '{}' as r)
+      order by se.start_time asc, info.schedule_name asc
     )
     select coalesce(json_agg(json_build_object(
-      'id', f.id,
-      'name', f.schedule_name,
+      'id', s.schedule_id,
+      'name', s.schedule_name,
       'description', '',
       'owner', (
         select json_build_object(
@@ -112,14 +87,14 @@ export async function list(req: Request, res: Response) {
           'profileImageUrl', '' -- TODO: Add profile image url
         )
         from user_account as ua
-        where ua.id = f.owner_id
+        where ua.id = s.owner_id
       ),
-      'role', f.user_role,
-      'startTime', (to_json(f.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
-      'endTime', (to_json(f.end_time)#>>'{}')||'Z',
+      'role', s.user_role,
+      'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+      'endTime', (to_json(s.end_time)#>>'{}')||'Z',
       'state', 'open'
     )), json_array()) as json
-    from filtered as f
+    from filtered as s
   `;
 
   const result = await pool.query({
@@ -128,4 +103,180 @@ export async function list(req: Request, res: Response) {
   });
 
   res.json(result.rows[0].json);
+}
+
+export async function getSchedule(req: Request, res: Response) {
+  const scheduleId = req.params.scheduleId;
+  const userId = await getUserId(req);
+
+  const query = /* sql */ `
+    with selected_schedule as (
+      select info.*, se.start_time, se.end_time
+      from schedule_info as info
+      join schedule_start_end as se on info.schedule_id = se.schedule_id
+      where info.user_id = $1 and info.schedule_id = $2
+    )
+    select json_build_object(
+      'id', s.schedule_id,
+      'name', s.schedule_name,
+      'description', '',
+      'owner', (
+        select json_build_object(
+          'id', ua.id,
+          'displayName', ua.username,
+          'email', ua.email,
+          'profileImageUrl', '' -- TODO: Add profile image url
+        )
+        from user_account as ua
+        where ua.id = s.owner_id
+      ),
+      'role', s.user_role,
+      'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+      'endTime', (to_json(s.end_time)#>>'{}')||'Z',
+      'state', 'open'
+    ) as json
+    from selected_schedule as s
+  `;
+
+  const results = await pool.query({
+    text: query,
+    values: [userId, scheduleId],
+  });
+
+  if (results.rows.length < 1) {
+    res.status(404).json({ error: "Schedule not found" });
+  } else {
+    res.status(200).json(results.rows[0].json);
+  }
+}
+
+export async function deleteSchedule(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  const schedulesQuery = /* sql */ `
+    select * from schedule_info
+    where schedule_info.user_id = $1 and schedule_info.schedule_id = $2
+  `;
+
+  const schedulesResult = await pool.query({
+    text: schedulesQuery,
+    values: [userId, scheduleId],
+  });
+
+  if (schedulesResult.rows.length < 1) {
+    res.status(404).json({ error: "Schedule not found" });
+    return;
+  }
+
+  const schedule = schedulesResult.rows[0];
+
+  if (!(schedule.user_role === "owner" || schedule.user_role === "manager")) {
+    res
+      .status(403)
+      .json({ error: "You do not have permission to delete this schedule" });
+    return;
+  }
+
+  await pool.query({
+    text: /* sql */ `
+      update schedule
+      set removed = current_timestamp
+      where id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  res.status(204).send();
+}
+
+export async function getShifts(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  // Check that user can access the schedule
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select *
+        from schedule_info as info
+        where info.user_id = $1 and info.schedule_id = $2
+      `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      with sorted as
+      (
+        select *
+        from shift as s
+        where s.schedule_id = $1
+        order by s.start_time asc
+      )
+      select json_agg(json_build_object(
+        'id', s.id,
+        'name', '', -- TODO: Add shift name to the schema
+        'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+        'endTime', (to_json(s.end_time)#>>'{}')||'Z'
+      )) as json
+      from sorted as s
+    `,
+    values: [scheduleId],
+  });
+
+  res.status(200).json(results.rows[0].json);
+}
+
+export async function createShift(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  // Check that user can access the schedule and has permission to create shifts
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select *
+        from schedule_info as info
+        where info.user_id = $1 and info.schedule_id = $2
+      `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to create shifts for this schedule",
+      });
+      return;
+    }
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      insert into shift (schedule_id, start_time, end_time)
+      values ($1, $2, $3)
+      returning json_build_object(
+        'id', shift.id,
+        'name', '', -- TODO: Add shift name to the schema
+        'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+        'endTime', (to_json(shift.end_time)#>>'{}')||'Z'
+      ) as json
+    `,
+    values: [scheduleId, req.body.startTime, req.body.endTime],
+  });
+
+  res.status(201).json(results.rows[0].json);
 }
