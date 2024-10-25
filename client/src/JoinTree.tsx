@@ -7,10 +7,14 @@ import {
   TextField,
 } from "@mui/material";
 import { amber } from "@mui/material/colors";
-import Navbar from "@/Navbar";
+//import Navbar from "@/Navbar";
 //import Home from "./Home";
 
-export default function JoinTree() {
+interface JoinTreeProps {
+  joinType: "ShiftTree" | "Organization";
+}
+
+export default function JoinTree({ joinType }: JoinTreeProps) {
   return (
     <Grid container>
       {/* <Grid size={12} sx={{pb: 2}}>
@@ -19,6 +23,9 @@ export default function JoinTree() {
       <Grid container size={12} justifyContent="center" alignItems="center">
         <Card>
           <CardContent>
+            <Typography variant="h6" align="center">
+              Join {joinType}
+            </Typography>
             <TextField
               id="outlined-basic"
               label="Enter Join Code"
