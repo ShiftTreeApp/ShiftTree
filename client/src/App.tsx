@@ -8,6 +8,7 @@ import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
 import JoinTree from "@/JoinTree.tsx";
+import ShiftTree from "@/ShiftTree.tsx";
 
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
@@ -35,6 +36,14 @@ export default function App() {
                 element={
                   <Authenticated>
                     <Create />
+                  </Authenticated>
+                }
+              />
+              <Route
+                path="/shifttree"
+                element={
+                  <Authenticated>
+                    <ShiftTree />
                   </Authenticated>
                 }
               />
