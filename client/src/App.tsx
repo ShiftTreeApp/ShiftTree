@@ -7,7 +7,7 @@ import { ApiProvider } from "@/client.tsx";
 import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
-import JoinTree from "@/JoinTree.tsx";
+//import JoinTree from "@/JoinTree.tsx";
 
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
