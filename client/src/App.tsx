@@ -11,6 +11,7 @@ import Create from "@/Create.tsx";
 
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
+import Schedule from "@/Schedule.tsx";
 
 export default function App() {
   return (
@@ -35,6 +36,14 @@ export default function App() {
                 element={
                   <Authenticated>
                     <Create />
+                  </Authenticated>
+                }
+              />
+              <Route
+                path="/schedule/:scheduleId"
+                element={
+                  <Authenticated>
+                    <Schedule />
                   </Authenticated>
                 }
               />
