@@ -3,20 +3,7 @@ import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import Drawer from "@mui/material/Drawer";
 import { LeftDrawerContext } from "./Home";
-import {
-  Button,
-  Grid2 as Grid,
-  Typography,
-  Paper,
-  Card,
-  Divider,
-} from "@mui/material";
-
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-
+import Calendar_and_Org from "./Calendar_and_Org_display";
 const drawerWidth = 360;
 
 export default function ResponsiveDrawer() {
@@ -32,46 +19,7 @@ export default function ResponsiveDrawer() {
 
   const drawer = (
     <div>
-      <Grid container spacing={2} sx={{ padding: 2 }}>
-        <Grid item xs={12}>
-          <Paper
-            sx={{
-              backgroundColor: theme => theme.palette.background.default,
-              minHeight: 600,
-              padding: 2,
-              boxSizing: "border-box",
-              overflow: "auto",
-            }}
-          >
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DateCalendar renderLoading={() => <DayCalendarSkeleton />} />
-            </LocalizationProvider>
-
-            <Grid container color="primary" sx={{ pt: 1, pb: 1 }}>
-              <Grid item xs={12}>
-                <Typography
-                  sx={{ marginLeft: 1, pt: 0.5, pb: 0.5, textAlign: "center" }}
-                  color={"black"}
-                  variant="h6"
-                >
-                  Organizations
-                </Typography>
-              </Grid>
-            </Grid>
-            <Divider variant="middle" />
-            <Paper
-              sx={{
-                margin: 2,
-                flexGrow: 1,
-                height: "calc(100% - 100px)",
-                overflow: "auto",
-              }}
-            >
-              <Typography sx={{ padding: 2 }}> Sample Organization</Typography>
-            </Paper>
-          </Paper>
-        </Grid>
-      </Grid>
+      <Calendar_and_Org />
     </div>
   );
 
@@ -80,7 +28,8 @@ export default function ResponsiveDrawer() {
       <CssBaseline />
       <Box
         component="nav"
-        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }} //BREAKPOINT
+        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+        y
         aria-label="mailbox folders"
       >
         <Drawer
