@@ -39,7 +39,7 @@ export default function ResponsiveDrawer() {
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
-              paddingTop: "56px", // mobile navbar shrinks -- measured in inspect element
+              paddingTop: { xs: "56px", sm: "64px" }, // mobile navbar shrinks -- measured in inspect element
             },
           }}
         >
