@@ -1,4 +1,3 @@
-
 info:
   version: 0.0.2
   title: "shifttree API"
@@ -6,7 +5,7 @@ info:
 openapi: 3.0.3
 
 paths:
-  # Login Endpoint. Body contains email and password json file. 
+  # Login Endpoint. Body contains email and password json file.
   # Response contains a User(username, jwt)
   /login:
     post:
@@ -17,20 +16,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Credentials'
+              $ref: "#/components/schemas/Credentials"
       responses:
         200:
           description: Successful
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         default:
           description: Unexpected Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UnexpectedError'
+                $ref: "#/components/schemas/UnexpectedError"
   /register:
     post:
       description: Registration
@@ -40,7 +39,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegistrationCredentials'
+              $ref: "#/components/schemas/RegistrationCredentials"
       responses:
         201:
           description: Successful Registration
@@ -57,7 +56,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UnexpectedError'
+                $ref: "#/components/schemas/UnexpectedError"
   /schedules:
     post:
       description: Create a new schedule
@@ -98,7 +97,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UnexpectedError'
+                $ref: "#/components/schemas/UnexpectedError"
     get:
       description: Get all schedules owned by the current user and the schedules the user is a member of
       security:
@@ -125,36 +124,36 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ScheduleInfoPreview'
+                  $ref: "#/components/schemas/ScheduleInfoPreview"
         default:
           description: Unexpected Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UnexpectedError'
+                $ref: "#/components/schemas/UnexpectedError"
 
   /shiftTreeID:
     get:
       security:
         - Bearer: []
       description: Gets the ID Code for a shiftTree, if the user making request is Owner
-      responses: 
+      responses:
         401:
           description: Unauthorised
-        404: 
+        404:
           description: Not found
-        200: 
+        200:
           description: ID Found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UUID'
+                $ref: "#/components/schemas/UUID"
         default:
           description: Unexpected Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UnexpectedError'
+                $ref: "#/components/schemas/UnexpectedError"
       parameters:
         - name: ShiftTree
           in: query
@@ -179,12 +178,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UnexpectedError'
+                $ref: "#/components/schemas/UnexpectedError"
       parameters:
         - name: ShiftTreeID
           in: query
           schema:
-            $ref: '#/components/schemas/UUID'
+            $ref: "#/components/schemas/UUID"
 
   /schedules/{scheduleId}:
     get:
@@ -204,13 +203,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScheduleInfo'
+                $ref: "#/components/schemas/ScheduleInfo"
         404:
           description: Schedule with specified ID does not exist, or user does not have access to it
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
     delete:
       security:
         - Bearer: []
@@ -230,13 +229,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to delete the schedule
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /schedules/{scheduleId}/members:
     get:
@@ -258,19 +257,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserInfoPreview'
+                  $ref: "#/components/schemas/UserInfoPreview"
         404:
           description: Schedule with specified ID does not exist, or user does not have access to it
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to view the members
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /schedules/{scheduleId}/shifts:
     get:
@@ -292,13 +291,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ShiftInfo'
+                  $ref: "#/components/schemas/ShiftInfo"
         404:
           description: Schedule with specified ID does not exist, or user does not have access to it
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
     post:
       security:
         - Bearer: []
@@ -314,26 +313,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ShiftCreateInfo'
+              $ref: "#/components/schemas/ShiftCreateInfo"
       responses:
         201:
           description: Created shift
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ShiftInfo'
+                $ref: "#/components/schemas/ShiftInfo"
         404:
           description: Schedule with specified ID does not exist, or user does not have access to it
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to modify the schedule
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /schedules/{scheduleId}/signups:
     get:
@@ -355,19 +354,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ShiftWithSignups'
+                  $ref: "#/components/schemas/ShiftWithSignups"
         404:
           description: Schedule with specified ID does not exist, or user does not have access to it
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to view the signups
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /shifts/{shiftId}:
     put:
@@ -403,20 +402,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to modify the shift
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
     delete:
       security:
         - Bearer: []
       summary: Delete shift
       parameters:
         - name: shiftId
-          in: query
+          in: path
           required: true
           schema:
             type: string
@@ -429,13 +428,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to modify the shift
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /signups/{shiftId}:
     post:
@@ -452,13 +451,19 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: userId
-          description: User to sign up, can only be another user if the current user is a manager
-          in: query
-          required: false
-          schema:
-            type: string
-            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  description: User to sign up, can only be another user if the current user is a manager
+                  type: string
+                  format: uuid
+                weight:
+                  type: number
+                  description: Weight of the user's preference for this shift
       responses:
         204:
           description: User added to shift
@@ -467,19 +472,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to modify the shift
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         400:
           description: User does not exist
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
     delete:
       security:
         - Bearer: []
@@ -509,19 +514,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to modify the shift
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         400:
           description: User does not exist
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /hello:
     get:
@@ -550,7 +555,7 @@ components:
       type: http
       scheme: bearer
   schemas:
-     UnexpectedError:
+    UnexpectedError:
       required:
         - code
         - message
@@ -560,7 +565,7 @@ components:
           format: int32
         message:
           type: string
-     Error:
+    Error:
       required:
         - error
       properties:
@@ -568,7 +573,7 @@ components:
           type: string
         detail:
           type: string
-     Credentials:
+    Credentials:
       type: object
       properties:
         email:
@@ -578,7 +583,7 @@ components:
       required:
         - email
         - password
-     RegistrationCredentials:
+    RegistrationCredentials:
       type: object
       properties:
         username:
@@ -591,7 +596,7 @@ components:
         - username
         - email
         - password
-     User:
+    User:
       type: object
       properties:
         name:
@@ -601,7 +606,7 @@ components:
       required:
         - name
         - accessToken
-     UserInfoPreview:
+    UserInfoPreview:
       type: object
       required:
         - id
@@ -618,15 +623,15 @@ components:
         profileImageUrl:
           type: string
 
-     UUID:
+    UUID:
       type: string
-      pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
-     
-     ScheduleInfo:
-      allOf:
-        - $ref: '#/components/schemas/ScheduleInfoPreview'
+      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 
-     ScheduleInfoPreview:
+    ScheduleInfo:
+      allOf:
+        - $ref: "#/components/schemas/ScheduleInfoPreview"
+
+    ScheduleInfoPreview:
       type: object
       required:
         - id
@@ -646,7 +651,7 @@ components:
         description:
           type: string
         owner:
-          $ref: '#/components/schemas/UserInfoPreview'
+          $ref: "#/components/schemas/UserInfoPreview"
         startTime:
           type: string
           format: date-time
@@ -667,7 +672,7 @@ components:
             - open
             - closed
 
-     ShiftInfo:
+    ShiftInfo:
       type: object
       required:
         - id
@@ -687,7 +692,7 @@ components:
           type: string
           format: date-time
 
-     ShiftCreateInfo:
+    ShiftCreateInfo:
       type: object
       required:
         - name
@@ -703,18 +708,18 @@ components:
           type: string
           format: date-time
 
-     SignupInfo:
+    SignupInfo:
       properties:
         user:
-          $ref: '#/components/schemas/UserInfoPreview'
+          $ref: "#/components/schemas/UserInfoPreview"
         weight:
           type: integer
 
-     ShiftWithSignups:
+    ShiftWithSignups:
       allOf:
-        - $ref: '#/components/schemas/ShiftInfo'
+        - $ref: "#/components/schemas/ShiftInfo"
       properties:
         signups:
           type: array
           items:
-            $ref: '#/components/schemas/SignupInfo'
+            $ref: "#/components/schemas/SignupInfo"
