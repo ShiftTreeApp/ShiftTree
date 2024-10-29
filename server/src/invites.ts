@@ -16,8 +16,7 @@ const checkUserInSchedule = async (ID, user) => {
   return rows.length > 0;
 };
 
-export const fetchShiftTreeUUID = async (req, res) => {
-  const ShiftTree = req.query.ShiftTree;
+const fetchShiftTreeUUID = async (ShiftTree) => {
   console.log(ShiftTree);
   const statement = "SELECT id FROM schedule WHERE schedule_name = $1";
   const query = {
@@ -25,13 +24,39 @@ export const fetchShiftTreeUUID = async (req, res) => {
     values: [ShiftTree],
   };
   const { rows } = await pool.query(query);
+  console.log(rows[0]);
+  return rows[0]["id"];
+};
+
+export const getExistingJoinCode = async (req, res) => {
+  const idProvided = await fetchShiftTreeUUID(req.query.ShiftTree;);
+  const statement = "SELECT code FROM join_code WHERE schedule_id = $1";
+  const query = {
+    text: statement,
+    values: [idProvided],
+  };
+  const { rows } = await pool.query(query);
+  console.log(rows);
   if (rows.length == 0) {
     res.status(404).send();
   }
-  console.log(rows[0]);
-  res.status(200).json(rows[0]["id"]);
+  res.status(200).json(rows[0]);
 };
 
+export const generateJoinCode = async(req, res) => {
+  const idProvided_ = await fetchShiftTreeUUID(req.query.ShiftTree);
+  const statement = "INSERT INTO join_code WHERE schedule_id = $1 (code) VALUES (gen_random_uuid())";
+  const query = {
+    text: statement,
+    values: [idProvided],
+  };
+  const { rows } = await pool.query(query);
+
+
+
+}
+
+// TODO: Change logic to compare to the foregin join code id instead
 // Handles user join requests, and confirms query was succesful.
 export const requestToJoin = async (req, res) => {
   const ID = req.query.ShiftTreeID;

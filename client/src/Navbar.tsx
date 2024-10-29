@@ -25,6 +25,7 @@ import {
   Dialog,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -32,6 +33,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 
 import { useAuth } from "@/auth";
 import JoinTree from "./JoinTree";
+import { LeftDrawerContext } from "./Home";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -47,7 +49,13 @@ const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
 export default function Navbar() {
   const auth = useAuth();
   const navigate = useNavigate();
+  const LDC = React.useContext(LeftDrawerContext);
 
+  const handleDrawerToggle = () => {
+    if (!LDC.isClosing) {
+      LDC.setMobileOpen(!LDC.mobileOpen);
+    }
+  };
   function onLogout() {
     auth.logout();
     // after logout, navigate("/") takes you to sign in
@@ -87,10 +95,22 @@ export default function Navbar() {
   return (
     <Grid container>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
+        <AppBar
+          position="fixed"
+          sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}
+        >
           <Toolbar
             sx={{ justifyContent: "space-between", backgroundColor: "primary" }}
           >
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2, display: { md: "none" } }}
+            >
+              <MenuIcon />
+            </IconButton>
             <Link component={RouterLink} to="/">
               <Typography fontSize={24} color={"white"}>
                 ShiftTree

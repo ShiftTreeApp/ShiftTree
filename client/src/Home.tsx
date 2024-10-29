@@ -1,15 +1,20 @@
 import {
-  //Button,
+  Button,
   Grid2 as Grid,
   Typography,
   Paper,
+  Card,
   Divider,
 } from "@mui/material";
-//import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import "dayjs/locale/en";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import Navbar from "@/Navbar";
 import ShiftTreeCard from "./ShiftTreeCard";
-import Calendar_and_Org from "./Calendar_and_Org_display";
 
 export default function Home() {
   // https://mui.com/x/react-date-pickers/date-calendar/#dynamic-data
@@ -22,7 +27,42 @@ export default function Home() {
       {/* Grid for everything below navbar */}
       <Grid container spacing={2} sx={{ paddingLeft: 2, paddingRight: 2 }}>
         {/* Grid contains Calendar and org */}
-        <Calendar_and_Org />
+        <Grid>
+          <Paper
+            sx={{
+              backgroundColor: theme => theme.palette.background.default,
+              minHeight: 600,
+            }}
+          >
+            {/* Weird Calendar Shit */}
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DateCalendar renderLoading={() => <DayCalendarSkeleton />} />
+            </LocalizationProvider>
+
+            {/* Grid that contains Organizations */}
+            <Grid container color="primary" sx={{ pt: 1, pb: 1 }}>
+              <Grid size={6}>
+                <Typography
+                  sx={{ marginLeft: 1, pt: 0.5, pb: 0.5, textAlign: "center" }}
+                  color={"black"}
+                  variant="h6"
+                >
+                  Organizations
+                </Typography>
+              </Grid>
+            </Grid>
+            <Divider variant="middle" />
+            <Paper
+              sx={{
+                margin: 2, // Set margin on all sides
+                flexGrow: 1,
+                height: "calc(100% - 100px)", // Adjust height based on spacing needs
+              }}
+            >
+              <Typography sx={{ padding: 2 }}> Sample Organization</Typography>
+            </Paper>
+          </Paper>
+        </Grid>
 
         {/* Grid that contains shiftTrees info */}
         <Grid sx={{ flexGrow: 1 }}>
