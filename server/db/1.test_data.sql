@@ -67,3 +67,9 @@ INSERT INTO schedule_org_membership (id, org_id, schedule_id) VALUES
   (gen_random_uuid(), (SELECT id FROM organization WHERE organization_name = 'Organization 1'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1')),
   (gen_random_uuid(), (SELECT id FROM organization WHERE organization_name = 'Organization 2'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2')),
   (gen_random_uuid(), (SELECT id FROM organization WHERE organization_name = 'Organization 3'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 3'));
+
+
+INSERT INTO join_code (code, schedule_id, expiration) VALUES
+  (gen_random_uuid(), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1'), '2023-12-31 23:59:59'),
+  (gen_random_uuid(), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2'), '2023-12-31 23:59:59'),
+  (gen_random_uuid(), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 3'), '2023-12-31 23:59:59');

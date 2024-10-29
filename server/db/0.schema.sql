@@ -6,7 +6,12 @@ DROP TABLE IF EXISTS final_shift;
 DROP TABLE IF EXISTS sign_up;
 DROP TABLE IF EXISTS organization;
 DROP TABLE IF EXISTS schedule_membership;
-
+DROP TABLE IF EXISTS join_code;
+DROP TABLE IF EXISTS user_schedule_membership;
+DROP TABLE IF EXISTS user_shift_assignment;
+DROP TABLE IF EXISTS user_shift_signup;
+DROP TABLE IF EXISTS schedule_org_membership;
+DROP TABLE IF EXISTS profile_image_data;
 --UserData
 --TODO: Decide on what else we want to store related to users, while keeping in mind that schedules/orgs and such are tracked through foreign keys so shouldn't be a part of user.
 CREATE TABLE user_account
