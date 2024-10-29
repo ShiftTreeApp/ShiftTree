@@ -13,6 +13,8 @@ import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
 import Schedule from "@/Schedule.tsx";
 
+import EditTree from "./EditTree.tsx";
+
 export default function App() {
   return (
     <ThemeProvider theme={customTheme}>
@@ -44,6 +46,14 @@ export default function App() {
                 element={
                   <Authenticated>
                     <Schedule />
+                  </Authenticated>
+                }
+              />
+              <Route
+                path="/schedule/:scheduleId/edit"
+                element={
+                  <Authenticated>
+                    <EditTree />
                   </Authenticated>
                 }
               />
