@@ -17,12 +17,6 @@ export default function ResponsiveDrawer() {
     LDC.setIsClosing(false);
   };
 
-  const drawer = (
-    <div>
-      <Calendar_and_Org />
-    </div>
-  );
-
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -41,20 +35,21 @@ export default function ResponsiveDrawer() {
             keepMounted: true,
           }}
           sx={{
-            display: { xs: "block", md: "none" }, //BREAKPOINT
+            display: { xs: "flex", md: "none" }, //BREAKPOINT
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
-              paddingTop: "64px",
+              paddingTop: { xs: "56px", sm: "64px" }, // mobile navbar shrinks -- measured in inspect element
             },
           }}
         >
-          {drawer}
+          <Calendar_and_Org />
         </Drawer>
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: "none", md: "block" }, //BREAKPOINT
+            display: { xs: "none", md: "flex" }, //BREAKPOINT
+            flexDirection: "column",
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
@@ -63,7 +58,7 @@ export default function ResponsiveDrawer() {
           }}
           open
         >
-          {drawer}
+          <Calendar_and_Org />
         </Drawer>
       </Box>
     </Box>

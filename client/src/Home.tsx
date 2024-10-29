@@ -21,7 +21,16 @@ export default function Home() {
   const [isClosing, setIsClosing] = React.useState(false);
 
   return (
-    <Grid container direction="column" spacing={2}>
+    <Grid
+      container
+      direction="column"
+      spacing={0.5}
+      sx={{
+        paddingTop: { xs: "52px", sm: "60px", md: "64px" }, // Add top margin to account for AppBar height
+        paddingLeft: { xs: 0.5, md: `${drawerWidth + 8}px` }, // Add left margin to account for drawer width (measured spacing 1 with inspect)
+        paddingRight: { xs: 0.5, md: 1 }, // Remove right margin on mobile
+      }}
+    >
       <LeftDrawerContext.Provider
         value={{ mobileOpen, setMobileOpen, isClosing, setIsClosing }}
       >
@@ -32,13 +41,11 @@ export default function Home() {
         component="main"
         sx={{
           flexGrow: 1,
-          ml: { md: `${drawerWidth}px` }, // Add left margin to account for drawer width
-          mt: 8, // Add top margin to account for AppBar height
         }}
       >
         <Paper
           sx={{
-            backgroundColor: theme => theme.palette.background.default,
+            backgroundColor: theme => theme.palette.background.paper,
             minHeight: 600,
             display: "flex",
             flexDirection: "column",
@@ -48,7 +55,7 @@ export default function Home() {
           <Grid
             container
             spacing={1}
-            sx={{ pt: 1, pb: 2, justifyContent: "space-between" }}
+            // sx={{ pt: 1, pb: 2, justifyContent: "space-between" }}
           >
             <Grid size={8}>
               <Typography

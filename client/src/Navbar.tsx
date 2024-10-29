@@ -174,7 +174,12 @@ export default function Navbar() {
             </Grid>
           </Toolbar>
         </AppBar>
-        <Drawer anchor="right" open={drawerOpen} onClose={handleDrawerClose}>
+        <Drawer
+          anchor="right"
+          open={drawerOpen}
+          onClose={handleDrawerClose}
+          sx={{ zIndex: theme => theme.zIndex.drawer + 1000 }}
+        >
           <Box
             sx={{ width: 250 }}
             role="presentation"

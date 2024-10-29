@@ -13,11 +13,13 @@ import Org_display from "./Org_display";
 
 export default function Calendar_and_Org() {
   return (
-    <Grid>
+    <Grid sx={{ flexGrow: 1, display: "flex" }}>
       <Paper
         sx={{
           backgroundColor: theme => theme.palette.background.default,
           minHeight: 600,
+          flexGrow: 1,
+          borderRadius: 0,
         }}
       >
         {/* Weird Calendar Shit */}
