@@ -665,11 +665,11 @@ export interface paths {
         /** Delete shift */
         delete: {
             parameters: {
-                query: {
+                query?: never;
+                header?: never;
+                path: {
                     shiftId: string;
                 };
-                header?: never;
-                path?: never;
                 cookie?: never;
             };
             requestBody?: never;
@@ -723,17 +723,26 @@ export interface paths {
          */
         post: {
             parameters: {
-                query?: {
-                    /** @description User to sign up, can only be another user if the current user is a manager */
-                    userId?: string;
-                };
+                query?: never;
                 header?: never;
                 path: {
                     shiftId: string;
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /**
+                         * Format: uuid
+                         * @description User to sign up, can only be another user if the current user is a manager
+                         */
+                        userId?: string;
+                        /** @description Weight of the user's preference for this shift */
+                        weight?: number;
+                    };
+                };
+            };
             responses: {
                 /** @description User added to shift */
                 204: {

@@ -60,10 +60,28 @@ app.get(
   auth.authorizationCheck,
   schedules.getShifts,
 );
+app.get(
+  "/schedules/:scheduleId/members",
+  auth.authorizationCheck,
+  schedules.getMembers,
+);
+app.get(
+  "/schedules/:scheduleId/signups",
+  auth.authorizationCheck,
+  schedules.getSignups,
+);
 app.post(
   "/schedules/:scheduleId/shifts",
   auth.authorizationCheck,
   schedules.createShift,
+);
+app.delete("/shifts/:shiftId", auth.authorizationCheck, schedules.deleteShift);
+app.put("/shifts/:shiftId", auth.authorizationCheck, schedules.editShift);
+app.post("/signups/:shiftId", auth.authorizationCheck, schedules.addSignup);
+app.delete(
+  "/signups/:shiftId",
+  auth.authorizationCheck,
+  schedules.deleteSignup,
 );
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {

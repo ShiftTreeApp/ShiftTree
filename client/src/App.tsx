@@ -7,8 +7,9 @@ import { ApiProvider } from "@/client.tsx";
 import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
-import JoinTree from "@/JoinTree.tsx";
-import ShiftTree from "@/ShiftTree.tsx";
+//import Schedule from "@/Schedule.tsx";
+import Profile from "@/Profile.tsx";
+import EditProfile from "@/EditProfile.tsx";
 
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
@@ -40,10 +41,26 @@ export default function App() {
                 }
               />
               <Route
-                path="/shifttree"
+                path="/profile"
                 element={
                   <Authenticated>
-                    <ShiftTree />
+                    <Profile />
+                  </Authenticated>
+                }
+              />
+              <Route
+                path="/edit_profile"
+                element={
+                  <Authenticated>
+                    <EditProfile />
+                  </Authenticated>
+                }
+              />
+              <Route
+                path="/schedule"
+                element={
+                  <Authenticated>
+                    <Schedule />
                   </Authenticated>
                 }
               />

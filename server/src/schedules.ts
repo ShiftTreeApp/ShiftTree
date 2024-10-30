@@ -275,3 +275,378 @@ export async function createShift(req: Request, res: Response) {
 
   res.status(201).json(results.rows[0].json);
 }
+
+export async function getMembers(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  // Check that user can access the schedule
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select * from schedule_info as info
+        where info.user_id = $1 and info.schedule_id = $2
+      `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    // TODO: Allow for members to view other members if the permission is set
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to view members of this schedule",
+      });
+      return;
+    }
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      select json_agg(json_build_object(
+        'id', ua.id,
+        'displayName', ua.username,
+        'email', ua.email,
+        'profileImageUrl', ''
+      )) as json
+      from user_schedule_membership as usm
+      join user_account as ua on usm.user_id = ua.id
+      where usm.schedule_id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  res.status(200).json(results.rows[0].json);
+}
+
+export async function getSignups(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  // Check that user can access the schedule
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select * from schedule_info as info
+        where info.user_id = $1 and info.schedule_id = $2
+      `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to view signups for this schedule",
+      });
+      return;
+    }
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      select json_agg(json_build_object(
+        'id', shift.id,
+        'name', '',
+        'description', '',
+        'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+        'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
+        'signups', (
+          select coalesce(json_agg(json_build_object(
+            'id', signup.id,
+            'weight', signup.user_weighting,
+            'user', json_build_object(
+              'id', ua.id,
+              'displayName', ua.username,
+              'email', ua.email,
+              'profileImageUrl', ''
+            )
+          )), json_array())
+          from user_shift_signup as signup
+          join user_account as ua on signup.user_id = ua.id
+          where signup.shift_id = shift.id
+        )
+      )) as json
+      from shift
+      join schedule on shift.schedule_id = schedule.id
+      where schedule.id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  res.status(200).json(results.rows[0].json);
+}
+
+export async function deleteShift(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const shiftId = req.params.shiftId as string;
+
+  // Check that user can access the shift
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select *
+        from shift
+        join schedule_info as info on shift.schedule_id = info.schedule_id
+        where info.user_id = $1 and shift.id = $2
+      `,
+      values: [userId, shiftId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to delete this shift",
+      });
+      return;
+    }
+  }
+
+  await pool.query({
+    text: /* sql */ `
+      delete from shift
+      where id = $1
+    `,
+    values: [shiftId],
+  });
+
+  res.status(204).send();
+}
+
+export async function editShift(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const shiftId = req.params.shiftId as string;
+
+  // TODO: Validate that the start date is before the end date
+
+  // Check that user can access the shift
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select *
+        from shift
+        join schedule_info as info on shift.schedule_id = info.schedule_id
+        where info.user_id = $1 and shift.id = $2
+      `,
+      values: [userId, shiftId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to edit this shift",
+      });
+      return;
+    }
+  }
+
+  await pool.query({
+    text: /* sql */ `
+      update shift
+      set start_time = $1, end_time = $2
+      where id = $3
+    `,
+    values: [req.body.startTime, req.body.endTime, shiftId],
+  });
+
+  res.status(204).send();
+}
+
+export async function addSignup(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const shiftId = req.params.shiftId as string;
+  const targetUserId = req.body.userId as string | null;
+  const weight = req.body.weight as number | null;
+
+  // If target user is specified, check that the current user has permission to sign users up in the schedule
+  // and that the target user is a member of the schedule
+  if (targetUserId && targetUserId !== userId) {
+    const results = await pool.query({
+      text: /* sql */ `
+          select info.user_role
+          from schedule_info as info
+          join shift on info.schedule_id = shift.schedule_id
+          join user_schedule_membership as usm on info.schedule_id = usm.schedule_id
+          where info.user_id = $1 and shift.id = $2
+        `,
+      values: [userId, shiftId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to sign users up for this shift",
+      });
+      return;
+    }
+
+    // Ensure target user is a member of the schedule
+    const targetUserResults = await pool.query({
+      text: /* sql */ `
+          select info.user_role
+          from schedule_info as info
+          join shift on info.schedule_id = shift.schedule_id
+          where info.user_id = $1
+        `,
+      values: [targetUserId],
+    });
+
+    if (
+      targetUserResults.rows.length < 1 ||
+      targetUserResults.rows[0].user_role !== "member"
+    ) {
+      res.status(400).json({
+        error: "Target user does not exist or is not a member of the schedule",
+      });
+      return;
+    }
+  } else {
+    // Ensure that the current user is a member of the schedule
+    const results = await pool.query({
+      text: /* sql */ `
+        select info.user_role
+        from schedule_info as info
+        join shift on info.schedule_id = shift.schedule_id
+        where info.user_id = $1 and shift.id = $2
+      `,
+      values: [userId, shiftId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (role !== "member") {
+      res.status(403).json({
+        error: "You are not allowed to sign up for this shift",
+      });
+      return;
+    }
+  }
+
+  await pool.query({
+    text: /* sql */ `
+      insert into user_shift_signup (user_id, shift_id, user_weighting)
+      values ($1, $2, $3)
+      on conflict do nothing
+    `,
+    values: [targetUserId ?? userId, shiftId, weight ?? 1],
+  });
+
+  res.status(204).send();
+}
+
+export async function deleteSignup(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const shiftId = req.params.shiftId as string;
+  const targetUserId = req.query.userId as string | null;
+
+  // If target user is specified, check that the current user has permission to sign users up in the schedule
+  // and that the target user is a member of the schedule
+  if (targetUserId && targetUserId !== userId) {
+    const results = await pool.query({
+      text: /* sql */ `
+          select info.user_role
+          from schedule_info as info
+          join shift on info.schedule_id = shift.schedule_id
+          join user_schedule_membership as usm on info.schedule_id = usm.schedule_id
+          where info.user_id = $1 and shift.id = $2
+        `,
+      values: [userId, shiftId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error:
+          "You do not have permission to remove other users from this shift",
+      });
+      return;
+    }
+
+    // Ensure target user is a member of the schedule
+    const targetUserResults = await pool.query({
+      text: /* sql */ `
+          select info.user_role
+          from schedule_info as info
+          join shift on info.schedule_id = shift.schedule_id
+          where info.user_id = $1
+        `,
+      values: [targetUserId],
+    });
+
+    if (
+      targetUserResults.rows.length < 1 ||
+      targetUserResults.rows[0].user_role !== "member"
+    ) {
+      res.status(400).json({
+        error: "Target user does not exist or is not a member of the schedule",
+      });
+      return;
+    }
+  } else {
+    // Ensure that the current user is a member of the schedule
+    const results = await pool.query({
+      text: /* sql */ `
+        select info.user_role
+        from schedule_info as info
+        join shift on info.schedule_id = shift.schedule_id
+        where info.user_id = $1 and shift.id = $2
+      `,
+      values: [userId, shiftId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (role !== "member") {
+      res.status(403).json({
+        error: "You are not allowed to give up this shift",
+      });
+      return;
+    }
+  }
+
+  await pool.query({
+    text: /* sql */ `
+      delete from user_shift_signup
+      where user_id = $1 and shift_id = $2
+    `,
+    values: [targetUserId ?? userId, shiftId],
+  });
+
+  res.status(204).send();
+}
