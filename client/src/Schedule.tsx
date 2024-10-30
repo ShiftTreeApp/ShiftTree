@@ -266,12 +266,17 @@ function WeekRow(props: WeekRowProps) {
               gap: 1,
             }}
           >
-            {date.getDate() === 1 && (
-              <Typography>
-                {dayjs(date).format("MMM")} {date.getDate()}
+            <Box sx={{ display: "inline-flex", gap: 1 }}>
+              {date.getDate() === 1 && (
+                <Typography>{dayjs(date).format("MMM DD")}</Typography>
+              )}
+              {date.getDate() !== 1 && (
+                <Typography>{dayjs(date).format("DD")}</Typography>
+              )}
+              <Typography sx={{ display: { md: "none" } }}>
+                {`(${dayjs(date).format("ddd")})`}
               </Typography>
-            )}
-            {date.getDate() !== 1 && <Typography>{date.getDate()}</Typography>}
+            </Box>
             {shifts.map(shift => (
               <ShiftCard
                 key={shift.id}
