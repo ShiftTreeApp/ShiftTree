@@ -12,9 +12,10 @@ export default function Schedule() {
         component="main"
         sx={{ display: "flex", flexDirection: "column", alignItems: "stretch" }}
       >
-        <WeekRow
+        <ShiftCalendar
           onClickShift={shiftId => console.log(shiftId)}
           startDate={new Date("2024-10-27, 8:00")}
+          endDate={new Date("2024-11-29, 3:00")}
           shifts={[
             {
               id: "1",
@@ -40,9 +41,107 @@ export default function Schedule() {
               startTime: new Date("2024-10-28, 23:00"),
               endTime: new Date("2024-10-29, 3:00"),
             },
+            {
+              id: "4",
+              name: "Shift 4",
+              startTime: new Date("2024-10-31, 23:00"),
+              endTime: new Date("2024-10-31, 3:00"),
+            },
           ]}
         />
       </Container>
+    </Grid>
+  );
+}
+
+type ShiftDetails = Omit<ShiftCardProps, "onClick">;
+
+interface ShiftCalendarProps {
+  shifts: ShiftDetails[];
+  startDate: Date;
+  endDate: Date;
+  onClickShift: (shiftId: string) => void;
+}
+
+function ShiftCalendar(props: ShiftCalendarProps) {
+  // Start date is the Sunday of the week that contains the start date
+  const startDate = useMemo(() => {
+    const date = new Date(props.startDate);
+    while (date.getDay() !== 0) {
+      date.setDate(date.getDate() - 1);
+    }
+    return date;
+  }, [props.startDate]);
+
+  const weekStartDates = useMemo(() => {
+    const dates = [new Date(startDate)];
+    let last = new Date(startDate);
+    while (last < props.endDate) {
+      last = new Date(last);
+      last.setDate(last.getDate() + 7);
+      dates.push(new Date(last));
+    }
+    last = new Date(last);
+    last.setDate(last.getDate() - 7);
+    dates.push(new Date(last));
+    return dates;
+  }, [props.endDate, startDate]);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <DaysOfWeek />
+      <Box>
+        {weekStartDates.map((date, i) => (
+          <Box
+            key={date.toISOString()}
+            sx={{
+              borderTop: i === 0 ? "1px solid" : "none",
+              borderBottom: "1px solid",
+              borderColor: theme => theme.palette.divider,
+            }}
+          >
+            <WeekRow
+              startDate={date}
+              shifts={props.shifts}
+              onClickShift={props.onClickShift}
+            />
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+function DaysOfWeek() {
+  function DayLabel(props: { name: string }) {
+    return (
+      <Grid
+        size={1}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <strong>{props.name}</strong>
+      </Grid>
+    );
+  }
+
+  return (
+    <Grid container columns={7} sx={{ padding: 1 }}>
+      <DayLabel name="Sun" />
+      <DayLabel name="Mon" />
+      <DayLabel name="Tue" />
+      <DayLabel name="Wed" />
+      <DayLabel name="Thu" />
+      <DayLabel name="Fri" />
+      <DayLabel name="Sat" />
     </Grid>
   );
 }
@@ -83,16 +182,18 @@ function WeekRow(props: WeekRowProps) {
   }, [days, props.shifts]);
 
   return (
-    <Grid container columns={7} sx={{ flexGrow: 1 }}>
+    <Grid container columns={{ xs: 1, md: 7 }} sx={{ flexGrow: 1 }}>
       {shiftsByDayOfWeek.map(({ date, shifts }, i) => (
         <Grid
           key={date.toISOString()}
           size={1}
           sx={{
-            paddingLeft: theme => theme.spacing(1),
-            paddingRight: theme => theme.spacing(1),
-            borderLeft: "1px solid",
-            borderRight: i == 6 ? "1px solid" : "none",
+            padding: 1.5,
+            paddingTop: 0.5,
+            md: {
+              borderLeft: "1px solid",
+              borderRight: i == 6 ? "1px solid" : "none",
+            },
             borderColor: theme => theme.palette.divider,
           }}
         >
