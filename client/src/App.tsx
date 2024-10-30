@@ -7,6 +7,7 @@ import { ApiProvider } from "@/client.tsx";
 import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
+//import Schedule from "@/Schedule.tsx";
 import Profile from "@/Profile.tsx";
 import EditProfile from "@/EditProfile.tsx";
 
@@ -52,6 +53,14 @@ export default function App() {
                 element={
                   <Authenticated>
                     <EditProfile />
+                  </Authenticated>
+                }
+              />
+              <Route
+                path="/schedule"
+                element={
+                  <Authenticated>
+                    <Schedule />
                   </Authenticated>
                 }
               />
