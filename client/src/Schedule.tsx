@@ -1,7 +1,16 @@
+import {
+  Box,
+  Card,
+  Chip,
+  Container,
+  Grid2 as Grid,
+  Typography,
+} from "@mui/material";
+import { useMemo } from "react";
+import dayjs from "dayjs";
+
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
-import { Box, Card, Container, Grid2 as Grid, Typography } from "@mui/material";
-import { useMemo } from "react";
 
 export default function Schedule() {
   return (
@@ -15,7 +24,7 @@ export default function Schedule() {
         <ShiftCalendar
           onClickShift={shiftId => console.log(shiftId)}
           startDate={new Date("2024-10-27, 8:00")}
-          endDate={new Date("2024-11-29, 3:00")}
+          endDate={new Date("2024-11-20, 3:00")}
           shifts={[
             {
               id: "1",
@@ -81,9 +90,7 @@ function ShiftCalendar(props: ShiftCalendarProps) {
       last.setDate(last.getDate() + 7);
       dates.push(new Date(last));
     }
-    last = new Date(last);
-    last.setDate(last.getDate() - 7);
-    dates.push(new Date(last));
+    dates.length -= 1;
     return dates;
   }, [props.endDate, startDate]);
 
@@ -94,22 +101,77 @@ function ShiftCalendar(props: ShiftCalendarProps) {
         flexDirection: "column",
       }}
     >
-      <DaysOfWeek />
-      <Box>
+      <Box
+        sx={theme => ({
+          paddingLeft: 10,
+          [theme.breakpoints.down("md")]: { display: "none" },
+        })}
+      >
+        <DaysOfWeek />
+      </Box>
+      <Box
+        sx={theme => ({
+          display: "flex",
+          flexDirection: "column",
+          [theme.breakpoints.down("md")]: {
+            gap: 1,
+          },
+        })}
+      >
         {weekStartDates.map((date, i) => (
           <Box
             key={date.toISOString()}
             sx={{
-              borderTop: i === 0 ? "1px solid" : "none",
-              borderBottom: "1px solid",
-              borderColor: theme => theme.palette.divider,
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 1,
+              alignItems: { xs: "stretch", md: "center" },
             }}
           >
-            <WeekRow
-              startDate={date}
-              shifts={props.shifts}
-              onClickShift={props.onClickShift}
-            />
+            <Box
+              sx={theme => ({
+                [theme.breakpoints.up("md")]: {
+                  width: theme => theme.spacing(10),
+                  minWidth: theme => theme.spacing(10),
+                },
+                display: "flex",
+                flexDirection: { xs: "row", md: "column" },
+                alignItems: "center",
+                gap: 1,
+              })}
+            >
+              <Chip
+                label={dayjs(date).format("MMM")}
+                color="primary"
+                sx={theme => ({
+                  [theme.breakpoints.down("md")]: { display: "none" },
+                })}
+              />
+              <Chip
+                label={`${dayjs(date).format("MMM DD")} - ${dayjs(date).add(6, "days").format("MMM DD")}`}
+                color="primary"
+                sx={theme => ({
+                  [theme.breakpoints.up("md")]: { display: "none" },
+                })}
+              />
+            </Box>
+            <Box
+              sx={{
+                borderTop: i === 0 ? "1px solid" : "none",
+                borderBottom: "1px solid",
+                borderColor: theme => theme.palette.divider,
+                display: "flex",
+                flexDirection: "row",
+                flexGrow: 1,
+                gap: 0.5,
+              }}
+            >
+              <WeekRow
+                startDate={date}
+                shifts={props.shifts}
+                onClickShift={props.onClickShift}
+              />
+            </Box>
           </Box>
         ))}
       </Box>
@@ -187,24 +249,29 @@ function WeekRow(props: WeekRowProps) {
         <Grid
           key={date.toISOString()}
           size={1}
-          sx={{
+          sx={theme => ({
             padding: 1.5,
             paddingTop: 0.5,
-            md: {
+            [theme.breakpoints.up("md")]: {
               borderLeft: "1px solid",
               borderRight: i == 6 ? "1px solid" : "none",
+              borderColor: theme => theme.palette.divider,
             },
-            borderColor: theme => theme.palette.divider,
-          }}
+          })}
         >
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: theme => theme.spacing(0.5),
+              gap: 1,
             }}
           >
-            <Typography>{date.getDate()}</Typography>
+            {date.getDate() === 1 && (
+              <Typography>
+                {dayjs(date).format("MMM")} {date.getDate()}
+              </Typography>
+            )}
+            {date.getDate() !== 1 && <Typography>{date.getDate()}</Typography>}
             {shifts.map(shift => (
               <ShiftCard
                 key={shift.id}
