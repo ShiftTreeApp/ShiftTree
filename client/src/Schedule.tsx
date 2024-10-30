@@ -25,6 +25,7 @@ export default function Schedule() {
           onClickShift={shiftId => console.log(shiftId)}
           startDate={new Date("2024-10-27, 8:00")}
           endDate={new Date("2024-11-20, 3:00")}
+          selectedShifts={["3"]}
           shifts={[
             {
               id: "1",
@@ -63,13 +64,12 @@ export default function Schedule() {
   );
 }
 
-type ShiftDetails = Omit<ShiftCardProps, "onClick">;
-
 interface ShiftCalendarProps {
   shifts: ShiftDetails[];
   startDate: Date;
   endDate: Date;
   onClickShift: (shiftId: string) => void;
+  selectedShifts: string[];
 }
 
 function ShiftCalendar(props: ShiftCalendarProps) {
@@ -169,6 +169,7 @@ function ShiftCalendar(props: ShiftCalendarProps) {
               <WeekRow
                 startDate={date}
                 shifts={props.shifts}
+                selectedShifts={props.selectedShifts}
                 onClickShift={props.onClickShift}
               />
             </Box>
@@ -209,9 +210,10 @@ function DaysOfWeek() {
 }
 
 interface WeekRowProps {
-  shifts: Omit<ShiftCardProps, "onClick">[];
+  shifts: ShiftDetails[];
   startDate: Date;
   onClickShift: (shiftId: string) => void;
+  selectedShifts: string[];
 }
 
 function WeekRow(props: WeekRowProps) {
@@ -226,8 +228,7 @@ function WeekRow(props: WeekRowProps) {
   );
 
   const shiftsByDayOfWeek = useMemo(() => {
-    const shifts: { date: Date; shifts: Omit<ShiftCardProps, "onClick">[] }[] =
-      [];
+    const shifts: { date: Date; shifts: ShiftDetails[] }[] = [];
     for (const day of days) {
       const selectedShifts = props.shifts.filter(
         shift =>
@@ -292,6 +293,7 @@ function WeekRow(props: WeekRowProps) {
                 key={shift.id}
                 {...shift}
                 onClick={() => props.onClickShift(shift.id)}
+                selected={props.selectedShifts.includes(shift.id)}
               />
             ))}
           </Box>
@@ -307,12 +309,16 @@ function formatTime(date: Date) {
   return `${h}:${m}`;
 }
 
-interface ShiftCardProps {
+interface ShiftDetails {
   id: string;
   name: string;
   startTime: Date;
   endTime: Date;
+}
+
+interface ShiftCardProps extends ShiftDetails {
   onClick: () => void;
+  selected: boolean;
 }
 
 function ShiftCard(props: ShiftCardProps) {
@@ -326,7 +332,11 @@ function ShiftCard(props: ShiftCardProps) {
         ":hover": {
           cursor: "pointer",
         },
+        backgroundColor: props.selected
+          ? theme => theme.palette.primary.light
+          : "inherit",
       }}
+      elevation={props.selected ? 4 : 1}
       onClick={props.onClick}
     >
       <Typography variant="h6">{props.name}</Typography>
