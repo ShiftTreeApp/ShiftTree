@@ -13,6 +13,7 @@ import { Request, Response, NextFunction } from "express";
 import * as auth from "@/auth";
 import * as registration from "@/registration";
 import * as schedules from "@/schedules";
+import * as invites from "@/invites";
 
 //Setup
 const app = express();
@@ -83,6 +84,18 @@ app.delete(
   auth.authorizationCheck,
   schedules.deleteSignup,
 );
+
+app.get(
+  "/shiftTreeCodeExisting",
+  auth.authorizationCheck,
+  invites.getExistingJoinCode,
+);
+app.get(
+  "/shiftTreeCodeGenerate",
+  auth.authorizationCheck,
+  invites.generateJoinCode,
+);
+app.put("/joinShiftTree", auth.authorizationCheck, invites.joinShiftTree);
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);
