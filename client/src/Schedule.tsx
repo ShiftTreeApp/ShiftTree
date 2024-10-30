@@ -23,39 +23,39 @@ export default function Schedule() {
       >
         <ShiftCalendar
           onClickShift={shiftId => console.log(shiftId)}
-          startDate={new Date("2024-10-27, 8:00")}
-          endDate={new Date("2024-11-20, 3:00")}
+          startDate={dayjs("2024-10-27, 8:00")}
+          endDate={dayjs("2024-11-20, 3:00")}
           selectedShifts={["3"]}
           shifts={[
             {
               id: "1",
               name: "Shift 1",
-              startTime: new Date("2024-10-27, 8:00"),
-              endTime: new Date("2024-10-27, 12:00"),
+              startTime: dayjs("2024-10-27, 8:00"),
+              endTime: dayjs("2024-10-27, 12:00"),
             },
             {
               id: "2",
               name: "Shift 2",
-              startTime: new Date("2024-10-27, 13:00"),
-              endTime: new Date("2024-10-27, 17:00"),
+              startTime: dayjs("2024-10-27, 13:00"),
+              endTime: dayjs("2024-10-27, 17:00"),
             },
             {
               id: "3",
               name: "Shift 3",
-              startTime: new Date("2024-10-28, 18:00"),
-              endTime: new Date("2024-10-28, 22:00"),
+              startTime: dayjs("2024-10-28, 18:00"),
+              endTime: dayjs("2024-10-28, 22:00"),
             },
             {
               id: "4",
               name: "Shift 4",
-              startTime: new Date("2024-10-28, 23:00"),
-              endTime: new Date("2024-10-29, 3:00"),
+              startTime: dayjs("2024-10-28, 23:00"),
+              endTime: dayjs("2024-10-29, 3:00"),
             },
             {
               id: "4",
               name: "Shift 4",
-              startTime: new Date("2024-10-31, 23:00"),
-              endTime: new Date("2024-10-31, 3:00"),
+              startTime: dayjs("2024-10-31, 23:00"),
+              endTime: dayjs("2024-10-31, 3:00"),
             },
           ]}
         />
@@ -66,33 +66,26 @@ export default function Schedule() {
 
 interface ShiftCalendarProps {
   shifts: ShiftDetails[];
-  startDate: Date;
-  endDate: Date;
+  startDate: dayjs.Dayjs;
+  endDate: dayjs.Dayjs;
   onClickShift: (shiftId: string) => void;
   selectedShifts: string[];
 }
 
 function ShiftCalendar(props: ShiftCalendarProps) {
   // Start date is the Sunday of the week that contains the start date
-  const startDate = useMemo(() => {
-    const date = new Date(props.startDate);
-    while (date.getDay() !== 0) {
-      date.setDate(date.getDate() - 1);
-    }
-    return date;
-  }, [props.startDate]);
-
   const weekStartDates = useMemo(() => {
-    const dates = [new Date(startDate)];
-    let last = new Date(startDate);
-    while (last < props.endDate) {
-      last = new Date(last);
-      last.setDate(last.getDate() + 7);
-      dates.push(new Date(last));
+    const dates: dayjs.Dayjs[] = [];
+    const startDate = props.startDate.startOf("week");
+    for (
+      let date = startDate;
+      !date.isSame(props.endDate.add(1, "week"), "week");
+      date = date.add(1, "week")
+    ) {
+      dates.push(date);
     }
-    dates.length -= 1;
     return dates;
-  }, [props.endDate, startDate]);
+  }, [props.startDate, props.endDate]);
 
   return (
     <Box
@@ -141,14 +134,14 @@ function ShiftCalendar(props: ShiftCalendarProps) {
               })}
             >
               <Chip
-                label={dayjs(date).format("MMM")}
+                label={date.format("MMM")}
                 color="primary"
                 sx={theme => ({
                   [theme.breakpoints.down("md")]: { display: "none" },
                 })}
               />
               <Chip
-                label={`${dayjs(date).format("MMM DD")} - ${dayjs(date).add(6, "days").format("MMM DD")}`}
+                label={`${date.format("MMM DD")} - ${date.add(6, "days").format("MMM DD")}`}
                 color="primary"
                 sx={theme => ({
                   [theme.breakpoints.up("md")]: { display: "none" },
@@ -211,7 +204,7 @@ function DaysOfWeek() {
 
 interface WeekRowProps {
   shifts: ShiftDetails[];
-  startDate: Date;
+  startDate: dayjs.Dayjs;
   onClickShift: (shiftId: string) => void;
   selectedShifts: string[];
 }
@@ -219,26 +212,17 @@ interface WeekRowProps {
 function WeekRow(props: WeekRowProps) {
   const days = useMemo(
     () =>
-      Array.from({ length: 7 }).map((_, i) => {
-        const date = new Date(props.startDate);
-        date.setDate(date.getDate() + i);
-        return date;
-      }),
+      Array.from({ length: 7 }).map((_, i) => props.startDate.add(i, "day")),
     [props.startDate],
   );
 
   const shiftsByDayOfWeek = useMemo(() => {
-    const shifts: { date: Date; shifts: ShiftDetails[] }[] = [];
+    const shifts: { date: dayjs.Dayjs; shifts: ShiftDetails[] }[] = [];
     for (const day of days) {
-      const selectedShifts = props.shifts.filter(
-        shift =>
-          shift.startTime.getFullYear() === day.getFullYear() &&
-          shift.startTime.getMonth() === day.getMonth() &&
-          shift.startTime.getDate() === day.getDate(),
+      const selectedShifts = props.shifts.filter(shift =>
+        shift.startTime.isSame(day, "day"),
       );
-      selectedShifts.sort(
-        (a, b) => a.startTime.getTime() - b.startTime.getTime(),
-      );
+      selectedShifts.sort((a, b) => a.startTime.unix() - b.startTime.unix());
       shifts.push({ date: day, shifts: selectedShifts });
     }
     return shifts;
@@ -273,20 +257,20 @@ function WeekRow(props: WeekRowProps) {
                 sx={{
                   display: "inline-flex",
                   gap: 1,
-                  borderBottom: dayjs().isSame(dayjs(date), "day")
+                  borderBottom: dayjs().isSame(date, "day")
                     ? "3px solid"
                     : "none",
                   borderColor: theme => theme.palette.primary.main,
                 }}
               >
-                {date.getDate() === 1 && (
-                  <Typography>{dayjs(date).format("MMM DD")}</Typography>
+                {date.date() === 1 && (
+                  <Typography>{date.format("MMM DD")}</Typography>
                 )}
-                {date.getDate() !== 1 && (
-                  <Typography>{dayjs(date).format("DD")}</Typography>
+                {date.date() !== 1 && (
+                  <Typography>{date.format("DD")}</Typography>
                 )}
                 <Typography sx={{ display: { md: "none" } }}>
-                  {`(${dayjs(date).format("ddd")})`}
+                  {`(${date.format("ddd")})`}
                 </Typography>
               </Box>
             </Box>
@@ -305,17 +289,11 @@ function WeekRow(props: WeekRowProps) {
   );
 }
 
-function formatTime(date: Date) {
-  const h = date.getHours().toString().padStart(2, "0");
-  const m = date.getMinutes().toString().padStart(2, "0");
-  return `${h}:${m}`;
-}
-
 interface ShiftDetails {
   id: string;
   name: string;
-  startTime: Date;
-  endTime: Date;
+  startTime: dayjs.Dayjs;
+  endTime: dayjs.Dayjs;
 }
 
 interface ShiftCardProps extends ShiftDetails {
@@ -343,9 +321,9 @@ function ShiftCard(props: ShiftCardProps) {
     >
       <Typography variant="h6">{props.name}</Typography>
       <Typography>
-        {formatTime(props.startTime)}
+        {props.startTime.format("HH:mm")}
         {" - "}
-        {formatTime(props.endTime)}
+        {props.endTime.format("HH:mm")}
       </Typography>
     </Card>
   );
