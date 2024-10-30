@@ -264,29 +264,31 @@ function WeekRow(props: WeekRowProps) {
             sx={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "baseline",
+              alignItems: "stretch",
               gap: 1,
             }}
           >
-            <Box
-              sx={{
-                display: "inline-flex",
-                gap: 1,
-                borderBottom: dayjs().isSame(dayjs(date), "day")
-                  ? "3px solid"
-                  : "none",
-                borderColor: theme => theme.palette.primary.main,
-              }}
-            >
-              {date.getDate() === 1 && (
-                <Typography>{dayjs(date).format("MMM DD")}</Typography>
-              )}
-              {date.getDate() !== 1 && (
-                <Typography>{dayjs(date).format("DD")}</Typography>
-              )}
-              <Typography sx={{ display: { md: "none" } }}>
-                {`(${dayjs(date).format("ddd")})`}
-              </Typography>
+            <Box>
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  gap: 1,
+                  borderBottom: dayjs().isSame(dayjs(date), "day")
+                    ? "3px solid"
+                    : "none",
+                  borderColor: theme => theme.palette.primary.main,
+                }}
+              >
+                {date.getDate() === 1 && (
+                  <Typography>{dayjs(date).format("MMM DD")}</Typography>
+                )}
+                {date.getDate() !== 1 && (
+                  <Typography>{dayjs(date).format("DD")}</Typography>
+                )}
+                <Typography sx={{ display: { md: "none" } }}>
+                  {`(${dayjs(date).format("ddd")})`}
+                </Typography>
+              </Box>
             </Box>
             {shifts.map(shift => (
               <ShiftCard
