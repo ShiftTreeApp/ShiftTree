@@ -263,10 +263,20 @@ function WeekRow(props: WeekRowProps) {
             sx={{
               display: "flex",
               flexDirection: "column",
+              alignItems: "baseline",
               gap: 1,
             }}
           >
-            <Box sx={{ display: "inline-flex", gap: 1 }}>
+            <Box
+              sx={{
+                display: "inline-flex",
+                gap: 1,
+                borderBottom: dayjs().isSame(dayjs(date), "day")
+                  ? "3px solid"
+                  : "none",
+                borderColor: theme => theme.palette.primary.main,
+              }}
+            >
               {date.getDate() === 1 && (
                 <Typography>{dayjs(date).format("MMM DD")}</Typography>
               )}
