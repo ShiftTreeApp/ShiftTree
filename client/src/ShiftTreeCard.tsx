@@ -45,7 +45,7 @@ export default function ShiftTreeCard({
     // Turn card into clickable route, can always redesign to add button to card instead
     <ButtonBase
       component={RouterLink}
-      to="/shifttree"
+      to="/schedule"
       sx={{
         width: "100%",
         display: "block",
