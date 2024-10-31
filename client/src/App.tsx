@@ -11,7 +11,8 @@ import Create from "@/Create.tsx";
 
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
-import Schedule from "@/Schedule.tsx";
+//import Schedule from "@/Schedule.tsx";
+import ScheduleView from "./Schedule_view.tsx";
 
 export default function App() {
   return (
@@ -43,7 +44,10 @@ export default function App() {
                 path="/schedule/:scheduleId"
                 element={
                   <Authenticated>
-                    <Schedule />
+                    <ScheduleView
+                      shiftTreeName="First ever ShiftTree"
+                      isManager={true}
+                    />
                   </Authenticated>
                 }
               />

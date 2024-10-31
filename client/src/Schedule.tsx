@@ -44,8 +44,6 @@ export default function Schedule() {
 
   return (
     <Grid container direction="column" spacing={1}>
-      <Navbar />
-      <NavbarPadding />
       <Drawer
         open={drawerOpen}
         onClose={clearSelectedShift}
