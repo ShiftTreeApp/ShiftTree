@@ -2,8 +2,8 @@ import { Container, Grid2 as Grid, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 
-import { ShiftCalendar } from "@/schedule/ShiftCalendar";
-import EditShiftDrawer from "./schedule/EditShiftDrawer";
+import { ShiftCalendar } from "./ShiftCalendar";
+import EditShiftDrawer from "./EditShiftDrawer";
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();

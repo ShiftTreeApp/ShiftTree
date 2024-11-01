@@ -12,9 +12,8 @@ import Create from "@/Create.tsx";
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
 //import Schedule from "@/Schedule.tsx";
-import ScheduleView from "./Schedule_view.tsx";
-
-import EditTree from "./EditTree.tsx";
+import ScheduleView from "@/schedule/Schedule_view";
+import EditTree from "@/schedule/EditTree";
 
 export default function App() {
   return (
