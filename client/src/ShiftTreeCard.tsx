@@ -18,6 +18,7 @@ interface ShiftTreeCardProps {
   status: ShiftStatus;
   dates: string;
   description: string;
+  id: string;
 }
 
 export default function ShiftTreeCard({
@@ -25,6 +26,7 @@ export default function ShiftTreeCard({
   status,
   dates,
   description,
+  id,
 }: ShiftTreeCardProps) {
   const theme = useTheme(); // Access the theme
 
@@ -45,7 +47,7 @@ export default function ShiftTreeCard({
     // Turn card into clickable route, can always redesign to add button to card instead
     <ButtonBase
       component={RouterLink}
-      to="/schedule"
+      to={`/schedule/${id}`}
       sx={{
         width: "100%",
         display: "block",

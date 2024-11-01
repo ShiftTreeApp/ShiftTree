@@ -75,6 +75,7 @@ export default function Home() {
                 status="open"
                 dates="Oct 1 - Oct 31"
                 description="description description description"
+                id="1"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -83,6 +84,7 @@ export default function Home() {
                 status="closed"
                 dates="Sept 1 - Sept 30"
                 description="This shift is closed. Hours schedlued: 120."
+                id="2"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -91,6 +93,7 @@ export default function Home() {
                 status="owned"
                 dates="Aug 1 - Aug 31"
                 description="You own this shift. Description, maybe a button to close the schedule as well"
+                id="3"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}></Grid>
