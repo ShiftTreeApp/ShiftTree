@@ -1,17 +1,9 @@
-import {
-  Box,
-  Container,
-  Drawer,
-  Grid2 as Grid,
-  IconButton,
-  Typography,
-} from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
+import { Container, Grid2 as Grid, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 
-import NavbarPadding from "@/NavbarPadding";
-import { ShiftCalendar } from "@/ShiftCalendar";
+import { ShiftCalendar } from "@/schedule/ShiftCalendar";
+import EditShiftDrawer from "./schedule/EditShiftDrawer";
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,47 +33,14 @@ export default function Schedule() {
 
   return (
     <Grid container direction="column" spacing={1}>
-      <Drawer
+      <EditShiftDrawer
         open={drawerOpen}
         onClose={clearSelectedShift}
-        anchor="right"
-        sx={theme => ({
-          ".MuiDrawer-paper": {
-            [theme.breakpoints.down("md")]: {
-              width: "100%",
-            },
-          },
-        })}
+        title="View shift"
       >
-        <NavbarPadding />
-        <Box
-          sx={theme => ({
-            [theme.breakpoints.up("md")]: {
-              width: theme => theme.spacing(96),
-            },
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-            padding: 2,
-          })}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="h6">View shift</Typography>
-            <IconButton onClick={clearSelectedShift}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Typography variant="body1">Shift details</Typography>
-          <Typography variant="body1">Shift id: {selectedShift}</Typography>
-        </Box>
-      </Drawer>
+        <Typography variant="body1">Shift details</Typography>
+        <Typography variant="body1">Shift id: {selectedShift}</Typography>
+      </EditShiftDrawer>
       <Container
         component="main"
         sx={{ display: "flex", flexDirection: "column", alignItems: "stretch" }}
