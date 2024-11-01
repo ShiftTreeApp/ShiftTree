@@ -14,6 +14,8 @@ import customTheme from "./theme";
 //import Schedule from "@/Schedule.tsx";
 import ScheduleView from "./Schedule_view.tsx";
 
+import EditTree from "./EditTree.tsx";
+
 export default function App() {
   return (
     <ThemeProvider theme={customTheme}>
@@ -48,6 +50,14 @@ export default function App() {
                       shiftTreeName="First ever ShiftTree"
                       isManager={true}
                     />
+                  </Authenticated>
+                }
+              />
+              <Route
+                path="/schedule/:scheduleId/edit"
+                element={
+                  <Authenticated>
+                    <EditTree />
                   </Authenticated>
                 }
               />
