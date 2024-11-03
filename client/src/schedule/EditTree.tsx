@@ -1,6 +1,7 @@
-import { useState } from "react";
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
+import { useSearchParam } from "@/useSearchParam";
+
 import {
   Container,
   Grid2 as Grid,
@@ -12,11 +13,22 @@ import {
   Typography,
 } from "@mui/material";
 
+const tabNames = {
+  shifts: "shifts",
+  members: "members",
+  signups: "signups",
+  assign: "assign",
+} as const;
+
+type TabName = (typeof tabNames)[keyof typeof tabNames];
+
 export default function EditTree() {
   // Get the state of the selected tab
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useSearchParam<TabName>("tab", {
+    default: tabNames.shifts,
+  });
 
-  const handleTabChange = (_event: any, newValue: number) => {
+  const handleTabChange = (_event: any, newValue: TabName) => {
     setSelectedTab(newValue);
   };
 
@@ -55,10 +67,10 @@ export default function EditTree() {
             value={selectedTab}
             onChange={handleTabChange}
           >
-            <Tab label="Shifts" />
-            <Tab label="Members" />
-            <Tab label="Signups" />
-            <Tab label="Assign" />
+            <Tab label="Shifts" value={tabNames.shifts} />
+            <Tab label="Members" value={tabNames.members} />
+            <Tab label="Signups" value={tabNames.signups} />
+            <Tab label="Assign" value={tabNames.assign} />
           </Tabs>
           <Grid
             sx={{
@@ -68,13 +80,13 @@ export default function EditTree() {
             }}
           >
             {/* Shift Settings */}
-            {selectedTab === 0 && (
+            {selectedTab === "shifts" && (
               <>
                 <Typography>Hello, world</Typography>
               </>
             )}
             {/* Members Settings */}
-            {selectedTab === 1 && (
+            {selectedTab === "members" && (
               <Paper
                 sx={{
                   backgroundColor: "gray",
@@ -89,7 +101,7 @@ export default function EditTree() {
               </Paper>
             )}
             {/* Signups Settings */}
-            {selectedTab === 2 && (
+            {selectedTab === "signups" && (
               <Paper
                 sx={{
                   backgroundColor: "gray",
@@ -104,7 +116,7 @@ export default function EditTree() {
               </Paper>
             )}
             {/* Assign Settings */}
-            {selectedTab === 3 && (
+            {selectedTab === "assign" && (
               <Paper
                 sx={{
                   backgroundColor: "gray",
