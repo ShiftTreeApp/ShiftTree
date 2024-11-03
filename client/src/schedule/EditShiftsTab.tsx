@@ -168,7 +168,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             startDate={startTime}
             endDate={endTime}
             onClickShift={shiftId => setCurrentlyEditing(shiftId)}
-            selectedShifts={[]}
+            selectedShifts={currentlyEditing ? [currentlyEditing] : []}
           />
         </>
       )}
