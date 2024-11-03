@@ -13,6 +13,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import { useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
+import { useApi } from "../client";
 
 import { ShiftCalendar } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
@@ -32,6 +33,8 @@ const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const api = useApi();
 
   const selectedShift = searchParams.get("shift");
   function setSelectedShift(shiftId: string) {
