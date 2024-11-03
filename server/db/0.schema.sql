@@ -119,14 +119,14 @@ SELECT
     (
         SELECT shift.start_time
         FROM shift
-        JOIN schedule ON shift.schedule_id = schedule.id
+        WHERE shift.schedule_id = schedule.id
         ORDER BY shift.start_time ASC
         LIMIT 1
     ) AS start_time,
     (
         SELECT shift.end_time
         FROM shift
-        JOIN schedule ON shift.schedule_id = schedule.id
+        WHERE shift.schedule_id = schedule.id
         ORDER BY shift.end_time DESC
         LIMIT 1
     ) AS end_time
