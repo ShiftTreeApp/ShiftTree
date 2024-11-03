@@ -27,7 +27,6 @@ import {
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Link as RouterLink } from "react-router-dom";
-import { useNavigate } from "react-router";
 
 import { ShiftCalendar, type ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
@@ -153,11 +152,6 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     );
   }
 
-  const navigate = useNavigate();
-  function toView() {
-    navigate("/schedule/:scheduleId");
-  }
-
   return (
     <Box
       sx={{
@@ -179,7 +173,10 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
         <>
           <Box sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}>
             <CustomTooltip title="To view mode" placement="bottom">
-              <IconButton onClick={toView}>
+              <IconButton
+                component={RouterLink}
+                to={`/schedule/${props.scheduleId}`}
+              >
                 <PreviewIcon />
               </IconButton>
             </CustomTooltip>
