@@ -1,6 +1,7 @@
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
 import { useSearchParam } from "@/useSearchParam";
+import EditShiftsTab from "./EditShiftsTab";
 
 import {
   Container,
@@ -10,8 +11,8 @@ import {
   Paper,
   useTheme,
   useMediaQuery,
-  Typography,
 } from "@mui/material";
+import { useParams } from "react-router";
 
 const tabNames = {
   shifts: "shifts",
@@ -23,6 +24,8 @@ const tabNames = {
 type TabName = (typeof tabNames)[keyof typeof tabNames];
 
 export default function EditTree() {
+  const { scheduleId } = useParams();
+
   // Get the state of the selected tab
   const [selectedTab, setSelectedTab] = useSearchParam<TabName>("tab", {
     default: tabNames.shifts,
@@ -82,7 +85,7 @@ export default function EditTree() {
             {/* Shift Settings */}
             {selectedTab === "shifts" && (
               <>
-                <Typography>Hello, world</Typography>
+                <EditShiftsTab scheduleId={scheduleId as string} />
               </>
             )}
             {/* Members Settings */}
