@@ -1,4 +1,12 @@
-import { Box, Card, Chip, Grid2 as Grid, Typography } from "@mui/material";
+import {
+  type Theme,
+  type SxProps,
+  Box,
+  Card,
+  Chip,
+  Grid2 as Grid,
+  Typography,
+} from "@mui/material";
 import { useMemo } from "react";
 import dayjs from "dayjs";
 
@@ -8,7 +16,11 @@ export interface ShiftCalendarProps {
   endDate: dayjs.Dayjs;
   onClickShift: (shiftId: string) => void;
   selectedShifts: string[];
+  /** Mapping from shiftId to the color */
+  colorMap?: Record<string, BackgroundColorType> | undefined;
 }
+
+export type ShiftColorMap = NonNullable<ShiftCalendarProps["colorMap"]>;
 
 export function ShiftCalendar(props: ShiftCalendarProps) {
   // Start date is the Sunday of the week that contains the start date
@@ -102,6 +114,7 @@ export function ShiftCalendar(props: ShiftCalendarProps) {
                 shifts={props.shifts}
                 selectedShifts={props.selectedShifts}
                 onClickShift={props.onClickShift}
+                colorMap={props.colorMap ?? {}}
               />
             </Box>
           </Box>
@@ -145,6 +158,7 @@ interface WeekRowProps {
   startDate: dayjs.Dayjs;
   onClickShift: (shiftId: string) => void;
   selectedShifts: string[];
+  colorMap: Record<string, BackgroundColorType>;
 }
 
 function WeekRow(props: WeekRowProps) {
@@ -218,6 +232,7 @@ function WeekRow(props: WeekRowProps) {
                 {...shift}
                 onClick={() => props.onClickShift(shift.id)}
                 selected={props.selectedShifts.includes(shift.id)}
+                colorMap={props.colorMap}
               />
             ))}
           </Box>
@@ -237,7 +252,13 @@ export interface ShiftDetails {
 interface ShiftCardProps extends ShiftDetails {
   onClick: () => void;
   selected: boolean;
+  colorMap: Record<string, BackgroundColorType>;
 }
+
+type BackgroundColorType = Extract<
+  SxProps<Theme>,
+  { backgroundColor?: any }
+>["backgroundColor"];
 
 function ShiftCard(props: ShiftCardProps) {
   return (
@@ -252,7 +273,10 @@ function ShiftCard(props: ShiftCardProps) {
         },
         backgroundColor: props.selected
           ? theme => theme.palette.primary.light
-          : theme => theme.palette.error.veryLight,
+          : (props.colorMap[props.id] ??
+            (theme => theme.palette.error.veryLight)),
+        // NOTE: colorMap gets priority over default color, but selection color overrides colorMap.
+        // This enables the following:
         // eventually, I want functionality to change the color of the card based on the status of the shift:
         // highlighted: blue, seleted: primary.light, signed up: secondary.veryLight, default: error.veryLight
       }}
