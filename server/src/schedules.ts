@@ -215,12 +215,12 @@ export async function getShifts(req: Request, res: Response) {
         where s.schedule_id = $1
         order by s.start_time asc
       )
-      select json_agg(json_build_object(
+      select coalesce(json_agg(json_build_object(
         'id', s.id,
         'name', '', -- TODO: Add shift name to the schema
         'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
         'endTime', (to_json(s.end_time)#>>'{}')||'Z'
-      )) as json
+      )), json_build_array()) as json
       from sorted as s
     `,
     values: [scheduleId],
@@ -307,12 +307,12 @@ export async function getMembers(req: Request, res: Response) {
 
   const results = await pool.query({
     text: /* sql */ `
-      select json_agg(json_build_object(
+      select coalesce(json_agg(json_build_object(
         'id', ua.id,
         'displayName', ua.username,
         'email', ua.email,
         'profileImageUrl', ''
-      )) as json
+      )), json_build_array()) as json
       from user_schedule_membership as usm
       join user_account as ua on usm.user_id = ua.id
       where usm.schedule_id = $1
@@ -353,7 +353,7 @@ export async function getSignups(req: Request, res: Response) {
 
   const results = await pool.query({
     text: /* sql */ `
-      select json_agg(json_build_object(
+      select coalesce(json_agg(json_build_object(
         'id', shift.id,
         'name', '',
         'description', '',
@@ -374,7 +374,7 @@ export async function getSignups(req: Request, res: Response) {
           join user_account as ua on signup.user_id = ua.id
           where signup.shift_id = shift.id
         )
-      )) as json
+      )), json_build_array()) as json
       from shift
       join schedule on shift.schedule_id = schedule.id
       where schedule.id = $1
