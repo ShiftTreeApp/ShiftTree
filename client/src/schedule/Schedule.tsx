@@ -10,6 +10,7 @@ import {
   tooltipClasses,
   styled,
 } from "@mui/material";
+import { useNavigate } from "react-router";
 import EditIcon from "@mui/icons-material/Edit";
 import { useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
@@ -59,18 +60,23 @@ export default function Schedule() {
 
   const drawerOpen = selectedShift !== null;
 
+  const navigate = useNavigate();
+  function toEdit() {
+    navigate("/schedule/:scheduleId/edit");
+  }
+
   return (
     <Grid container direction="column" alignItems="center" sx={{ padding: 2 }}>
       <Navbar />
       <NavbarPadding />
       <Paper elevation={3} sx={{ padding: 2, width: "100%", maxWidth: 800 }}>
         <Grid container justifyContent="space-between" alignItems="center">
-          <Grid>
+          <Grid sx={{ paddingLeft: 2 }}>
             <Typography variant="h5">shiftTreeName</Typography>
           </Grid>
           <Grid>
             <CustomTooltip title="Edit ShiftTree" placement="bottom">
-              <IconButton>
+              <IconButton onClick={toEdit}>
                 <EditIcon />
               </IconButton>
             </CustomTooltip>

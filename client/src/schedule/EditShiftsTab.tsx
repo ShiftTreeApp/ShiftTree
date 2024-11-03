@@ -5,12 +5,18 @@ import {
   Link,
   TextField,
   Typography,
+  IconButton,
+  Tooltip,
+  TooltipProps,
+  tooltipClasses,
+  styled,
 } from "@mui/material";
 import dayjs from "dayjs";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Save as SaveIcon,
+  Preview as PreviewIcon,
 } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import "dayjs/locale/en";
@@ -21,11 +27,23 @@ import {
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 import { ShiftCalendar, type ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import { useSearchParam } from "@/useSearchParam";
 import { useApi } from "@/client";
+
+const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
+}));
 
 interface EditShiftsTabProps {
   scheduleId: string;
@@ -135,6 +153,11 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     );
   }
 
+  const navigate = useNavigate();
+  function toView() {
+    navigate("/schedule/:scheduleId");
+  }
+
   return (
     <Box
       sx={{
@@ -155,13 +178,21 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       {shifts?.length !== 0 && (
         <>
           <Box sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}>
-            <Button
+            <CustomTooltip title="To view mode" placement="bottom">
+              <IconButton onClick={toView}>
+                <PreviewIcon />
+              </IconButton>
+            </CustomTooltip>
+            <CustomTooltip title="Add Shift" placement="bottom">
+              <IconButton onClick={createNewShiftAndEdit}>
+                <AddIcon />
+              </IconButton>
+            </CustomTooltip>
+            {/* <Button
               startIcon={<AddIcon />}
               variant="contained"
               onClick={createNewShiftAndEdit}
-            >
-              Create shift
-            </Button>
+            /> */}
           </Box>
           <ShiftCalendar
             shifts={shifts ?? []}

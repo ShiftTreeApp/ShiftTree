@@ -13,6 +13,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useParams } from "react-router";
+import { useNavigate } from "react-router";
 
 const tabNames = {
   shifts: "shifts",
@@ -37,6 +38,11 @@ export default function EditTree() {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const navigate = useNavigate();
+  function toView() {
+    navigate("/schedule/:scheduleId/view");
+  }
 
   return (
     <Grid container direction="column" spacing={1}>
