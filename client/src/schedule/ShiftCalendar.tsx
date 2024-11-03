@@ -252,7 +252,9 @@ function ShiftCard(props: ShiftCardProps) {
         },
         backgroundColor: props.selected
           ? theme => theme.palette.primary.light
-          : "inherit",
+          : theme => theme.palette.error.veryLight,
+        // eventually, I want functionality to change the color of the card based on the status of the shift:
+        // highlighted: blue, seleted: primary.light, signed up: secondary.veryLight, default: error.veryLight
       }}
       elevation={props.selected ? 4 : 1}
       onClick={props.onClick}
