@@ -80,6 +80,7 @@ export default function EditTree() {
               padding: 1,
               paddingLeft: 1.5,
               paddingRight: 1.5,
+              flexGrow: 1,
             }}
           >
             {/* Shift Settings */}
