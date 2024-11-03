@@ -4,8 +4,13 @@ import {
   Typography,
   Paper,
   Divider,
-  Button,
+  IconButton,
+  Tooltip,
+  TooltipProps,
+  tooltipClasses,
+  styled,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 import { useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 
@@ -13,6 +18,17 @@ import { ShiftCalendar } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
+
+const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
+}));
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -50,9 +66,11 @@ export default function Schedule() {
             <Typography variant="h5">shiftTreeName</Typography>
           </Grid>
           <Grid>
-            <Button variant="contained" color="primary">
-              <Typography>Edit Shift Tree (Manager only)</Typography>
-            </Button>
+            <CustomTooltip title="Edit ShiftTree" placement="bottom">
+              <IconButton>
+                <EditIcon />
+              </IconButton>
+            </CustomTooltip>
           </Grid>
         </Grid>
         <Divider sx={{ my: 2 }} />
