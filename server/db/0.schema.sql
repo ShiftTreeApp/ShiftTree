@@ -1,4 +1,4 @@
---We should remove these eventually, just good for if we create some testing data/are debugging queries and keep restarting container
+-- Drop tables if they exist
 DROP TABLE IF EXISTS user_account;
 DROP TABLE IF EXISTS schedule;
 DROP TABLE IF EXISTS shift;
@@ -12,10 +12,10 @@ DROP TABLE IF EXISTS user_shift_assignment;
 DROP TABLE IF EXISTS user_shift_signup;
 DROP TABLE IF EXISTS schedule_org_membership;
 DROP TABLE IF EXISTS profile_image_data;
---UserData
---TODO: Decide on what else we want to store related to users, while keeping in mind that schedules/orgs and such are tracked through foreign keys so shouldn't be a part of user.
+
+-- Create tables
 CREATE TABLE user_account
-( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , removed TIMESTAMP DEFAULT NULL
 , username VARCHAR(64) NOT NULL
 , email VARCHAR(64) NOT NULL UNIQUE
@@ -23,21 +23,23 @@ CREATE TABLE user_account
 );
 
 CREATE TABLE schedule
-( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , removed TIMESTAMP DEFAULT NULL
 , owner_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
 , schedule_name VARCHAR(64) NOT NULL DEFAULT ''
 , schedule_description VARCHAR(255) NOT NULL DEFAULT ''
+, code UUID DEFAULT gen_random_uuid()
 );
 
 CREATE TABLE user_schedule_membership
-( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
 , schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
+, UNIQUE (user_id, schedule_id)
 );
 
 CREATE TABLE shift
-( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
 , start_time TIMESTAMP NOT NULL
 , end_time TIMESTAMP NOT NULL
@@ -46,41 +48,35 @@ CREATE TABLE shift
 );
 
 CREATE TABLE user_shift_assignment
-( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
 , shift_id UUID NOT NULL REFERENCES shift (id) ON DELETE CASCADE
 );
 
 CREATE TABLE user_shift_signup
-( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
 , shift_id UUID NOT NULL REFERENCES shift (id) ON DELETE CASCADE
 , user_weighting INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE organization
-( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , removed TIMESTAMP DEFAULT NULL
 , organization_name VARCHAR(64) NOT NULL
 , organization_description VARCHAR(255) NOT NULL DEFAULT ''
 , owner_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
+, code UUID DEFAULT gen_random_uuid()
 );
 
 CREATE TABLE schedule_org_membership
-( id UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
+( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , org_id UUID NOT NULL REFERENCES organization (id) ON DELETE CASCADE
 , schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
 );
 
-CREATE TABLE join_code
-( code UUID UNIQUE PRIMARY KEY DEFAULT gen_random_uuid()
-, removed TIMESTAMP DEFAULT NULL
-, schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
-, expiration TIMESTAMP DEFAULT NULL
-);
-
 CREATE TABLE profile_image_data
-( user_id UUID NOT NULL PRIMARY KEY REFERENCES user_account (id) ON DELETE CASCADE
+( user_id UUID PRIMARY KEY REFERENCES user_account (id) ON DELETE CASCADE
 , image_data BYTEA NOT NULL
 );
 
@@ -119,14 +115,14 @@ SELECT
     (
         SELECT shift.start_time
         FROM shift
-        JOIN schedule ON shift.schedule_id = schedule.id
+        WHERE shift.schedule_id = schedule.id
         ORDER BY shift.start_time ASC
         LIMIT 1
     ) AS start_time,
     (
         SELECT shift.end_time
         FROM shift
-        JOIN schedule ON shift.schedule_id = schedule.id
+        WHERE shift.schedule_id = schedule.id
         ORDER BY shift.end_time DESC
         LIMIT 1
     ) AS end_time

@@ -1,84 +1,140 @@
 import { pool } from "@/pool";
+import { Request, Response } from "express";
 
-// Returns True if user in schedule at least once
-const checkUserInSchedule = async (ID, user) => {
-  const statement = `
-        SELECT usm.id
-        FROM user_schedule_membership usm
-        JOIN user_account ua ON usm.user_id = ua.id
-        WHERE usm.schedule_id = $1 AND ua.email = $2
+// Fetches the join-code for a ShiftTree
+export const getExistingJoinCode = async (req: Request, res: Response) => {
+  try {
+    const { ShiftTreeID } = req.query;
+    const statement = "SELECT code FROM schedule WHERE id = $1";
+    const query = {
+      text: statement,
+      values: [ShiftTreeID],
+    };
+    const { rows } = await pool.query(query);
+    if (rows.length === 0) {
+      return res.status(404).send();
+    }
+    res.status(200).json({ code: rows[0].code });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+// Generates a new join-code for a ShiftTree
+export const generateJoinCode = async (req: Request, res: Response) => {
+  try {
+    const { ShiftTreeID } = req.query;
+    console.log(ShiftTreeID);
+    const statement =
+      "UPDATE schedule SET code = gen_random_uuid() WHERE id = $1 RETURNING code";
+    const query = {
+      text: statement,
+      values: [ShiftTreeID],
+    };
+    const { rows } = await pool.query(query);
+    if (rows.length === 0) {
+      return res.status(404).send();
+    }
+    res.status(200).json({ code: rows[0].code });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+// Adds a user to the ShiftTree
+export const joinShiftTree = async (req: Request, res: Response) => {
+  try {
+    const { ShiftTreeID, UserID } = req.query;
+    const statement = `
+      INSERT INTO user_schedule_membership (id, user_id, schedule_id)
+      VALUES (gen_random_uuid(), $1, $2)
+      ON CONFLICT (user_id, schedule_id) DO NOTHING
     `;
-  const query = {
-    text: statement,
-    values: [ID, user],
-  };
-  const { rows } = await pool.query(query);
-  return rows.length > 0;
-};
-
-const fetchShiftTreeUUID = async (ShiftTree) => {
-  console.log(ShiftTree);
-  const statement = "SELECT id FROM schedule WHERE schedule_name = $1";
-  const query = {
-    text: statement,
-    values: [ShiftTree],
-  };
-  const { rows } = await pool.query(query);
-  console.log(rows[0]);
-  return rows[0]["id"];
-};
-
-export const getExistingJoinCode = async (req, res) => {
-  const idProvided = await fetchShiftTreeUUID(req.query.ShiftTree;);
-  const statement = "SELECT code FROM join_code WHERE schedule_id = $1";
-  const query = {
-    text: statement,
-    values: [idProvided],
-  };
-  const { rows } = await pool.query(query);
-  console.log(rows);
-  if (rows.length == 0) {
-    res.status(404).send();
+    const query = {
+      text: statement,
+      values: [UserID, ShiftTreeID],
+    };
+    await pool.query(query);
+    const result = await pool.query(query);
+    console.log(result);
+    // //Might not need, could just do 200 and act like was added
+    // if (result.rowCount === 0) {
+    //   return res.status(409).send("User is already a member of this schedule");
+    // }
+    res.status(200).send("User added to ShiftTree");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
   }
-  res.status(200).json(rows[0]);
 };
 
-export const generateJoinCode = async(req, res) => {
-  const idProvided_ = await fetchShiftTreeUUID(req.query.ShiftTree);
-  const statement = "INSERT INTO join_code WHERE schedule_id = $1 (code) VALUES (gen_random_uuid())";
-  const query = {
-    text: statement,
-    values: [idProvided],
-  };
-  const { rows } = await pool.query(query);
+// WIP: Need to figure out join-schema adjustment?
+// // Fetches the join-code for an Organization
+// export const getExistingOrgJoinCode = async (req: Request, res: Response) => {
+//   try {
+//     const { OrgID } = req.query;
+//     const statement = "SELECT code FROM organization WHERE id = $1";
+//     const query = {
+//       text: statement,
+//       values: [OrgID],
+//     };
+//     const { rows } = await pool.query(query);
+//     if (rows.length === 0) {
+//       return res.status(404).send();
+//     }
+//     res.status(200).json({ code: rows[0].code });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };
 
+// // Generates a new join-code for an Organization
+// export const generateOrgJoinCode = async (req: Request, res: Response) => {
+//   try {
+//     const { OrgID } = req.query;
+//     const statement =
+//       "UPDATE organization SET code = gen_random_uuid() WHERE id = $1 RETURNING code";
+//     const query = {
+//       text: statement,
+//       values: [OrgID],
+//     };
+//     const { rows } = await pool.query(query);
+//     if (rows.length === 0) {
+//       return res.status(404).send();
+//     }
+//     res.status(200).json({ code: rows[0].code });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };
 
-
-}
-
-// TODO: Change logic to compare to the foregin join code id instead
-// Handles user join requests, and confirms query was succesful.
-export const requestToJoin = async (req, res) => {
-  const ID = req.query.ShiftTreeID;
-  const email = req.user["email"];
-  if (await checkUserInSchedule(ID, email)) {
-    // If the user is already in the schedule, should requests just do nothing? Or send error?
-    res.status(200).send();
-    return;
-  }
-  console.log(req.user["email"]);
-  const statement = `
-        INSERT INTO user_schedule_membership (id, user_id, schedule_id)
-        VALUES (gen_random_uuid(), (SELECT id FROM user_account WHERE email = $2), $1)
-    `;
-  const query = {
-    text: statement,
-    values: [ID, email],
-  };
-  await pool.query(query);
-  if (await checkUserInSchedule(ID, email)) {
-    res.status(200).send();
-    return;
-  }
-  res.status(500).send();
-};
+// // Adds a user to the Organization
+// export const joinOrganization = async (req: Request, res: Response) => {
+//   try {
+//     const { OrgID, UserID } = req.query;
+//     const statement = `
+//       INSERT INTO user_schedule_membership (id, user_id, schedule_id)
+//       VALUES (gen_random_uuid(), $1, $2)
+//       ON CONFLICT (user_id, schedule_id) DO NOTHING
+//     `;
+//     const query = {
+//       text: statement,
+//       values: [UserID, OrgID],
+//     };
+//     await pool.query(query);
+//     const result = await pool.query(query);
+//     console.log(result);
+//     // //Might not need, could just do 200 and act like was added
+//     // if (result.rowCount === 0) {
+//     //   return res.status(409).send("User is already a member of this schedule");
+//     // }
+//     res.status(200).send("User added to ShiftTree");
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };
