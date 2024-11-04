@@ -37,6 +37,7 @@ export default function Home() {
     [scheduleData],
   );
 
+  // Making the times into readable format
   const formatTimes = (startTime: string | null, endTime: string | null) => {
     if (startTime && endTime) {
       const formattedStart = dayjs(startTime).format("MMMM D, h:mm A");
@@ -96,6 +97,7 @@ export default function Home() {
           </Grid>
           <Divider variant="middle" />
           <Grid container spacing={2} sx={{ padding: 2 }}>
+            {/* Create a card from each schedule from query */}
             {schedules?.map(schedule => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <ShiftTreeCard
