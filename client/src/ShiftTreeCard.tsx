@@ -21,13 +21,7 @@ interface ShiftTreeCardProps {
   id: string;
 }
 
-export default function ShiftTreeCard({
-  name,
-  status,
-  dates,
-  description,
-  id,
-}: ShiftTreeCardProps) {
+export default function ShiftTreeCard(props: ShiftTreeCardProps) {
   const theme = useTheme(); // Access the theme
 
   // Use the theme to determine the background color based on status
@@ -47,7 +41,7 @@ export default function ShiftTreeCard({
     // Turn card into clickable route, can always redesign to add button to card instead
     <ButtonBase
       component={RouterLink}
-      to={`/schedule/${id}`}
+      to={`/schedule/${props.id}`}
       sx={{
         width: "100%",
         display: "block",
@@ -60,7 +54,7 @@ export default function ShiftTreeCard({
           flexDirection: "column",
           justifyContent: "flex-start",
           padding: 2,
-          backgroundColor: getBackgroundColor(status), // Use theme-based color
+          backgroundColor: getBackgroundColor(props.status), // Use theme-based color
         }}
       >
         <Grid container direction="column" spacing={1}>
@@ -69,7 +63,7 @@ export default function ShiftTreeCard({
             size={12}
             sx={{ display: "flex", justifyContent: "center", pt: 1 }}
           >
-            <Typography variant="h5">{name}</Typography>
+            <Typography variant="h5">{props.name}</Typography>
           </Grid>
 
           {/* Middle Divider */}
@@ -81,13 +75,13 @@ export default function ShiftTreeCard({
             sx={{ display: "flex", justifyContent: "flex-start" }}
           >
             <Typography sx={{ fontWeight: "bold" }} variant="body1">
-              {dates}
+              {props.dates}
             </Typography>
           </Grid>
 
           {/* Space for description or statistics */}
           <Grid size={12} sx={{ marginTop: "auto" }}>
-            <Typography variant="body2">{description}</Typography>
+            <Typography variant="body2">{props.description}</Typography>
           </Grid>
         </Grid>
       </Paper>
