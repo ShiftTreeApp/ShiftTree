@@ -8,7 +8,10 @@ function useAuthInner() {
   const api = useApi();
 
   const { mutateAsync: submitLogin } = api.useMutation("post", "/login");
-  const { mutateAsync: submitRegistration } = api.useMutation("post", "/register");
+  const { mutateAsync: submitRegistration } = api.useMutation(
+    "post",
+    "/register",
+  );
 
   return {
     async login({
@@ -28,11 +31,11 @@ function useAuthInner() {
     async register({
       username,
       email,
-      password
+      password,
     }: {
-      username : string;
-      email : string;
-      password : string;
+      username: string;
+      email: string;
+      password: string;
     }): Promise<void> {
       await submitRegistration({
         body: { username, email, password },

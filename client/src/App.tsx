@@ -57,7 +57,7 @@ export default function App() {
                 }
               />
               <Route
-                path="/schedule"
+                path="/schedule/:scheduleId"
                 element={
                   <Authenticated>
                     <Schedule />
