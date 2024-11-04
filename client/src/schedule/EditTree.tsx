@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router";
 import { useNavigate } from "react-router";
+import EditMembersTab from "./EditMembersTab";
 
 const tabNames = {
   shifts: "shifts",
@@ -97,18 +98,9 @@ export default function EditTree() {
             )}
             {/* Members Settings */}
             {selectedTab === "members" && (
-              <Paper
-                sx={{
-                  backgroundColor: "gray",
-                  minHeight: "75vh",
-                  minWidth: "75vw",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-start",
-                }}
-              >
-                Member Settings
-              </Paper>
+              <>
+                <EditMembersTab scheduleId={scheduleId as string} />
+              </>
             )}
             {/* Signups Settings */}
             {selectedTab === "signups" && (
