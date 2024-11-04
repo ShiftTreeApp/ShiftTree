@@ -45,12 +45,12 @@ const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
     backgroundColor: theme.palette.common.black,
   },
 }));
+export const ModalContext = React.createContext();
 
 export default function Navbar() {
   const auth = useAuth();
   const navigate = useNavigate();
   const LDC = React.useContext(LeftDrawerContext);
-
   const handleDrawerToggle = () => {
     if (!LDC.isClosing) {
       LDC.setMobileOpen(!LDC.mobileOpen);
@@ -145,7 +145,9 @@ export default function Navbar() {
                     Create ShiftTree
                   </Button>
                 </MenuItem>
-                <MenuItem onClick={handleClose}>Create Organization</MenuItem>
+                <MenuItem onClick={handleClose}>
+                  <Button>Create Organization</Button>
+                </MenuItem>
                 <MenuItem onClick={() => handleModalOpen("ShiftTree")}>
                   <Button>Join ShiftTree</Button>
                 </MenuItem>
@@ -209,7 +211,9 @@ export default function Navbar() {
           </Box>
         </Drawer>
         <Dialog open={modalOpen} onClose={handleModalClose}>
-          <JoinTree joinType={joinType} />
+          <ModalContext.Provider value={{ modalOpen, setModalOpen }}>
+            <JoinTree joinType={joinType} />
+          </ModalContext.Provider>
         </Dialog>
       </Box>
     </Grid>
