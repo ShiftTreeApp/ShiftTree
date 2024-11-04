@@ -87,6 +87,7 @@ WITH
             schedule.id AS schedule_id,
             schedule.owner_id,
             schedule.schedule_name,
+            schedule.schedule_description,
             usm.user_id,
             'member' AS user_role
         FROM schedule
@@ -98,6 +99,7 @@ WITH
             schedule.id AS schedule_id,
             schedule.owner_id,
             schedule.schedule_name,
+            schedule.schedule_description,
             schedule.owner_id AS user_id,
             'owner' AS user_role
         FROM schedule
