@@ -99,7 +99,7 @@ export default function Home() {
           <Grid container spacing={2} sx={{ padding: 2 }}>
             {/* Create a card from each schedule from query */}
             {schedules?.map(schedule => (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={schedule.id}>
                 <ShiftTreeCard
                   name={schedule.name}
                   status={schedule.state}
