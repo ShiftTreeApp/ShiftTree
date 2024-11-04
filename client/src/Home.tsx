@@ -7,9 +7,12 @@ import {
   Divider,
   Box,
 } from "@mui/material";
+import { useState, useMemo } from "react";
 import ResponsiveDrawer from "./LeftDrawer";
 import "dayjs/locale/en";
 import * as React from "react";
+import { useApi } from "@/client";
+import dayjs from "dayjs";
 
 const drawerWidth = 360;
 
@@ -17,8 +20,36 @@ import Navbar from "@/Navbar";
 import ShiftTreeCard from "./ShiftTreeCard";
 export const LeftDrawerContext = React.createContext();
 export default function Home() {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [isClosing, setIsClosing] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const api = useApi();
+
+  // Retrieve and create schedule array to display
+  const { data: scheduleData } = api.useQuery("get", "/schedules", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+  });
+
+  const schedules = useMemo(
+    () =>
+      scheduleData?.map(schedule => ({
+        id: schedule.id,
+        name: schedule.name,
+        description: schedule.description,
+        state: schedule.state,
+        startTime: schedule.startTime,
+        endTime: schedule.endTime,
+      })),
+    [scheduleData],
+  );
+
+  const formatTimes = (startTime: string, endTime: string) => {
+    const formattedStart = dayjs(startTime).format("MMMM D, h:mm A");
+    const formattedEnd = dayjs(endTime).format("MMMM D, h:mm A");
+    return `${formattedStart} - ${formattedEnd}`;
+  };
 
   return (
     <Grid
@@ -69,33 +100,17 @@ export default function Home() {
           </Grid>
           <Divider variant="middle" />
           <Grid container spacing={2} sx={{ padding: 2 }}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <ShiftTreeCard
-                name="Open Shift"
-                status="open"
-                dates="Oct 1 - Oct 31"
-                description="description description description"
-                id="1"
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <ShiftTreeCard
-                name="Closed Shift"
-                status="closed"
-                dates="Sept 1 - Sept 30"
-                description="This shift is closed. Hours schedlued: 120."
-                id="2"
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <ShiftTreeCard
-                name="Your Shift"
-                status="owned"
-                dates="Aug 1 - Aug 31"
-                description="You own this shift. Description, maybe a button to close the schedule as well"
-                id="3"
-              />
-            </Grid>
+            {schedules?.map(schedule => (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <ShiftTreeCard
+                  name={schedule.name}
+                  status={schedule.state}
+                  dates={formatTimes(schedule.startTime, schedule.endTime)}
+                  description={schedule.description}
+                  id={schedule.id}
+                />
+              </Grid>
+            ))}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}></Grid>
           </Grid>
         </Paper>
