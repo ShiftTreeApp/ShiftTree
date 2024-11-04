@@ -7,7 +7,7 @@ import {
   Grid2 as Grid,
   Typography,
 } from "@mui/material";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import dayjs from "dayjs";
 
 export interface ShiftCalendarProps {
@@ -18,6 +18,8 @@ export interface ShiftCalendarProps {
   selectedShifts: string[];
   /** Mapping from shiftId to the color */
   colorMap?: Record<string, BackgroundColorType> | undefined;
+  /** Mapping from shiftId to custom content to be rendered in the shift card */
+  customContentMap?: Record<string, React.FC> | undefined;
 }
 
 export type ShiftColorMap = NonNullable<ShiftCalendarProps["colorMap"]>;
@@ -115,6 +117,7 @@ export function ShiftCalendar(props: ShiftCalendarProps) {
                 selectedShifts={props.selectedShifts}
                 onClickShift={props.onClickShift}
                 colorMap={props.colorMap ?? {}}
+                customContentMap={props.customContentMap ?? {}}
               />
             </Box>
           </Box>
@@ -159,6 +162,7 @@ interface WeekRowProps {
   onClickShift: (shiftId: string) => void;
   selectedShifts: string[];
   colorMap: Record<string, BackgroundColorType>;
+  customContentMap: Record<string, React.FC>;
 }
 
 function WeekRow(props: WeekRowProps) {
@@ -233,6 +237,7 @@ function WeekRow(props: WeekRowProps) {
                 onClick={() => props.onClickShift(shift.id)}
                 selected={props.selectedShifts.includes(shift.id)}
                 colorMap={props.colorMap}
+                customContentMap={props.customContentMap}
               />
             ))}
           </Box>
@@ -253,6 +258,7 @@ interface ShiftCardProps extends ShiftDetails {
   onClick: () => void;
   selected: boolean;
   colorMap: Record<string, BackgroundColorType>;
+  customContentMap: Record<string, React.FC>;
 }
 
 type BackgroundColorType = Extract<
@@ -289,6 +295,21 @@ function ShiftCard(props: ShiftCardProps) {
         {" - "}
         {props.endTime.format("HH:mm")}
       </Typography>
+      <CustomContent map={props.customContentMap} id={props.id} />
     </Card>
   );
+}
+
+interface CustomContentProps {
+  map: Record<string, React.FC>;
+  id: string;
+}
+
+function CustomContent(props: CustomContentProps) {
+  if (props.map[props.id]) {
+    const Component = props.map[props.id];
+    return <Component />;
+  } else {
+    return <></>;
+  }
 }
