@@ -3,11 +3,17 @@ import {
   Breadcrumbs,
   Typography,
   Box,
-  Link
-
+  Link,
+  Tooltip,
+  MenuList,
+  MenuItem,
+  ButtonGroup,
+  Grow,
+  Popper,
+  Paper
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { Fragment } from "react";
+import { useState, useRef } from "react";
 
 import { useApi } from "@/client";
 
@@ -16,8 +22,6 @@ interface EditSignupsTabProps {
 }
 
 export default function EditSignupTab(props: EditSignupsTabProps) {
-  
-
   const api = useApi();
 
   const { data: scheduleData } = api.useQuery(
@@ -27,9 +31,6 @@ export default function EditSignupTab(props: EditSignupsTabProps) {
   );
 
   return (
-
-
-
     <Box
       sx={{
         display: "flex",
@@ -39,34 +40,69 @@ export default function EditSignupTab(props: EditSignupsTabProps) {
         gap: 1.5,
       }}
     >
-
       <Breadcrumbs>
         <Link component={RouterLink} to={`/schedule/${props.scheduleId}`}>
           {scheduleData?.name ?? scheduleData?.id ?? "Schedule"}
         </Link>
         <Typography>Edit Signup Options</Typography>
       </Breadcrumbs>
-      
-      <EditButton/>
 
+      <SwitchButton buttonType={"off"} buttonText="Test" />
+      <SwitchButton
+        buttonType={"on"}
+        buttonText="test2"
+        buttonDesc="This button is very special and does this thing!"
+      />
     </Box>
-  )
+  );
 }
 
+/* 
+  
+  Button types for menu options:
 
-function EditButton(){
-  return(
+  'on'       : by default the button (switch) is on
+  'off'      : by default the button (switch) is off
+  'disabed'  : button (switch) is disabled
+
+*/
+
+interface SwitchButtonProps {
+  buttonType?: string; // Type of the button
+  buttonText?: string; // Text to the right of the button
+  buttonDesc?: string; // Additional Description when you hover over the button
+}
+
+function SwitchButton(props: SwitchButtonProps) {
+  return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
-        alignItems: "stretch",
+        flexDirection: "row",
+        alignItems: "center",
         flexGrow: 1,
         gap: 1.5,
       }}
     >
-      <Typography>test</Typography>
-      <Switch/>
+      <Typography>{props.buttonText}</Typography>
+
+      {/* Type of button */}
+      {props.buttonType == "on" && (
+        <Tooltip title={props.buttonDesc || ""}>
+          <Switch defaultChecked />
+        </Tooltip>
+      )}
+      {props.buttonType == "off" && (
+        <Tooltip title={props.buttonDesc || ""}>
+          <Switch />
+        </Tooltip>
+      )}
+      {props.buttonType == "disabled" && (
+        <Tooltip title={props.buttonDesc || ""}>
+          <Switch disabled />
+        </Tooltip>
+      )}
     </Box>
-  )
+  );
 }
+
