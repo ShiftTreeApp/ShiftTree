@@ -45,10 +45,14 @@ export default function Home() {
     [scheduleData],
   );
 
-  const formatTimes = (startTime: string, endTime: string) => {
-    const formattedStart = dayjs(startTime).format("MMMM D, h:mm A");
-    const formattedEnd = dayjs(endTime).format("MMMM D, h:mm A");
-    return `${formattedStart} - ${formattedEnd}`;
+  const formatTimes = (startTime: string | null, endTime: string | null) => {
+    if (startTime && endTime) {
+      const formattedStart = dayjs(startTime).format("MMMM D, h:mm A");
+      const formattedEnd = dayjs(endTime).format("MMMM D, h:mm A");
+      return `${formattedStart} - ${formattedEnd}`;
+    }
+
+    return "Invalid start and/or end time";
   };
 
   return (
