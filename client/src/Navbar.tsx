@@ -35,6 +35,11 @@ import { useAuth } from "@/auth";
 import JoinTree from "./JoinTree";
 import { LeftDrawerContext } from "./Home";
 
+interface ModalContextType {
+  modalOpen: boolean;
+  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
 ))(({ theme }) => ({
@@ -45,7 +50,10 @@ const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
     backgroundColor: theme.palette.common.black,
   },
 }));
-export const ModalContext = React.createContext();
+
+export const ModalContext = React.createContext<ModalContextType | undefined>(
+  undefined,
+);
 
 export default function Navbar() {
   const auth = useAuth();
