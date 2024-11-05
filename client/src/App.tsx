@@ -13,6 +13,7 @@ import EditProfile from "@/EditProfile.tsx";
 
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
+import NotFoundPage from "@/NotFound.tsx";
 
 export default function App() {
   return (
@@ -64,6 +65,7 @@ export default function App() {
                   </Authenticated>
                 }
               />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>
