@@ -195,19 +195,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/shiftTreeID": {
+    "/shiftTreeCodeExisting": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** @description Gets the ID Code for a shiftTree, if the user making request is Owner */
+        /**
+         * Fetches the join-code for shiftree; used on initial click
+         * @description Gets the Code for a shiftTree, if the user making request is Owner
+         */
         get: {
             parameters: {
                 query: {
-                    /** @description The ShiftTree to generate code for */
-                    ShiftTree: string;
+                    /** @description ShiftTreeID to fetch code for */
+                    ShiftTreeID: components["schemas"]["UUID"];
                 };
                 header?: never;
                 path?: never;
@@ -221,7 +224,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["UUID"];
+                        "application/json": {
+                            code?: string;
+                        };
                     };
                 };
                 /** @description Unauthorised */
@@ -257,7 +262,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/join": {
+    "/shiftTreeCodeGenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Generates a new join-code for shiftree; used with generate button
+         * @description Generates the Code for a shiftTree, if the user making request is Owner
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description ShiftTreeID to generate code for */
+                    ShiftTreeID: components["schemas"]["UUID"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description ID Found */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            code?: string;
+                        };
+                    };
+                };
+                /** @description Unauthorised */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unexpected Error */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UnexpectedError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/joinShiftTree": {
         parameters: {
             query?: never;
             header?: never;
@@ -265,11 +337,15 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** @description Adds a user to the queue for shiftTree membership */
+        /**
+         * Joins a shiftree with given join-code
+         * @description Adds a user to the Shiftree
+         */
         put: {
             parameters: {
                 query?: {
-                    ShiftTreeID?: components["schemas"]["UUID"];
+                    JoinCode?: components["schemas"]["UUID"];
+                    UserID?: components["schemas"]["UUID"];
                 };
                 header?: never;
                 path?: never;
@@ -392,6 +468,60 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/removeUser/{scheduleID}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a user from the specified schedule */
+        delete: {
+            parameters: {
+                query: {
+                    userID: string;
+                };
+                header?: never;
+                path: {
+                    scheduleID: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description User Not in Schedule */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unexpected Error */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UnexpectedError"];
                     };
                 };
             };
