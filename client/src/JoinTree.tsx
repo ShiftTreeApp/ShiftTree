@@ -8,12 +8,26 @@ import {
 } from "@mui/material";
 //import Navbar from "@/Navbar";
 //import Home from "./Home";
-
+import React, { useState } from "react";
+import { ModalContext } from "./Navbar";
 interface JoinTreeProps {
   joinType: "ShiftTree" | "Organization";
 }
 
 export default function JoinTree({ joinType }: JoinTreeProps) {
+  const [joinCode, setJoinCode] = useState("");
+  const MC = React.useContext(ModalContext);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setJoinCode(event.target.value);
+  };
+
+  const handleButtonClick = () => {
+    console.log(joinCode);
+    // TODO: IMPLEMENT CONNECTION TO BACKEND HERE
+    MC.setModalOpen(false);
+  };
+
   return (
     <Grid container>
       {/* <Grid size={12} sx={{pb: 2}}>
@@ -30,6 +44,8 @@ export default function JoinTree({ joinType }: JoinTreeProps) {
               label="Enter Join Code"
               variant="outlined"
               fullWidth
+              value={joinCode}
+              onChange={handleInputChange}
             />
             <Button
               fullWidth
@@ -41,7 +57,7 @@ export default function JoinTree({ joinType }: JoinTreeProps) {
                   backgroundColor: theme => theme.palette.secondary.dark,
                 },
               }}
-              //onClick={}
+              onClick={handleButtonClick}
             >
               <Typography sx={{ color: "black" }}>Join</Typography>
             </Button>

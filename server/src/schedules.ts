@@ -73,7 +73,7 @@ export async function list(req: Request, res: Response) {
     select coalesce(json_agg(json_build_object(
       'id', s.schedule_id,
       'name', s.schedule_name,
-      'description', '',
+      'description', s.schedule_description,
       'owner', (
         select json_build_object(
           'id', ua.id,

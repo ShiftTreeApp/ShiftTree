@@ -131,12 +131,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnexpectedError"
-
-  /shiftTreeID:
+  /shiftTreeCodeExisting:
     get:
+      summary: Fetches the join-code for shiftree; used on initial click
       security:
         - Bearer: []
-      description: Gets the ID Code for a shiftTree, if the user making request is Owner
+      description: Gets the Code for a shiftTree, if the user making request is Owner
+      parameters:
+        - name: ShiftTreeID
+          in: query
+          schema:
+            $ref: "#/components/schemas/UUID"
+          description: ShiftTreeID to fetch code for
+          required: true
       responses:
         401:
           description: Unauthorised
@@ -147,7 +154,36 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UUID"
+                type: object
+                properties:
+                  code:
+                    type: string
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnexpectedError"
+  /shiftTreeCodeGenerate:
+    get:
+      summary: Generates a new join-code for shiftree; used with generate button
+      security:
+        - Bearer: []
+      description: Generates the Code for a shiftTree, if the user making request is Owner
+      responses:
+        401:
+          description: Unauthorised
+        404:
+          description: Not found
+        200:
+          description: ID Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
         default:
           description: Unexpected Error
           content:
@@ -155,17 +191,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/UnexpectedError"
       parameters:
-        - name: ShiftTree
+        - name: ShiftTreeID
           in: query
           schema:
-            type: string
-          description: The ShiftTree to generate code for
+            $ref: "#/components/schemas/UUID"
+          description: ShiftTreeID to generate code for
           required: true
-  /join:
+  /joinShiftTree:
     put:
+      summary: Joins a shiftree with given join-code
       security:
         - Bearer: []
-      description: Adds a user to the queue for shiftTree membership
+      description: Adds a user to the Shiftree
+      parameters:
+        - name: ShiftTreeID
+          in: query
+          schema:
+            $ref: "#/components/schemas/UUID"
+        - name: UserID
+          in: query
+          schema:
+            $ref: "#/components/schemas/UUID"
       responses:
         404:
           description: UUID does not have corresponding ShiftTree
@@ -179,11 +225,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnexpectedError"
-      parameters:
-        - name: ShiftTreeID
-          in: query
-          schema:
-            $ref: "#/components/schemas/UUID"
 
   /schedules/{scheduleId}:
     get:
@@ -236,7 +277,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
+  /removeUser/{scheduleID}:
+    delete:
+      security:
+        - Bearer: []
+      summary: Remove a user from the specified schedule
+      parameters:
+        - name: userID
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: scheduleID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Success
+        401:
+          description: User Not in Schedule
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnexpectedError"
   /schedules/{scheduleId}/members:
     get:
       security:

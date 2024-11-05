@@ -1,5 +1,4 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-// import * as React from "react";
 import SignIn from "./SignIn.tsx";
 import SignUp from "./SignUp.tsx";
 import { ApiProvider } from "@/client.tsx";
@@ -7,13 +6,15 @@ import { ApiProvider } from "@/client.tsx";
 import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
-//import JoinTree from "@/JoinTree.tsx";
+import Schedule from "@/Schedule.tsx";
+import Profile from "@/Profile.tsx";
+import EditProfile from "@/EditProfile.tsx";
+import Schedule from "@/schedule/Schedule.tsx";
+import EditTree from "@/schedule/EditTree";
+import NotFoundPage from "@/NotFound.tsx";
 
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
-import Schedule from "@/schedule/Schedule.tsx";
-//import ScheduleView from "@/schedule/Schedule_view";
-import EditTree from "@/schedule/EditTree";
 
 export default function App() {
   return (
@@ -42,10 +43,18 @@ export default function App() {
                 }
               />
               <Route
-                path="/schedule/:scheduleId"
+                path="/profile"
                 element={
                   <Authenticated>
-                    <Schedule />
+                    <Profile />
+                  </Authenticated>
+                }
+              />
+              <Route
+                path="/edit_profile"
+                element={
+                  <Authenticated>
+                    <EditProfile />
                   </Authenticated>
                 }
               />
@@ -57,6 +66,15 @@ export default function App() {
                   </Authenticated>
                 }
               />
+              <Route
+                path="/schedule/:scheduleId"
+                element={
+                  <Authenticated>
+                    <Schedule />
+                  </Authenticated>
+                }
+              />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>
