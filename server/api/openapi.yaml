@@ -204,7 +204,7 @@ paths:
         - Bearer: []
       description: Adds a user to the Shiftree
       parameters:
-        - name: ShiftTreeID
+        - name: JoinCode
           in: query
           schema:
             $ref: "#/components/schemas/UUID"
