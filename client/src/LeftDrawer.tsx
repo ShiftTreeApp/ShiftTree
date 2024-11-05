@@ -23,7 +23,6 @@ export default function ResponsiveDrawer() {
       <Box
         component="nav"
         sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
-        y
         aria-label="mailbox folders"
       >
         <Drawer

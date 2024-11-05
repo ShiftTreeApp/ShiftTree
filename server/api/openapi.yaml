@@ -204,11 +204,7 @@ paths:
         - Bearer: []
       description: Adds a user to the Shiftree
       parameters:
-        - name: ShiftTreeID
-          in: query
-          schema:
-            $ref: "#/components/schemas/UUID"
-        - name: UserID
+        - name: JoinCode
           in: query
           schema:
             $ref: "#/components/schemas/UUID"
@@ -277,7 +273,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
+  /removeUser/{scheduleID}:
+    delete:
+      security:
+        - Bearer: []
+      summary: Remove a user from the specified schedule
+      parameters:
+        - name: userID
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: scheduleID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Success
+        401:
+          description: User Not in Schedule
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnexpectedError"
   /schedules/{scheduleId}/members:
     get:
       security:
