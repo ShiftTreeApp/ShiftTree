@@ -4,6 +4,8 @@
 services:
   database:
     image: postgres:latest
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: dev
       POSTGRES_USER: admin
@@ -14,30 +16,13 @@ services:
       - db_data:/var/lib/postgresql/data/pgdata
   pgadmin:
     image: dpage/pgadmin4
+    ports:
+      - "8888:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: "1234"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-  webapp:
-    build:
-      context: client
-  shifttree:
-    build:
-      context: server
-    environment:
-      SHIFTTREE_PG_USER: admin
-      SHIFTTREE_PG_PASSWORD: "1234"
-      SHIFTTREE_PG_HOST: database
-      SHIFTTREE_PG_PORT: "5432"
-      SHIFTTREE_PG_DATABASE: dev
-      SHIFTTREE_JWT_PK: ShiftTree
-  proxy:
-    image: caddy:alpine
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-    ports:
-      - 8080:80
 volumes:
   db_data:
   pgadmin_data:
