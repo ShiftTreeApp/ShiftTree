@@ -6,7 +6,6 @@ import { ApiProvider } from "@/client.tsx";
 import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
-import Schedule from "@/Schedule.tsx";
 import Profile from "@/Profile.tsx";
 import EditProfile from "@/EditProfile.tsx";
 import Schedule from "@/schedule/Schedule.tsx";
