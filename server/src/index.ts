@@ -97,6 +97,12 @@ app.get(
 );
 app.put("/joinShiftTree", auth.authorizationCheck, invites.joinShiftTree);
 
+app.delete(
+  "/removeUser/:scheduleID",
+  auth.authorizationCheck,
+  invites.removeUserFromShiftTree,
+);
+
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);
   res.status(500).send("Internal Server Error");
