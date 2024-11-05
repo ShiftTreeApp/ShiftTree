@@ -72,13 +72,13 @@ export const generateJoinCode = async (req: Request, res: Response) => {
 // Adds a user to the ShiftTree
 export const joinShiftTree = async (req: Request, res: Response) => {
   try {
-    const { JoinCode, UserID } = req.query;
+    const { JoinCode } = req.query;
     const findScheduleQuery = {
       text: "SELECT id FROM schedule WHERE code = $1",
       values: [JoinCode],
     };
     const scheduleResult = await pool.query(findScheduleQuery);
-
+    const UserID = getUserId(req);
     if (scheduleResult.rows.length === 0) {
       return res.status(404).send("Invalid join code");
     }

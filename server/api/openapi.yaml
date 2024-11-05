@@ -208,10 +208,6 @@ paths:
           in: query
           schema:
             $ref: "#/components/schemas/UUID"
-        - name: UserID
-          in: query
-          schema:
-            $ref: "#/components/schemas/UUID"
       responses:
         404:
           description: UUID does not have corresponding ShiftTree
