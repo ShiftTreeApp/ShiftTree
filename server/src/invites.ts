@@ -1,5 +1,31 @@
 import { pool } from "@/pool";
 import { Request, Response } from "express";
+import { z } from "zod";
+const tokenPayload = z.object({ email: z.string(), name: z.string() });
+import * as jwt from "jsonwebtoken";
+//Scuffed copy paste
+async function getUserId(req: Request) {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    throw new Error("Missing token");
+  }
+  const decoded = tokenPayload.parse(
+    jwt.verify(token, process.env.SHIFTTREE_JWT_PK as string),
+  );
+
+  const query = /* sql */ `
+    SELECT u.id
+    FROM user_account AS u
+    WHERE u.email = $1
+  `;
+  const result = await pool.query({
+    text: query,
+    values: [decoded.email],
+  });
+  return result.rows[0].id as string;
+}
+
+// async function checkAuth(req: Request, ShiftTreeID) {}
 
 // Fetches the join-code for a ShiftTree
 export const getExistingJoinCode = async (req: Request, res: Response) => {
@@ -46,7 +72,19 @@ export const generateJoinCode = async (req: Request, res: Response) => {
 // Adds a user to the ShiftTree
 export const joinShiftTree = async (req: Request, res: Response) => {
   try {
-    const { ShiftTreeID, UserID } = req.query;
+    const { JoinCode, UserID } = req.query;
+    const findScheduleQuery = {
+      text: "SELECT id FROM schedule WHERE code = $1",
+      values: [JoinCode],
+    };
+    const scheduleResult = await pool.query(findScheduleQuery);
+
+    if (scheduleResult.rows.length === 0) {
+      return res.status(404).send("Invalid join code");
+    }
+
+    const scheduleID = scheduleResult.rows[0].id;
+
     const statement = `
       INSERT INTO user_schedule_membership (id, user_id, schedule_id)
       VALUES (gen_random_uuid(), $1, $2)
@@ -54,15 +92,12 @@ export const joinShiftTree = async (req: Request, res: Response) => {
     `;
     const query = {
       text: statement,
-      values: [UserID, ShiftTreeID],
+      values: [UserID, scheduleID],
     };
     await pool.query(query);
     const result = await pool.query(query);
     console.log(result);
-    // //Might not need, could just do 200 and act like was added
-    // if (result.rowCount === 0) {
-    //   return res.status(409).send("User is already a member of this schedule");
-    // }
+
     res.status(200).send("User added to ShiftTree");
   } catch (err) {
     console.error(err);
@@ -83,6 +118,6 @@ export const removeUserFromShiftTree = async (req: Request, res: Response) => {
   };
   //TODO: Add check actually removed user
   await pool.query(query);
-  const result = await pool.query(query);
+  await pool.query(query);
   res.status(200).send("User removed from ShiftTree");
 };
