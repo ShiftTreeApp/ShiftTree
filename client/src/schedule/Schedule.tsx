@@ -20,7 +20,7 @@ import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useApi } from "../client";
 
-import { ShiftCalendar } from "./ShiftCalendar";
+import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
@@ -85,6 +85,20 @@ export default function Schedule() {
     { params: { path: { scheduleId: scheduleId as string } } },
   );
 
+  const { data: shifts } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/shifts",
+    { params: { path: { scheduleId: scheduleId as string } } },
+  );
+
+  const formattedShifts: ShiftDetails[] = (shifts || []).map(shift => ({
+    id: shift.id,
+    name: shift.name,
+    startTime: dayjs(shift.startTime),
+    endTime: dayjs(shift.endTime),
+  }));
+
+
   return (
     <Grid container direction="column" spacing={1}>
       <Navbar />
@@ -128,38 +142,7 @@ export default function Schedule() {
             endDate={dayjs("2024-11-20, 3:00")}
             selectedShifts={selectedShift ? [selectedShift] : []}
             customContentMap={signedUpIndicators}
-            shifts={[
-              {
-                id: "1",
-                name: "Shift 1",
-                startTime: dayjs("2024-10-27, 8:00"),
-                endTime: dayjs("2024-10-27, 12:00"),
-              },
-              {
-                id: "2",
-                name: "Shift 2",
-                startTime: dayjs("2024-10-27, 13:00"),
-                endTime: dayjs("2024-10-27, 17:00"),
-              },
-              {
-                id: "3",
-                name: "Shift 3",
-                startTime: dayjs("2024-10-28, 18:00"),
-                endTime: dayjs("2024-10-28, 22:00"),
-              },
-              {
-                id: "4",
-                name: "Shift 4",
-                startTime: dayjs("2024-10-28, 23:00"),
-                endTime: dayjs("2024-10-29, 3:00"),
-              },
-              {
-                id: "4",
-                name: "Shift 4",
-                startTime: dayjs("2024-10-31, 23:00"),
-                endTime: dayjs("2024-10-31, 3:00"),
-              },
-            ]}
+            shifts={formattedShifts}
           />
         </Paper>
       </Container>
