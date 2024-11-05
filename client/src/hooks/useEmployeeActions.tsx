@@ -26,3 +26,28 @@ export function useEmployeeActions() {
     },
   };
 }
+
+export function useSignupActions() {
+  const api = useApi();
+
+  const { mutateAsync: signupForShift } = api.useMutation(
+    "post",
+    "/signups/{shiftId}",
+  );
+
+  return {
+    async signup({ shiftId }: { shiftId: string }): Promise<void> {
+      await signupForShift({
+        params: {
+          path: {
+            shiftId,
+          },
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      console.log("Signed up for shift");
+    },
+  };
+}
