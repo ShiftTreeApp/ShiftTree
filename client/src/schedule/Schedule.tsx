@@ -40,8 +40,6 @@ const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const api = useApi();
-
   const selectedShift = searchParams.get("shift");
   function setSelectedShift(shiftId: string) {
     setSearchParams(prev => {
@@ -62,10 +60,13 @@ function useSelectedShiftParam() {
 export default function Schedule() {
   const { scheduleId } = useParams();
 
+  // TODO: Change this to useSearchParam
   const { selectedShift, setSelectedShift, clearSelectedShift } =
     useSelectedShiftParam();
 
   const drawerOpen = selectedShift !== null;
+
+  const api = useApi();
 
   // TODO: Get this from API
   const signedUpShifts = useMemo(() => ["1", "3"], []);
@@ -76,6 +77,12 @@ export default function Schedule() {
         signedUpShifts.map(shiftId => [shiftId, SignedUpIndicator]),
       ),
     [signedUpShifts],
+  );
+
+  const { data: scheduleData } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}",
+    { params: { path: { scheduleId: scheduleId as string } } },
   );
 
   return (
@@ -93,7 +100,7 @@ export default function Schedule() {
         <Paper elevation={3} sx={{ padding: 2 }}>
           <Grid container justifyContent="space-between" alignItems="center">
             <Grid sx={{ paddingLeft: 2 }}>
-              <Typography variant="h5">shiftTreeName</Typography>
+              <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
             <Grid>
               <CustomTooltip title="Edit ShiftTree" placement="bottom">
