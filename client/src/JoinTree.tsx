@@ -12,9 +12,13 @@ import React, { useState } from "react";
 import { ModalContext } from "./Navbar";
 interface JoinTreeProps {
   joinType: "ShiftTree" | "Organization";
+  refetchAllSchedules: () => void;
 }
 
-export default function JoinTree({ joinType }: JoinTreeProps) {
+export default function JoinTree({
+  joinType,
+  refetchAllSchedules,
+}: JoinTreeProps) {
   const [joinCode, setJoinCode] = useState("");
   const MC = React.useContext(ModalContext);
 
@@ -22,9 +26,10 @@ export default function JoinTree({ joinType }: JoinTreeProps) {
     setJoinCode(event.target.value);
   };
 
-  const handleButtonClick = () => {
+  const handleButtonClick = async () => {
     console.log(joinCode);
     // TODO: IMPLEMENT CONNECTION TO BACKEND HERE
+    await refetchAllSchedules();
     MC.setModalOpen(false);
   };
 
