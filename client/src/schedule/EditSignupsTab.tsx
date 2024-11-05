@@ -10,7 +10,7 @@ import {
   ButtonGroup,
   Grow,
   Popper,
-  Paper
+  Paper,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { useState, useRef } from "react";
@@ -105,4 +105,3 @@ function SwitchButton(props: SwitchButtonProps) {
     </Box>
   );
 }
-
