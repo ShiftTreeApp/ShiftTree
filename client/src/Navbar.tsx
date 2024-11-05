@@ -51,6 +51,7 @@ export default function Navbar() {
   const auth = useAuth();
   const navigate = useNavigate();
   const LDC = React.useContext(LeftDrawerContext);
+  const { refetchAllSchedules } = LDC;
   const handleDrawerToggle = () => {
     if (!LDC.isClosing) {
       LDC.setMobileOpen(!LDC.mobileOpen);
@@ -212,7 +213,10 @@ export default function Navbar() {
         </Drawer>
         <Dialog open={modalOpen} onClose={handleModalClose}>
           <ModalContext.Provider value={{ modalOpen, setModalOpen }}>
-            <JoinTree joinType={joinType} />
+            <JoinTree
+              joinType={joinType}
+              refetchAllSchedules={refetchAllSchedules}
+            />
           </ModalContext.Provider>
         </Dialog>
       </Box>

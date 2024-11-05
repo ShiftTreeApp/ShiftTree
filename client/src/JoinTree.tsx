@@ -9,23 +9,37 @@ import {
 //import Navbar from "@/Navbar";
 //import Home from "./Home";
 import React, { useState } from "react";
-import { ModalContext } from "./Navbar";
+import { ModalContext } from "@/Navbar";
+import { useEmployeeActions } from "@/hooks/useEmployeeActions";
+
 interface JoinTreeProps {
   joinType: "ShiftTree" | "Organization";
+  refetchAllSchedules: () => void;
 }
 
-export default function JoinTree({ joinType }: JoinTreeProps) {
+export default function JoinTree({
+  joinType,
+  refetchAllSchedules,
+}: JoinTreeProps) {
   const [joinCode, setJoinCode] = useState("");
   const MC = React.useContext(ModalContext);
+  const empActions = useEmployeeActions();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setJoinCode(event.target.value);
   };
 
-  const handleButtonClick = () => {
+  const handleButtonClick = async () => {
     console.log(joinCode);
-    // TODO: IMPLEMENT CONNECTION TO BACKEND HERE
-    MC.setModalOpen(false);
+    empActions
+      .join({ shiftTreeId: joinCode })
+      .then(() => {
+        refetchAllSchedules();
+        MC.setModalOpen(false);
+      })
+      .catch(e => {
+        console.log(e.response.status);
+      });
   };
 
   return (

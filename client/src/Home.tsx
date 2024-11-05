@@ -10,7 +10,23 @@ const drawerWidth = 360;
 
 import Navbar from "@/Navbar";
 import ShiftTreeCard from "./ShiftTreeCard";
-export const LeftDrawerContext = React.createContext();
+
+interface LeftDrawerContextType {
+  mobileOpen: boolean;
+  setMobileOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isClosing: boolean;
+  setIsClosing: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchAllSchedules: () => void;
+}
+
+export const LeftDrawerContext = React.createContext<LeftDrawerContextType>({
+  mobileOpen: false,
+  setMobileOpen: () => {},
+  isClosing: false,
+  setIsClosing: () => {},
+  refetchAllSchedules: () => {},
+});
+
 export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -18,11 +34,15 @@ export default function Home() {
   const api = useApi();
 
   // Retrieve and create schedule array to display
-  const { data: scheduleData } = api.useQuery("get", "/schedules", {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  const { data: scheduleData, refetch: refetchAllSchedules } = api.useQuery(
+    "get",
+    "/schedules",
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
     },
-  });
+  );
 
   const schedules = useMemo(
     () =>
@@ -60,7 +80,13 @@ export default function Home() {
       }}
     >
       <LeftDrawerContext.Provider
-        value={{ mobileOpen, setMobileOpen, isClosing, setIsClosing }}
+        value={{
+          mobileOpen,
+          setMobileOpen,
+          isClosing,
+          setIsClosing,
+          refetchAllSchedules,
+        }}
       >
         <Navbar />
         <ResponsiveDrawer />
