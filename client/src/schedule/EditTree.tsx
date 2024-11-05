@@ -15,6 +15,7 @@ import {
 import { useParams } from "react-router";
 import { useNavigate } from "react-router";
 import EditMembersTab from "./EditMembersTab";
+import EditSignupsTab from "./EditSignupsTab";
 
 const tabNames = {
   shifts: "shifts",
@@ -104,18 +105,7 @@ export default function EditTree() {
             )}
             {/* Signups Settings */}
             {selectedTab === "signups" && (
-              <Paper
-                sx={{
-                  backgroundColor: "gray",
-                  minHeight: "75vh",
-                  minWidth: "75vw",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-start",
-                }}
-              >
-                Signup Settings
-              </Paper>
+                <EditSignupsTab scheduleId={scheduleId as string} />
             )}
             {/* Assign Settings */}
             {selectedTab === "assign" && (
