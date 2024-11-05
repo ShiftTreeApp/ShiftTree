@@ -1,5 +1,4 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-// import * as React from "react";
 import SignIn from "./SignIn.tsx";
 import SignUp from "./SignUp.tsx";
 import { ApiProvider } from "@/client.tsx";
@@ -10,10 +9,12 @@ import Create from "@/Create.tsx";
 import Schedule from "@/Schedule.tsx";
 import Profile from "@/Profile.tsx";
 import EditProfile from "@/EditProfile.tsx";
+import Schedule from "@/schedule/Schedule.tsx";
+import EditTree from "@/schedule/EditTree";
+import NotFoundPage from "@/NotFound.tsx";
 
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
-import NotFoundPage from "@/NotFound.tsx";
 
 export default function App() {
   return (
@@ -54,6 +55,14 @@ export default function App() {
                 element={
                   <Authenticated>
                     <EditProfile />
+                  </Authenticated>
+                }
+              />
+              <Route
+                path="/schedule/:scheduleId/edit"
+                element={
+                  <Authenticated>
+                    <EditTree />
                   </Authenticated>
                 }
               />
