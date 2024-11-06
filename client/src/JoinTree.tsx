@@ -32,13 +32,13 @@ export default function JoinTree({
   const handleButtonClick = async () => {
     console.log(joinCode);
     empActions
-      .join({ shiftTreeId: joinCode })
+      .join({ joinCode: joinCode })
       .then(() => {
         refetchAllSchedules();
         MC.setModalOpen(false);
       })
       .catch(e => {
-        console.log(e.response.status);
+        console.log(e);
       });
   };
 

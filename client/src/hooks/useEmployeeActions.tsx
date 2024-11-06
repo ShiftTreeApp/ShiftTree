@@ -11,11 +11,11 @@ export function useEmployeeActions() {
   );
 
   return {
-    async join({ shiftTreeId }: { shiftTreeId: string }): Promise<void> {
+    async join({ joinCode }: { joinCode: string }): Promise<void> {
       await joinShiftTree({
         params: {
           query: {
-            ShiftTreeID: shiftTreeId,
+            JoinCode: joinCode,
           },
         },
         headers: {
