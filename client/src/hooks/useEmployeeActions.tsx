@@ -12,33 +12,37 @@ export function useEmployeeActions() {
     "/signups/{shiftId}",
   );
 
-  return {
-    async join({ joinCode }: { joinCode: string }): Promise<void> {
-      await joinShiftTree({
-        params: {
-          query: {
-            JoinCode: joinCode,
-          },
+  /*
+   * Changed structure to separately build functions and return them
+   * rather than creating them within the return statement
+   */
+  async function join({ joinCode }: { joinCode: string }): Promise<void> {
+    await joinShiftTree({
+      params: {
+        query: {
+          JoinCode: joinCode,
         },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      console.log("Joined");
-    },
+      },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+    console.log("Joined");
+  }
 
-    async signup({ shiftId }: { shiftId: string }): Promise<void> {
-      await signupForShift({
-        params: {
-          path: {
-            shiftId,
-          },
+  async function signup({ shiftId }: { shiftId: string }): Promise<void> {
+    await signupForShift({
+      params: {
+        path: {
+          shiftId,
         },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      console.log("Signed up for shift");
-    },
-  };
+      },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+    console.log("Signed up for shift");
+  }
+
+  return { join, signup };
 }

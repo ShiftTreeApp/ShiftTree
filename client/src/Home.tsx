@@ -65,7 +65,7 @@ export default function Home() {
       return `${formattedStart} - ${formattedEnd}`;
     }
 
-    return "Invalid start and/or end time";
+    return "No Shifts";
   };
 
   return (
