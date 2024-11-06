@@ -1,10 +1,10 @@
 import { Grid2 as Grid, Typography, Paper, Divider, Box } from "@mui/material";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import ResponsiveDrawer from "./LeftDrawer";
 import "dayjs/locale/en";
 import * as React from "react";
-import { useApi } from "@/client";
 import dayjs from "dayjs";
+import { useDatabaseQueries } from "@/hooks/useDatabaseQueries";
 
 const drawerWidth = 360;
 
@@ -16,7 +16,6 @@ interface LeftDrawerContextType {
   setMobileOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isClosing: boolean;
   setIsClosing: React.Dispatch<React.SetStateAction<boolean>>;
-  refetchAllSchedules: () => void;
 }
 
 export const LeftDrawerContext = React.createContext<LeftDrawerContextType>({
@@ -24,38 +23,13 @@ export const LeftDrawerContext = React.createContext<LeftDrawerContextType>({
   setMobileOpen: () => {},
   isClosing: false,
   setIsClosing: () => {},
-  refetchAllSchedules: () => {},
 });
 
 export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  const api = useApi();
-
-  // Retrieve and create schedule array to display
-  const { data: scheduleData, refetch: refetchAllSchedules } = api.useQuery(
-    "get",
-    "/schedules",
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-    },
-  );
-
-  const schedules = useMemo(
-    () =>
-      scheduleData?.map(schedule => ({
-        id: schedule.id,
-        name: schedule.name,
-        description: schedule.description,
-        state: schedule.state,
-        startTime: schedule.startTime,
-        endTime: schedule.endTime,
-      })),
-    [scheduleData],
-  );
+  const queries = useDatabaseQueries();
 
   // Making the times into readable format
   const formatTimes = (startTime: string | null, endTime: string | null) => {
@@ -65,7 +39,7 @@ export default function Home() {
       return `${formattedStart} - ${formattedEnd}`;
     }
 
-    return "Invalid start and/or end time";
+    return "No Shifts";
   };
 
   return (
@@ -85,7 +59,6 @@ export default function Home() {
           setMobileOpen,
           isClosing,
           setIsClosing,
-          refetchAllSchedules,
         }}
       >
         <Navbar />
@@ -124,7 +97,7 @@ export default function Home() {
           <Divider variant="middle" />
           <Grid container spacing={2} sx={{ padding: 2 }}>
             {/* Create a card from each schedule from query */}
-            {schedules?.map(schedule => (
+            {queries.schedules?.map(schedule => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={schedule.id}>
                 <ShiftTreeCard
                   name={schedule.name}

@@ -11,19 +11,17 @@ import {
 import React, { useState } from "react";
 import { ModalContext } from "@/Navbar";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
+import { useDatabaseQueries } from "@/hooks/useDatabaseQueries";
 
 interface JoinTreeProps {
   joinType: "ShiftTree" | "Organization";
-  refetchAllSchedules: () => void;
 }
 
-export default function JoinTree({
-  joinType,
-  refetchAllSchedules,
-}: JoinTreeProps) {
+export default function JoinTree({ joinType }: JoinTreeProps) {
   const [joinCode, setJoinCode] = useState("");
   const MC = React.useContext(ModalContext);
   const empActions = useEmployeeActions();
+  const queries = useDatabaseQueries();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setJoinCode(event.target.value);
@@ -34,7 +32,7 @@ export default function JoinTree({
     empActions
       .join({ joinCode: joinCode })
       .then(() => {
-        refetchAllSchedules();
+        queries.refetchAllSchedules();
         MC.setModalOpen(false);
       })
       .catch(e => {
