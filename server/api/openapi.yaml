@@ -211,7 +211,7 @@ paths:
       responses:
         404:
           description: UUID does not have corresponding ShiftTree
-        200:
+        204:
           description: Request To Join Successful
         500:
           description: Unable to add User to Schedule

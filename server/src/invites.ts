@@ -100,7 +100,7 @@ export const joinShiftTree = async (req: Request, res: Response) => {
     const result = await pool.query(query);
     console.log(result);
 
-    res.status(200).send("User added to ShiftTree");
+    res.status(204).send("User added to ShiftTree");
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
