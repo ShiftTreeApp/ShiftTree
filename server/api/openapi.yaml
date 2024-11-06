@@ -525,7 +525,6 @@ paths:
                 userId:
                   description: User to sign up, can only be another user if the current user is a manager
                   type: string
-                  format: uuid
                 weight:
                   type: number
                   description: Weight of the user's preference for this shift
