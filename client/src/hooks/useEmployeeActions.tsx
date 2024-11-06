@@ -1,13 +1,15 @@
 import { useApi } from "@/client";
-import { useAuth } from "@/auth";
 
 export function useEmployeeActions() {
   const api = useApi();
-  const auth = useAuth();
 
   const { mutateAsync: joinShiftTree } = api.useMutation(
     "put",
     "/joinShiftTree",
+  );
+  const { mutateAsync: signupForShift } = api.useMutation(
+    "post",
+    "/signups/{shiftId}",
   );
 
   return {
@@ -24,18 +26,7 @@ export function useEmployeeActions() {
       });
       console.log("Joined");
     },
-  };
-}
 
-export function useSignupActions() {
-  const api = useApi();
-
-  const { mutateAsync: signupForShift } = api.useMutation(
-    "post",
-    "/signups/{shiftId}",
-  );
-
-  return {
     async signup({ shiftId }: { shiftId: string }): Promise<void> {
       await signupForShift({
         params: {
