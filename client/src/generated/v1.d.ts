@@ -353,7 +353,7 @@ export interface paths {
             requestBody?: never;
             responses: {
                 /** @description Request To Join Successful */
-                200: {
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -755,6 +755,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         name?: string;
+                        description?: string;
                         /** Format: date-time */
                         startTime?: string;
                         /** Format: date-time */
@@ -1066,6 +1067,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+            description: string;
             /** Format: date-time */
             startTime: string;
             /** Format: date-time */
@@ -1073,6 +1075,7 @@ export interface components {
         };
         ShiftCreateInfo: {
             name: string;
+            description?: string;
             /** Format: date-time */
             startTime: string;
             /** Format: date-time */
