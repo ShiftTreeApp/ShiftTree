@@ -92,7 +92,9 @@ WITH
             'member' AS user_role
         FROM schedule
         JOIN user_schedule_membership AS usm ON schedule.id = usm.schedule_id
-        WHERE schedule.removed IS NULL
+        WHERE TRUE
+            AND schedule.removed IS NULL
+            AND NOT (schedule.owner_id = usm.user_id)
     ),
     owner_info AS (
         SELECT
