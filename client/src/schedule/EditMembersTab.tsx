@@ -58,20 +58,12 @@ export default function EditMembersTab(props: EditMembersTabProps) {
   );
 
   async function kickUser(id: string) {
-    // FIXME: the mutateAsync from "/removeUser/{scheduleID}" throws an error (something about JSON.parse)
-    // For now, catch the error and manually refetch the members.
-    try {
-      await sendKickUser({
-        params: {
-          path: { scheduleID: props.scheduleId },
-          query: { userID: id },
-        },
-      });
-    } catch (e) {
-      console.error(e);
-    } finally {
-      await refetchMembers();
-    }
+    await sendKickUser({
+      params: {
+        path: { scheduleID: props.scheduleId },
+        query: { userID: id },
+      },
+    });
   }
 
   return (
@@ -216,7 +208,9 @@ function KickDialog(props: KickDialogProps) {
         <Button onClick={props.onClose}>Cancel</Button>
         <Button
           onClick={async () => {
-            props.user && props.onKick(props.user.id);
+            if (props.user) {
+              props.onKick(props.user.id);
+            }
             props.onClose();
           }}
         >
