@@ -217,7 +217,8 @@ export async function getShifts(req: Request, res: Response) {
       )
       select coalesce(json_agg(json_build_object(
         'id', s.id,
-        'name', '', -- TODO: Add shift name to the schema
+        'name', s.shift_name,
+        'description', s.shift_description,
         'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
         'endTime', (to_json(s.end_time)#>>'{}')||'Z'
       )), json_build_array()) as json
@@ -261,16 +262,23 @@ export async function createShift(req: Request, res: Response) {
 
   const results = await pool.query({
     text: /* sql */ `
-      insert into shift (schedule_id, start_time, end_time)
-      values ($1, $2, $3)
+      insert into shift (schedule_id, start_time, end_time, shift_name, shift_description)
+      values ($1, $2, $3, $4, $5)
       returning json_build_object(
         'id', shift.id,
-        'name', '', -- TODO: Add shift name to the schema
+        'name', shift.shift_name,
+        'description', shift.shift_description,
         'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
         'endTime', (to_json(shift.end_time)#>>'{}')||'Z'
       ) as json
     `,
-    values: [scheduleId, req.body.startTime, req.body.endTime],
+    values: [
+      scheduleId,
+      req.body.startTime,
+      req.body.endTime,
+      req.body.name,
+      req.body.description ?? "",
+    ],
   });
 
   res.status(201).json(results.rows[0].json);
@@ -355,8 +363,8 @@ export async function getSignups(req: Request, res: Response) {
     text: /* sql */ `
       select coalesce(json_agg(json_build_object(
         'id', shift.id,
-        'name', '',
-        'description', '',
+        'name', shift.shift_name,
+        'description', shift.shift_description,
         'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
         'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
         'signups', (
@@ -461,10 +469,20 @@ export async function editShift(req: Request, res: Response) {
   await pool.query({
     text: /* sql */ `
       update shift
-      set start_time = $1, end_time = $2
-      where id = $3
+      set
+        start_time = coalesce($2, start_time),
+        end_time = coalesce($3, end_time),
+        shift_name = coalesce($4, shift_name),
+        shift_description = coalesce($5, shift_description)
+      where id = $1
     `,
-    values: [req.body.startTime, req.body.endTime, shiftId],
+    values: [
+      shiftId,
+      req.body.startTime,
+      req.body.endTime,
+      req.body.name,
+      req.body.description,
+    ],
   });
 
   res.status(204).send();
