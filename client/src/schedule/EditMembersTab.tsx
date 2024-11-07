@@ -3,13 +3,17 @@ import {
   Box,
   Breadcrumbs,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   Link,
   TextField,
   Typography,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 import { useApi } from "@/client";
 
@@ -26,7 +30,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
     { params: { path: { scheduleId: props.scheduleId } } },
   );
 
-  const { data: membersData } = api.useQuery(
+  const { data: membersData, refetch: refetchMembers } = api.useQuery(
     "get",
     "/schedules/{scheduleId}/members",
     { params: { path: { scheduleId: props.scheduleId } } },
@@ -37,6 +41,29 @@ export default function EditMembersTab(props: EditMembersTabProps) {
 
   function copyInviteCode() {
     navigator.clipboard.writeText(inviteCode);
+  }
+
+  const [userToKick, setUserToKick] = useState<
+    { id: string; displayName: string } | undefined
+  >();
+
+  const { mutateAsync: sendKickUser } = api.useMutation(
+    "delete",
+    "/removeUser/{scheduleID}",
+    {
+      onSuccess: async () => {
+        await refetchMembers();
+      },
+    },
+  );
+
+  async function kickUser(id: string) {
+    await sendKickUser({
+      params: {
+        path: { scheduleID: props.scheduleId },
+        query: { userID: id },
+      },
+    });
   }
 
   return (
@@ -79,6 +106,11 @@ export default function EditMembersTab(props: EditMembersTabProps) {
       >
         <Button>Regenerate</Button>
       </Box>
+      <KickDialog
+        user={userToKick}
+        onClose={() => setUserToKick(undefined)}
+        onKick={kickUser}
+      />
       <Typography variant="h5">Members</Typography>
       {membersData?.map((member, i) => (
         <Fragment key={member.id}>
@@ -91,6 +123,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
               member.displayName,
               member.id,
             )}
+            onKick={() => setUserToKick(member)}
           />
         </Fragment>
       ))}
@@ -149,8 +182,41 @@ function MemberItem(props: MemberItemProps) {
         </Box>
       </Box>
       <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-        <Button color="error">Kick</Button>
+        <Button color="error" onClick={props.onKick}>
+          Kick
+        </Button>
       </Box>
     </Box>
+  );
+}
+
+interface KickDialogProps {
+  user: { id: string; displayName: string } | undefined;
+  onClose: () => void;
+  onKick: (id: string) => void;
+}
+
+function KickDialog(props: KickDialogProps) {
+  return (
+    <Dialog open={props.user !== undefined} onClose={props.onClose}>
+      <DialogTitle>{`Kick ${props.user?.displayName}?`}</DialogTitle>
+      <DialogContent>
+        This will remove the user from the current ShiftTree. They can still
+        rejoin using a join code.
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={props.onClose}>Cancel</Button>
+        <Button
+          onClick={async () => {
+            if (props.user) {
+              props.onKick(props.user.id);
+            }
+            props.onClose();
+          }}
+        >
+          Kick
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

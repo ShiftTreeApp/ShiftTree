@@ -121,5 +121,5 @@ export const removeUserFromShiftTree = async (req: Request, res: Response) => {
   //TODO: Add check actually removed user
   await pool.query(query);
   await pool.query(query);
-  res.status(200).send("User removed from ShiftTree");
+  res.status(204).send("User removed from ShiftTree");
 };
