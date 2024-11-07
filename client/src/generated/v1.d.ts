@@ -501,7 +501,7 @@ export interface paths {
             requestBody?: never;
             responses: {
                 /** @description Success */
-                200: {
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -863,10 +863,7 @@ export interface paths {
             requestBody?: {
                 content: {
                     "application/json": {
-                        /**
-                         * Format: uuid
-                         * @description User to sign up, can only be another user if the current user is a manager
-                         */
+                        /** @description User to sign up, can only be another user if the current user is a manager */
                         userId?: string;
                         /** @description Weight of the user's preference for this shift */
                         weight?: number;
