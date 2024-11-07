@@ -11,9 +11,11 @@ import {
   Link,
   TextField,
   Typography,
+  IconButton,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { Fragment, useState } from "react";
+import EditMembersDrawer from "./EditMembersDrawer";
 
 import { useApi } from "@/client";
 
@@ -158,6 +160,13 @@ interface MemberItemProps {
 }
 
 function MemberItem(props: MemberItemProps) {
+  // Variables defining opening of drawer
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // state of the drawer
+  const handleDrawerOpen = () => setDrawerOpen(true);
+  const handleDrawerClose = () => setDrawerOpen(false);
+
   return (
     <Box
       sx={{
@@ -175,7 +184,36 @@ function MemberItem(props: MemberItemProps) {
           gap: 1,
         }}
       >
-        <Avatar src={props.profilePictureUrl} />
+        <IconButton onClick={handleDrawerOpen}>
+          <Avatar src={props.profilePictureUrl} />
+        </IconButton>
+
+        {/* Members Drawer */}
+        <EditMembersDrawer
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        title="Member View"
+        >
+          <Avatar src={props.profilePictureUrl} sx={{ width: '7vw', height: '7vw' }} />
+          <Typography variant="h6" fontWeight="bold">{props.displayName}</Typography>
+          <Typography variant="body1">{props.email}<br></br><br></br><br></br></Typography>
+          
+
+          <Divider component="div" role="presentation"/>
+
+          <Typography variant="h5" sx={{textDecoration:'underline'}}>Shift Details</Typography>
+
+          
+
+
+          <Typography variant="body1">UserID: {props.userId}</Typography>
+          <Button color="error" onClick={props.onKick}>
+            Kick
+          </Button>
+        </EditMembersDrawer>
+
+
+
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Typography fontWeight="bold">{props.displayName}</Typography>
           <Typography color="textSecondary">{props.email}</Typography>
