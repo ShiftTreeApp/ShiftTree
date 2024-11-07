@@ -12,20 +12,20 @@ export function useManagerActions(shiftTreeId: string) {
     shiftTreeId,
   }: {
     shiftTreeId: string;
-  }): Promise<void> {
+  }): Promise<string | undefined> {
     const { code } = await generateCode({
       params: {
         query: {
           ShiftTreeID: shiftTreeId,
         },
       },
-      /* TODO: Use this/replace this with manager authentication
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },*/
-      // TODO: Do something with the code var
+      // TODO: Use this/replace this with manager authentication
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
     });
-    console.log("Invite Code Generated");
+    console.log("Invite Code Generated: ", code);
+    return code;
   }
 
   const { data } = api.useQuery("get", "/shiftTreeCodeExisting", {
