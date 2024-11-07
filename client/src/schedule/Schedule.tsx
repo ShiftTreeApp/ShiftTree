@@ -5,11 +5,13 @@ import {
   Paper,
   Divider,
   IconButton,
+  Button,
   Tooltip,
   TooltipProps,
   tooltipClasses,
   styled,
   Chip,
+  Box,
 } from "@mui/material";
 import { useParams } from "react-router";
 import {
@@ -25,6 +27,7 @@ import EditShiftDrawer from "./EditShiftDrawer";
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
 import { useMemo } from "react";
+import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -39,7 +42,6 @@ const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
-
   const selectedShift = searchParams.get("shift");
   function setSelectedShift(shiftId: string) {
     setSearchParams(prev => {
@@ -59,7 +61,15 @@ function useSelectedShiftParam() {
 
 export default function Schedule() {
   const { scheduleId } = useParams();
+  const empActions = useEmployeeActions();
 
+  const handleRegister = async () => {
+    console.log(selectedShift);
+    empActions.signup({
+      shiftId: selectedShift,
+      userId: "none",
+    });
+  };
   // TODO: Change this to useSearchParam
   const { selectedShift, setSelectedShift, clearSelectedShift } =
     useSelectedShiftParam();
@@ -98,7 +108,6 @@ export default function Schedule() {
     endTime: dayjs(shift.endTime),
   }));
 
-
   return (
     <Grid container direction="column" spacing={1}>
       <Navbar />
@@ -131,10 +140,25 @@ export default function Schedule() {
           <EditShiftDrawer
             open={drawerOpen}
             onClose={clearSelectedShift}
-            title="View shift"
+            title="Sign-Up"
           >
-            <Typography variant="body1">Shift details</Typography>
-            <Typography variant="body1">Shift id: {selectedShift}</Typography>
+            <Box>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<RegisterIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.success.main,
+                  "&:hover": {
+                    backgroundColor: theme => theme.palette.success.dark,
+                  },
+                  color: "white",
+                }}
+                onClick={handleRegister}
+              >
+                Register
+              </Button>
+            </Box>
           </EditShiftDrawer>
           <ShiftCalendar
             onClickShift={shiftId => setSelectedShift(shiftId)}

@@ -353,7 +353,7 @@ export interface paths {
             requestBody?: never;
             responses: {
                 /** @description Request To Join Successful */
-                200: {
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -501,7 +501,7 @@ export interface paths {
             requestBody?: never;
             responses: {
                 /** @description Success */
-                200: {
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -755,6 +755,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         name?: string;
+                        description?: string;
                         /** Format: date-time */
                         startTime?: string;
                         /** Format: date-time */
@@ -862,10 +863,7 @@ export interface paths {
             requestBody?: {
                 content: {
                     "application/json": {
-                        /**
-                         * Format: uuid
-                         * @description User to sign up, can only be another user if the current user is a manager
-                         */
+                        /** @description User to sign up, can only be another user if the current user is a manager */
                         userId?: string;
                         /** @description Weight of the user's preference for this shift */
                         weight?: number;
@@ -1066,6 +1064,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+            description: string;
             /** Format: date-time */
             startTime: string;
             /** Format: date-time */
@@ -1073,6 +1072,7 @@ export interface components {
         };
         ShiftCreateInfo: {
             name: string;
+            description?: string;
             /** Format: date-time */
             startTime: string;
             /** Format: date-time */

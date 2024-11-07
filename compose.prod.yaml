@@ -1,0 +1,33 @@
+services:
+  database:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: dev
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: "1234"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./server/db:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/postgresql/data/pgdata
+  webapp:
+    build:
+      context: client
+  shifttree:
+    build:
+      context: server
+    environment:
+      SHIFTTREE_PG_USER: admin
+      SHIFTTREE_PG_PASSWORD: "1234"
+      SHIFTTREE_PG_HOST: database
+      SHIFTTREE_PG_PORT: "5432"
+      SHIFTTREE_PG_DATABASE: dev
+      SHIFTTREE_JWT_PK: ShiftTree
+  proxy:
+    image: caddy:alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - 8080:80
+volumes:
+  db_data:
+  pgadmin_data:

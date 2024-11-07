@@ -73,18 +73,20 @@ export const generateJoinCode = async (req: Request, res: Response) => {
 export const joinShiftTree = async (req: Request, res: Response) => {
   try {
     const { JoinCode } = req.query;
+    console.log(JoinCode);
     const findScheduleQuery = {
       text: "SELECT id FROM schedule WHERE code = $1",
       values: [JoinCode],
     };
     const scheduleResult = await pool.query(findScheduleQuery);
-    const UserID = getUserId(req);
+    const UserID = await getUserId(req);
     if (scheduleResult.rows.length === 0) {
       return res.status(404).send("Invalid join code");
     }
 
     const scheduleID = scheduleResult.rows[0].id;
-
+    console.log(scheduleID);
+    console.log(UserID);
     const statement = `
       INSERT INTO user_schedule_membership (id, user_id, schedule_id)
       VALUES (gen_random_uuid(), $1, $2)
@@ -98,7 +100,7 @@ export const joinShiftTree = async (req: Request, res: Response) => {
     const result = await pool.query(query);
     console.log(result);
 
-    res.status(200).send("User added to ShiftTree");
+    res.status(204).send("User added to ShiftTree");
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
@@ -119,5 +121,5 @@ export const removeUserFromShiftTree = async (req: Request, res: Response) => {
   //TODO: Add check actually removed user
   await pool.query(query);
   await pool.query(query);
-  res.status(200).send("User removed from ShiftTree");
+  res.status(204).send("User removed from ShiftTree");
 };

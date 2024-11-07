@@ -7,8 +7,7 @@ import { createContext, useContext } from "react";
 import { type paths } from "@/generated/v1";
 
 const fetchClient = createFetchClient<paths>({
-  // TODO: Change later
-  baseUrl: "http://localhost:3000/",
+  baseUrl: import.meta.env.VITE_SHIFTTREE_BASE_URL ?? "http://localhost:3000/",
 });
 
 fetchClient.use({

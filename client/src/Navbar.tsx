@@ -35,6 +35,11 @@ import { useAuth } from "@/auth";
 import JoinTree from "./JoinTree";
 import { LeftDrawerContext } from "./Home";
 
+interface ModalContextType {
+  modalOpen: boolean;
+  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
 ))(({ theme }) => ({
@@ -45,13 +50,15 @@ const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
     backgroundColor: theme.palette.common.black,
   },
 }));
-export const ModalContext = React.createContext();
+export const ModalContext = React.createContext<ModalContextType>({
+  modalOpen: false,
+  setModalOpen: () => {},
+});
 
 export default function Navbar() {
   const auth = useAuth();
   const navigate = useNavigate();
   const LDC = React.useContext(LeftDrawerContext);
-  const { refetchAllSchedules } = LDC;
   const handleDrawerToggle = () => {
     if (!LDC.isClosing) {
       LDC.setMobileOpen(!LDC.mobileOpen);
@@ -213,10 +220,7 @@ export default function Navbar() {
         </Drawer>
         <Dialog open={modalOpen} onClose={handleModalClose}>
           <ModalContext.Provider value={{ modalOpen, setModalOpen }}>
-            <JoinTree
-              joinType={joinType}
-              refetchAllSchedules={refetchAllSchedules}
-            />
+            <JoinTree joinType={joinType} />
           </ModalContext.Provider>
         </Dialog>
       </Box>
