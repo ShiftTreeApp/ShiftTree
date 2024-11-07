@@ -493,10 +493,9 @@ export async function addSignup(req: Request, res: Response) {
   const shiftId = req.params.shiftId as string;
   const targetUserId = req.body.userId as string | null;
   const weight = req.body.weight as number | null;
-
   // If target user is specified, check that the current user has permission to sign users up in the schedule
   // and that the target user is a member of the schedule
-  if (targetUserId && targetUserId !== userId) {
+  if (targetUserId && targetUserId !== userId && targetUserId != "none") {
     const results = await pool.query({
       text: /* sql */ `
           select info.user_role
@@ -541,6 +540,14 @@ export async function addSignup(req: Request, res: Response) {
       });
       return;
     }
+    await pool.query({
+      text: /* sql */ `
+        insert into user_shift_signup (user_id, shift_id, user_weighting)
+        values ($1, $2, $3)
+        on conflict (user_id, shift_id) do nothing
+      `,
+      values: [targetUserId, shiftId, weight ?? 1],
+    });
   } else {
     // Ensure that the current user is a member of the schedule
     const results = await pool.query({
@@ -565,17 +572,15 @@ export async function addSignup(req: Request, res: Response) {
       });
       return;
     }
+    await pool.query({
+      text: /* sql */ `
+        insert into user_shift_signup (user_id, shift_id, user_weighting)
+        values ($1, $2, $3)
+        on conflict (user_id, shift_id) do nothing
+      `,
+      values: [userId, shiftId, weight ?? 1],
+    });
   }
-
-  await pool.query({
-    text: /* sql */ `
-      insert into user_shift_signup (user_id, shift_id, user_weighting)
-      values ($1, $2, $3)
-      on conflict do nothing
-    `,
-    values: [targetUserId ?? userId, shiftId, weight ?? 1],
-  });
-
   res.status(204).send();
 }
 

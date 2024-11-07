@@ -58,6 +58,7 @@ CREATE TABLE user_shift_signup
 , user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
 , shift_id UUID NOT NULL REFERENCES shift (id) ON DELETE CASCADE
 , user_weighting INTEGER NOT NULL DEFAULT 1
+, UNIQUE (user_id, shift_id)
 );
 
 CREATE TABLE organization

@@ -30,12 +30,24 @@ export function useEmployeeActions() {
     console.log("Joined");
   }
 
-  async function signup({ shiftId }: { shiftId: string }): Promise<void> {
+  async function signup({
+    shiftId,
+    userId,
+    weight,
+  }: {
+    shiftId: string;
+    userId?: string;
+    weight?: number;
+  }): Promise<void> {
     await signupForShift({
       params: {
         path: {
-          shiftId,
+          shiftId: shiftId,
         },
+      },
+      body: {
+        userId: userId || "none", //this needs to probably change, will fail if no userId provided but i guess thats fine maybe?
+        weight: weight || 1,
       },
       headers: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,

@@ -13,7 +13,6 @@ import { Close as CloseIcon } from "@mui/icons-material";
 import { HowToReg as RegisterIcon } from "@mui/icons-material";
 import NavbarPadding from "@/NavbarPadding";
 import { type ReactNode } from "react";
-
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
 ))(({ theme }) => ({
@@ -72,22 +71,6 @@ export default function EditShiftDrawer(props: EditShiftDrawerProps) {
           </IconButton>
         </Box>
         {props.children}
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<RegisterIcon />}
-            sx={{
-              backgroundColor: theme => theme.palette.success.main,
-              "&:hover": {
-                backgroundColor: theme => theme.palette.success.dark,
-              },
-              color: "white",
-            }}
-          >
-            Register
-          </Button>
-        </Box>
       </Box>
     </Drawer>
   );
