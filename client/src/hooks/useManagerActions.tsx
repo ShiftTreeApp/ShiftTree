@@ -8,6 +8,10 @@ export function useManagerActions(shiftTreeId: string) {
     "/shiftTreeCodeGenerate",
   );
 
+  /*
+   * Takes in a shiftTreeId and generates a new code
+   * Function returns the code to be used after generating
+   */
   async function generate({
     shiftTreeId,
   }: {
@@ -24,7 +28,6 @@ export function useManagerActions(shiftTreeId: string) {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
     });
-    console.log("Invite Code Generated: ", code);
     return code;
   }
 

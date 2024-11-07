@@ -39,7 +39,6 @@ export default function EditMembersTab(props: EditMembersTabProps) {
   );
 
   // TODO: Add the base url as an environment variable so it can be set during build
-  //const [inviteCode, setInviteCode] = useState("http://localhost:5173?join=[code here]");
   const [inviteCode, setInviteCode] = useState<string>("");
   useEffect(() => {
     if (managerActions.existingCode) {
@@ -66,16 +65,10 @@ export default function EditMembersTab(props: EditMembersTabProps) {
   );
 
   const handleRegenerateClick = async () => {
-    console.log("Regenerating Code");
-    /*empActions
-      .join({ joinCode: joinCode })
-      .then(() => {
-        queries.refetchAllSchedules();
-        MC.setModalOpen(false);
-      })
-      .catch(e => {
-        console.log(e);
-      });*/
+    const newCode = await managerActions.generate({
+      shiftTreeId: props.scheduleId,
+    });
+    setInviteCode(newCode || "Code Generation Failed, please try again");
   };
 
   async function kickUser(id: string) {
