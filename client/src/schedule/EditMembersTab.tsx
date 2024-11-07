@@ -13,9 +13,10 @@ import {
   Typography,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 
 import { useApi } from "@/client";
+import { useManagerActions } from "@/hooks/useManagerActions";
 
 interface EditMembersTabProps {
   scheduleId: string;
@@ -23,6 +24,7 @@ interface EditMembersTabProps {
 
 export default function EditMembersTab(props: EditMembersTabProps) {
   const api = useApi();
+  const managerActions = useManagerActions(props.scheduleId);
 
   const { data: scheduleData } = api.useQuery(
     "get",
@@ -37,7 +39,13 @@ export default function EditMembersTab(props: EditMembersTabProps) {
   );
 
   // TODO: Add the base url as an environment variable so it can be set during build
-  const inviteCode = "http://localhost:5173?join=[code here]";
+  //const [inviteCode, setInviteCode] = useState("http://localhost:5173?join=[code here]");
+  const [inviteCode, setInviteCode] = useState<string>("");
+  useEffect(() => {
+    if (managerActions.existingCode) {
+      setInviteCode(managerActions.existingCode);
+    }
+  }, [managerActions.existingCode]);
 
   function copyInviteCode() {
     navigator.clipboard.writeText(inviteCode);
@@ -56,6 +64,19 @@ export default function EditMembersTab(props: EditMembersTabProps) {
       },
     },
   );
+
+  const handleRegenerateClick = async () => {
+    console.log("Regenerating Code");
+    /*empActions
+      .join({ joinCode: joinCode })
+      .then(() => {
+        queries.refetchAllSchedules();
+        MC.setModalOpen(false);
+      })
+      .catch(e => {
+        console.log(e);
+      });*/
+  };
 
   async function kickUser(id: string) {
     await sendKickUser({
@@ -104,7 +125,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
           alignItems: "flex-start",
         }}
       >
-        <Button>Regenerate</Button>
+        <Button onClick={handleRegenerateClick}>Regenerate</Button>
       </Box>
       <KickDialog
         user={userToKick}
