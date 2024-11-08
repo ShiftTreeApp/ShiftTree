@@ -14,7 +14,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { Fragment, useState } from "react";
+import { Fragment, useState, useMemo } from "react";
 import EditMembersDrawer from "./EditMembersDrawer";
 
 import { useApi } from "@/client";
@@ -121,6 +121,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
             displayName={member.displayName}
             email={member.email}
             userId={member.id}
+            scheduleId={props.scheduleId}
             profilePictureUrl={createRandomPfpUrl(
               member.displayName,
               member.id,
@@ -155,6 +156,7 @@ interface MemberItemProps {
   displayName: string;
   email: string;
   profilePictureUrl: string;
+  scheduleId: string;
   userId: string;
   onKick?: () => void;
 }
@@ -190,29 +192,38 @@ function MemberItem(props: MemberItemProps) {
 
         {/* Members Drawer */}
         <EditMembersDrawer
-        open={drawerOpen}
-        onClose={handleDrawerClose}
-        title="Member View"
+          open={drawerOpen}
+          onClose={handleDrawerClose}
+          title="Member View"
         >
-          <Avatar src={props.profilePictureUrl} sx={{ width: '7vw', height: '7vw' }} />
-          <Typography variant="h6" fontWeight="bold">{props.displayName}</Typography>
-          <Typography variant="body1">{props.email}<br></br><br></br><br></br></Typography>
-          
+          <Avatar
+            src={props.profilePictureUrl}
+            sx={{ width: "7vw", height: "7vw" }}
+          />
+          <Typography variant="h6" fontWeight="bold">
+            {props.displayName}
+          </Typography>
+          <Typography variant="body1">
+            {props.email}
+            <br></br>
+            <br></br>
+            <br></br>
+          </Typography>
 
-          <Divider component="div" role="presentation"/>
+          <Divider component="div" role="presentation" />
 
-          <Typography variant="h5" sx={{textDecoration:'underline'}}>Shift Details</Typography>
-
-          
-
+          <Typography variant="h5" sx={{ textDecoration: "underline" }}>
+            Shift Details
+          </Typography>
+          {drawerOpen && (
+            <ShiftDisplay userId={props.userId} scheduleId={props.scheduleId} />
+          )}
 
           <Typography variant="body1">UserID: {props.userId}</Typography>
           <Button color="error" onClick={props.onKick}>
             Kick
           </Button>
         </EditMembersDrawer>
-
-
 
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Typography fontWeight="bold">{props.displayName}</Typography>
@@ -226,6 +237,39 @@ function MemberItem(props: MemberItemProps) {
       </Box>
     </Box>
   );
+}
+
+interface ShiftDisplayProps {
+  userId: string;
+  scheduleId: string;
+}
+
+function ShiftDisplay(props: ShiftDisplayProps) {
+  const api = useApi();
+
+  // Get the signups for the current shift tree
+  const { data: scheduleSignups } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/signups",
+    { params: { path: { scheduleId: props.scheduleId } } },
+  );
+
+
+  // confusing
+  // const signupData = useMemo(
+  //   () => scheduleSignups?.find(shift => shift.id === props.shiftId),
+  //   [props.shiftId, shiftsData],
+  // );
+
+  
+
+
+
+  console.log("Signups:");
+  console.log(props.userId);
+  console.log(scheduleSignups);
+
+  return <Box></Box>;
 }
 
 interface KickDialogProps {
