@@ -14,7 +14,7 @@ import Container from "@mui/material/Container";
 import { useNavigate, useParams } from "react-router";
 
 import { useAuth } from "@/auth";
-import { Alert, Snackbar } from "@mui/material";
+import { useNotifier } from "@/notifier";
 
 export type SignInParams = {
   from: string;
@@ -25,11 +25,9 @@ export default function SignIn() {
   const routeParams = useParams<SignInParams>();
 
   const auth = useAuth();
+  const notifier = useNotifier();
 
   const [remember, setRemember] = useState(false);
-
-  // TODO: Ensure server error messages are good enough to show to the user
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -39,32 +37,13 @@ export default function SignIn() {
     auth
       .login({ email, password })
       .then(() => {
-        setErrorMessage(null);
         navigate(routeParams.from ?? "/");
       })
-      .catch(e => {
-        console.error(e);
-        setErrorMessage(e.toString());
-        setSnackbarOpen(true);
-      });
+      .catch(notifier.error);
   };
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   return (
     <Container component="main" maxWidth="xs">
-      {errorMessage && (
-        <Snackbar
-          open={snackbarOpen}
-          onClose={() => setSnackbarOpen(false)}
-          autoHideDuration={6000}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <Alert color="error" onClose={() => setSnackbarOpen(false)}>
-            {errorMessage}
-          </Alert>
-        </Snackbar>
-      )}
       <CssBaseline />
       <Box
         sx={{
