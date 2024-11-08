@@ -18,6 +18,7 @@ import { Fragment, useState, useMemo } from "react";
 import EditMembersDrawer from "./EditMembersDrawer";
 
 import { useApi } from "@/client";
+import dayjs from "dayjs";
 
 interface EditMembersTabProps {
   scheduleId: string;
@@ -254,20 +255,20 @@ function ShiftDisplay(props: ShiftDisplayProps) {
     { params: { path: { scheduleId: props.scheduleId } } },
   );
 
+  // const signupData = useMemo();
+  console.log("Unpacking");
 
-  // confusing
-  // const signupData = useMemo(
-  //   () => scheduleSignups?.find(shift => shift.id === props.shiftId),
-  //   [props.shiftId, shiftsData],
-  // );
-
-  
-
-
-
-  console.log("Signups:");
-  console.log(props.userId);
-  console.log(scheduleSignups);
+  const filteredSignups = scheduleSignups
+    ?.filter(
+      x =>
+        x.signups?.find(signups => signups.user?.id === props.userId) !==
+        undefined,
+    )
+    .map(shift => ({
+      name: shift.name,
+      startTime: dayjs(shift.startTime),
+      endTime: dayjs(shift.endTime),
+    }));
 
   return <Box></Box>;
 }
