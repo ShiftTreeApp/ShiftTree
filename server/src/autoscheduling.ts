@@ -86,9 +86,15 @@ export async function sendShifts(req: Request, res: Response) {
   });
   console.log(results.rows[0].json);
   const result = await fetch(host + "/shifts", {
-    method: "GET",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: results.rows[0].json,
   });
   console.log(result);
+  //   const insertQuery = await pool.query({
+  //     text: "",
+  //   });
   res.status(204).send();
 }
