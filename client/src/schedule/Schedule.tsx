@@ -12,6 +12,7 @@ import {
   styled,
   Chip,
   Box,
+  Slider,
 } from "@mui/material";
 import { useParams } from "react-router";
 import {
@@ -142,7 +143,16 @@ export default function Schedule() {
             onClose={clearSelectedShift}
             title="Sign-Up"
           >
-            <Box>
+            <Divider sx={{ marginBottom: 2 }} />
+            <Box width={300}>
+              <Typography sx={{ marginBottom: 0.5 }}>Request Weight</Typography>
+              <Slider
+                defaultValue={50}
+                aria-label="Request weight"
+                valueLabelDisplay="off"
+                sx={{ marginBottom: 1 }}
+              />
+
               <Button
                 variant="contained"
                 color="primary"
