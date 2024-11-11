@@ -64,14 +64,13 @@ export async function sendShifts(req: Request, res: Response) {
     text: /* sql */ `
         select coalesce(json_agg(json_build_object(
           'id', shift.id,
-          'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
-          'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
+          'start_time', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+          'end_time', (to_json(shift.end_time)#>>'{}')||'Z',
           'signups', (
             select coalesce(json_agg(json_build_object(
               'id', signup.id,
               'weight', signup.user_weighting,
-              'userID', signup.user_id
-              )
+              'user_id', signup.user_id
             )), json_array())
             from user_shift_signup as signup
             join user_account as ua on signup.user_id = ua.id
@@ -90,9 +89,9 @@ export async function sendShifts(req: Request, res: Response) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: results.rows[0].json,
+    body: JSON.stringify({ shifts: results.rows[0].json }),
   });
-  console.log(result);
+  console.log(await result.json());
   //   const insertQuery = await pool.query({
   //     text: "",
   //   });
