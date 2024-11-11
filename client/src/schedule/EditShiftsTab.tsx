@@ -270,6 +270,12 @@ function EditShift(props: EditShiftProps) {
     }
   }, [shiftData]);
 
+  useEffect(() => {
+    if (newStartTime.isAfter(newEndTime)) {
+      setNewEndTime(newStartTime.add(1, "hour"));
+    }
+  }, [newStartTime]);
+
   const { mutateAsync: updateShift } = api.useMutation(
     "put",
     "/shifts/{shiftId}",
