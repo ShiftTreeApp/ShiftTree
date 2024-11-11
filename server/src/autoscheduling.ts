@@ -32,6 +32,18 @@ async function getUserId(req: Request) {
   return result.rows[0].id as string;
 }
 
+const scheduleResponse = z.object({
+  assignments: z.array(
+    z.object({
+      shift_id: z.string(),
+      user_id: z.string(),
+      requested_weight: z.number().optional(),
+    }),
+  ),
+});
+
+type ScheduleResponse = z.infer<typeof scheduleResponse>;
+
 export async function sendShifts(req: Request, res: Response) {
   const userId = await getUserId(req);
   const scheduleId = req.params.scheduleId as string;
