@@ -8,7 +8,7 @@ from scheduling.models import Config, ScheduleRequest, ScheduleResponse
 app = fastapi.FastAPI()
 
 
-@app.get("/shifts")
+@app.post("/shifts")
 def generate_schedule(_req: ScheduleRequest) -> ScheduleResponse:
     return ScheduleResponse(assignments=[])
 
