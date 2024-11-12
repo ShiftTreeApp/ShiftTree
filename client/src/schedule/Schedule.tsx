@@ -114,7 +114,7 @@ export default function Schedule() {
 
   const handleRegister = async () => {
     console.log(selectedShift);
-    empActions.signup({
+    await empActions.signup({
       shiftId: selectedShift ? selectedShift : "",
       userId: "none",
     });
