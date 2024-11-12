@@ -689,7 +689,7 @@ export async function getUserSignups(req: Request, res: Response) {
         from user_shift_signup as uss
         join shifts as s on uss.shift_id = s.id
       )
-      select coalesce(json_agg(uss.id), json_build_array()) as json
+      select coalesce(json_agg(uss.shift_id), json_build_array()) as json
       from user_signups as uss
       where uss.user_id = $2
     `;
