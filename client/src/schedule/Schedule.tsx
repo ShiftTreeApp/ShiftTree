@@ -127,14 +127,17 @@ export default function Schedule() {
               <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
             <Grid>
-              <CustomTooltip title="Edit ShiftTree" placement="bottom">
-                <IconButton
-                  component={RouterLink}
-                  to={`/schedule/${scheduleId}/edit`}
-                >
-                  <EditIcon />
-                </IconButton>
-              </CustomTooltip>
+              <Button
+                variant="contained"
+                startIcon={<EditIcon />}
+                component={RouterLink}
+                to={`/schedule/${scheduleId}/edit`}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.main,
+                }}
+              >
+                Edit mode
+              </Button>
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
