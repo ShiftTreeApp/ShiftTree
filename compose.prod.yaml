@@ -10,11 +10,9 @@ services:
       - ./server/db:/docker-entrypoint-initdb.d
       - db_data:/var/lib/postgresql/data/pgdata
   webapp:
-    build:
-      context: client
+    image: ghcr.io/shifttreeapp/client:latest
   shifttree:
-    build:
-      context: server
+    image: ghcr.io/shifttreeapp/server:latest
     environment:
       SHIFTTREE_PG_USER: admin
       SHIFTTREE_PG_PASSWORD: "1234"
@@ -27,7 +25,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     ports:
-      - 8080:80
+      - 80:80
 volumes:
   db_data:
   pgadmin_data:

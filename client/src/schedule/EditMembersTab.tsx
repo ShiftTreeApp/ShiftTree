@@ -11,11 +11,13 @@ import {
   Link,
   TextField,
   Typography,
+  IconButton,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { Fragment, useState, useEffect } from "react";
-
+import { Fragment, useState, useMemo, useEffect } from "react";
+import EditMembersDrawer from "./EditMembersDrawer";
 import { useApi } from "@/client";
+import dayjs from "dayjs";
 import { useManagerActions } from "@/hooks/useManagerActions";
 
 interface EditMembersTabProps {
@@ -133,6 +135,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
             displayName={member.displayName}
             email={member.email}
             userId={member.id}
+            scheduleId={props.scheduleId}
             profilePictureUrl={createRandomPfpUrl(
               member.displayName,
               member.id,
@@ -167,11 +170,19 @@ interface MemberItemProps {
   displayName: string;
   email: string;
   profilePictureUrl: string;
+  scheduleId: string;
   userId: string;
   onKick?: () => void;
 }
 
 function MemberItem(props: MemberItemProps) {
+  // Variables defining opening of drawer
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // state of the drawer
+  const handleDrawerOpen = () => setDrawerOpen(true);
+  const handleDrawerClose = () => setDrawerOpen(false);
+
   return (
     <Box
       sx={{
@@ -189,7 +200,49 @@ function MemberItem(props: MemberItemProps) {
           gap: 1,
         }}
       >
-        <Avatar src={props.profilePictureUrl} />
+        <IconButton onClick={handleDrawerOpen}>
+          <Avatar src={props.profilePictureUrl} />
+        </IconButton>
+
+        {/* Members Drawer */}
+        <EditMembersDrawer
+          open={drawerOpen}
+          onClose={handleDrawerClose}
+          title="Member View"
+        >
+          <Avatar
+            src={props.profilePictureUrl}
+            sx={{ width: "7vw", height: "7vw" }}
+          />
+          <Typography variant="h6" fontWeight="bold">
+            {props.displayName}
+          </Typography>
+          <Typography variant="body1">
+            {props.email}
+            <br></br>
+            <br></br>
+            <br></br>
+          </Typography>
+
+          <Divider component="div" role="presentation" />
+
+          <Typography variant="h5" sx={{ textDecoration: "underline" }}>
+            Shift Details
+          </Typography>
+          {drawerOpen && (
+            <ShiftDisplay userId={props.userId} scheduleId={props.scheduleId} />
+          )}
+
+          <Typography variant="body1">
+            <br></br>
+            <br></br>
+            <br></br>UserID: {props.userId}
+          </Typography>
+          <Button color="error" onClick={props.onKick}>
+            Kick
+          </Button>
+        </EditMembersDrawer>
+
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Typography fontWeight="bold">{props.displayName}</Typography>
           <Typography color="textSecondary">{props.email}</Typography>
@@ -200,6 +253,53 @@ function MemberItem(props: MemberItemProps) {
           Kick
         </Button>
       </Box>
+    </Box>
+  );
+}
+
+interface ShiftDisplayProps {
+  userId: string;
+  scheduleId: string;
+}
+
+function ShiftDisplay(props: ShiftDisplayProps) {
+  const api = useApi();
+
+  // Get the signups for the current shift tree
+  const { data: scheduleSignups } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/signups",
+    { params: { path: { scheduleId: props.scheduleId } } },
+  );
+
+  // const signupData = useMemo();
+  console.log("Unpacking");
+
+  const filteredSignups = scheduleSignups
+    ?.filter(
+      x =>
+        x.signups?.find(signups => signups.user?.id === props.userId) !==
+        undefined,
+    )
+    .map(shift => ({
+      name: shift.name,
+      startTime: dayjs(shift.startTime),
+      endTime: dayjs(shift.endTime),
+    }));
+
+  return (
+    <Box>
+      {filteredSignups !== undefined && filteredSignups.length > 0 ? (
+        filteredSignups.map((signup, index) => (
+          <Typography key={index}>
+            {signup.startTime.format("dddd")} {signup.name} -{" "}
+            {signup.startTime.format("HH:mm")} to{" "}
+            {signup.endTime.format("HH:mm")}
+          </Typography>
+        ))
+      ) : (
+        <Typography>Loading signup data...</Typography>
+      )}
     </Box>
   );
 }

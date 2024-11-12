@@ -447,6 +447,7 @@ paths:
       responses:
         204:
           description: Successful
+
   /schedules/{scheduleId}/user-signups:
     get:
       security:
@@ -481,6 +482,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
   /shifts/{shiftId}:
     put:
       security:
