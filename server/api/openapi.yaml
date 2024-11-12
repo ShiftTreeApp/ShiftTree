@@ -432,6 +432,22 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /autoschedule/{scheduleId}:
+    post:
+      security:
+        - Bearer: []
+      summary: Generate shift assignments given a filled out shift-tree
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Successful
+
   /schedules/{scheduleId}/user-signups:
     get:
       security:
@@ -627,28 +643,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
-  /hello:
-    get:
-      summary: "Test endpoint"
-      parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
-          description: "Name to greet"
-      responses:
-        200:
-          description: "Successful response"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-                    example: "Hello World"
 components:
   securitySchemes:
     Bearer:

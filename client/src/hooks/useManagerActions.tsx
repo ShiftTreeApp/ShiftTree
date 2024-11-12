@@ -7,7 +7,10 @@ export function useManagerActions(shiftTreeId: string) {
     "get",
     "/shiftTreeCodeGenerate",
   );
-
+  const { mutateAsync: autoSchedule } = api.useMutation(
+    "post",
+    "/autoschedule/{scheduleId}",
+  );
   /*
    * Takes in a shiftTreeId and generates a new code
    * Function returns the code to be used after generating
@@ -31,6 +34,24 @@ export function useManagerActions(shiftTreeId: string) {
     return code;
   }
 
+  //Untested query for scheduling
+  async function triggerAutoSchedule({
+    scheduleId,
+  }: {
+    scheduleId: string;
+  }): Promise<void> {
+    await autoSchedule({
+      params: {
+        path: {
+          scheduleId: scheduleId,
+        },
+      },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+    console.log("Autoscheduling triggered");
+  }
   const { data } = api.useQuery("get", "/shiftTreeCodeExisting", {
     params: {
       query: {
@@ -44,5 +65,5 @@ export function useManagerActions(shiftTreeId: string) {
 
   const existingCode = data?.code;
 
-  return { generate, existingCode };
+  return { generate, existingCode, triggerAutoSchedule };
 }

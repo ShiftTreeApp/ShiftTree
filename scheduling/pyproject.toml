@@ -1,0 +1,22 @@
+[project]
+name = "shifttree-scheduling"
+version = "0.1.0"
+description = "Scheduling server for ShfitTree"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.4",
+    "ortools>=9.11.4210",
+    "pydantic>=2.9.2",
+    "python-dotenv>=1.0.1",
+    "uvicorn>=0.32.0",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.7.2"]
+
+[tool.pyright]
+typeCheckingMode = "standard"
+
+[tool.ruff]
+select = ["E4", "E7", "E9", "F", "I"]
