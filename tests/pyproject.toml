@@ -18,3 +18,6 @@ typeCheckingMode = "standard"
 
 [tool.uv.sources]
 shifttree-api-client = { path = "shifttree-api-client" }
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
