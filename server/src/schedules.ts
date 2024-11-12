@@ -20,7 +20,7 @@ export async function create(req: Request, res: Response) {
       values ($1, $2, $3)
       returning id
     `,
-    values: [userId, scheduleInfo.name, scheduleInfo.description],
+    values: [userId, scheduleInfo.name, scheduleInfo.description ?? ""],
   });
   if (result.rows.length < 1) {
     console.error("Failed to create schedule");
