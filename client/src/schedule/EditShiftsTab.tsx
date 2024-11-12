@@ -296,7 +296,7 @@ function EditShift(props: EditShiftProps) {
   useEffect(() => {
     if (shiftData) {
       setNewName(shiftData.name);
-      // TODO: set descripion
+      setNewDesc(shiftData.description);
       setNewStartTime(dayjs(shiftData.startTime));
       setNewEndTime(dayjs(shiftData.endTime));
     }
@@ -324,7 +324,7 @@ function EditShift(props: EditShiftProps) {
       params: { path: { shiftId: props.shiftId } },
       body: {
         name: newName,
-        // TODO: add description
+        description: newDesc,
         startTime: newStartTime.toISOString(),
         endTime: newEndTime.toISOString(),
       },
