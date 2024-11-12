@@ -685,15 +685,13 @@ export async function getUserSignups(req: Request, res: Response) {
         where s.schedule_id = $1
       ),
       user_signups as (
-        select *
+        select uss.*
         from user_shift_signup as uss
         join shifts as s on uss.shift_id = s.id
       )
-      select coalesce(json_agg(json_build_object(
-        'id', s.id
-      )), json_build_array()) as json
-      from user_signups as s
-      where s.user_id = $2
+      select coalesce(json_agg(uss.id), json_build_array()) as json
+      from user_signups as uss
+      where uss.user_id = $2
     `;
 
   const result = await pool.query({
