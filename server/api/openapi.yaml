@@ -483,40 +483,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-    /schedules/{scheduleId}/user-assigned:
-      get:
-        security:
-          - Bearer: []
-        summary: Get assigned schedule shifts for the current user
-        parameters:
-          - name: scheduleId
-            in: path
-            required: true
-            schema:
-              type: string
-              format: uuid
-        responses:
-          200:
-            description: Successful
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    type: string
-                    format: uuid
-          404:
-            description: Schedule does not exist, user does not have access or has not be assigned shifts
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          403:
-            description: User does not have permission to view shifts
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
+  /schedules/{scheduleId}/user-assigned:
+    get:
+      security:
+        - Bearer: []
+      summary: Get assigned schedule shifts for the current user
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+        404:
+          description: Schedule does not exist, user does not have access or has not be assigned shifts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: User does not have permission to view shifts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /shifts/{shiftId}:
     put:
