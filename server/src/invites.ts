@@ -77,13 +77,18 @@ export const joinShiftTree = async (req: Request, res: Response) => {
     const { JoinCode } = req.query;
     console.log(JoinCode);
     const findScheduleQuery = {
-      text: "SELECT id FROM schedule WHERE code = $1",
+      text: "SELECT id, owner_id FROM schedule WHERE code = $1",
       values: [JoinCode],
     };
     const scheduleResult = await pool.query(findScheduleQuery);
     const UserID = await getUserId(req);
     if (scheduleResult.rows.length === 0) {
       res.status(404).send("Invalid join code");
+      return;
+    }
+
+    if (scheduleResult.rows[0].owner_id === UserID) {
+      res.status(403).json("Owner cannot join their own ShiftTree as a member");
       return;
     }
 
