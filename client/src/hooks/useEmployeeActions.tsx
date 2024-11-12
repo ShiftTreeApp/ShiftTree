@@ -1,6 +1,6 @@
 import { useApi } from "@/client";
 
-export function useEmployeeActions() {
+export function useEmployeeActions(shiftTreeId: string) {
   const api = useApi();
 
   const { mutateAsync: joinShiftTree } = api.useMutation(
@@ -10,10 +10,6 @@ export function useEmployeeActions() {
   const { mutateAsync: signupForShift } = api.useMutation(
     "post",
     "/signups/{shiftId}",
-  );
-  const { mutateAsync: getUserSignups } = api.useMutation(
-    "get",
-    "/schedules/{scheduleId}/user-signups",
   );
 
   /*
@@ -65,12 +61,10 @@ export function useEmployeeActions() {
    * Return a list of the shifts that the current user signed up for
    * from that list.
    */
-  async function getSignups({
-    shiftTreeId,
-  }: {
-    shiftTreeId: string;
-  }): Promise<string[] | undefined> {
-    const shiftIds = await getUserSignups({
+  const { data: userSignups = [], refetch: refetchUserSignups } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/user-signups",
+    {
       params: {
         path: {
           scheduleId: shiftTreeId,
@@ -79,9 +73,10 @@ export function useEmployeeActions() {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
-    });
-    return shiftIds;
-  }
+    },
+  );
 
-  return { getSignups, join, signup };
+  const signedUpShifts = userSignups;
+
+  return { join, signup, signedUpShifts, refetchUserSignups };
 }
