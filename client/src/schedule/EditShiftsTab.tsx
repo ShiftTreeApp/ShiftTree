@@ -17,6 +17,8 @@ import {
   Delete as DeleteIcon,
   Save as SaveIcon,
   Preview as PreviewIcon,
+  //EventRepeat as GenerateSchedule,
+  AutoMode as GenerateSchedule,
 } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import "dayjs/locale/en";
@@ -32,6 +34,7 @@ import { ShiftCalendar, type ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import { useSearchParam } from "@/useSearchParam";
 import { useApi } from "@/client";
+import GenerateShiftModal from "./GenerateShiftModal";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -152,6 +155,25 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     );
   }
 
+  // generate shift modal
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
+  const handleConfirmModal = () => {
+    // Add logic to generate the schedule here
+    // For now, we'll just close the modal after a delay to simulate loading
+    setTimeout(() => {
+      setModalOpen(false);
+    }, 2000);
+  };
+
   return (
     <Box
       sx={{
@@ -172,7 +194,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       {shifts?.length !== 0 && (
         <>
           <Box sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}>
-            <CustomTooltip title="To view mode" placement="bottom">
+            <CustomTooltip title="To view mode" placement="top">
               <IconButton
                 component={RouterLink}
                 to={`/schedule/${props.scheduleId}`}
@@ -180,11 +202,21 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
                 <PreviewIcon />
               </IconButton>
             </CustomTooltip>
-            <CustomTooltip title="Add Shift" placement="bottom">
+            <CustomTooltip title="Add Shift" placement="top">
               <IconButton onClick={createNewShiftAndEdit}>
                 <AddIcon />
               </IconButton>
             </CustomTooltip>
+            <CustomTooltip title="Generate schedule" placement="top">
+              <IconButton onClick={handleOpenModal}>
+                <GenerateSchedule />
+              </IconButton>
+            </CustomTooltip>
+            <GenerateShiftModal
+              open={modalOpen}
+              onClose={handleCloseModal}
+              onConfirm={handleConfirmModal}
+            />
             {/* <Button
               startIcon={<AddIcon />}
               variant="contained"
@@ -264,7 +296,7 @@ function EditShift(props: EditShiftProps) {
   useEffect(() => {
     if (shiftData) {
       setNewName(shiftData.name);
-      setNewDesc(shiftData.description);
+      // TODO: set descripion
       setNewStartTime(dayjs(shiftData.startTime));
       setNewEndTime(dayjs(shiftData.endTime));
     }
@@ -292,7 +324,7 @@ function EditShift(props: EditShiftProps) {
       params: { path: { shiftId: props.shiftId } },
       body: {
         name: newName,
-        description: newDesc,
+        // TODO: add description
         startTime: newStartTime.toISOString(),
         endTime: newEndTime.toISOString(),
       },
