@@ -86,6 +86,12 @@ app.delete(
 );
 
 app.get(
+  "/schedules/:scheduleId/user-signups",
+  auth.authorizationCheck,
+  schedules.getUserSignups,
+);
+
+app.get(
   "/shiftTreeCodeExisting",
   auth.authorizationCheck,
   invites.getExistingJoinCode,

@@ -14,11 +14,11 @@ import {
   IconButton,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { Fragment, useState, useMemo } from "react";
+import { Fragment, useState, useMemo, useEffect } from "react";
 import EditMembersDrawer from "./EditMembersDrawer";
-
 import { useApi } from "@/client";
 import dayjs from "dayjs";
+import { useManagerActions } from "@/hooks/useManagerActions";
 
 interface EditMembersTabProps {
   scheduleId: string;
@@ -26,6 +26,7 @@ interface EditMembersTabProps {
 
 export default function EditMembersTab(props: EditMembersTabProps) {
   const api = useApi();
+  const managerActions = useManagerActions(props.scheduleId);
 
   const { data: scheduleData } = api.useQuery(
     "get",
@@ -40,7 +41,12 @@ export default function EditMembersTab(props: EditMembersTabProps) {
   );
 
   // TODO: Add the base url as an environment variable so it can be set during build
-  const inviteCode = "http://localhost:5173?join=[code here]";
+  const [inviteCode, setInviteCode] = useState<string>("");
+  useEffect(() => {
+    if (managerActions.existingCode) {
+      setInviteCode(managerActions.existingCode);
+    }
+  }, [managerActions.existingCode]);
 
   function copyInviteCode() {
     navigator.clipboard.writeText(inviteCode);
@@ -59,6 +65,13 @@ export default function EditMembersTab(props: EditMembersTabProps) {
       },
     },
   );
+
+  const handleRegenerateClick = async () => {
+    const newCode = await managerActions.generate({
+      shiftTreeId: props.scheduleId,
+    });
+    setInviteCode(newCode || "Code Generation Failed, please try again");
+  };
 
   async function kickUser(id: string) {
     await sendKickUser({
@@ -107,7 +120,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
           alignItems: "flex-start",
         }}
       >
-        <Button>Regenerate</Button>
+        <Button onClick={handleRegenerateClick}>Regenerate</Button>
       </Box>
       <KickDialog
         user={userToKick}

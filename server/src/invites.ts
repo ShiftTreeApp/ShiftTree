@@ -38,7 +38,8 @@ export const getExistingJoinCode = async (req: Request, res: Response) => {
     };
     const { rows } = await pool.query(query);
     if (rows.length === 0) {
-      return res.status(404).send();
+      res.status(404).send();
+      return;
     }
     res.status(200).json({ code: rows[0].code });
   } catch (err) {
@@ -60,7 +61,8 @@ export const generateJoinCode = async (req: Request, res: Response) => {
     };
     const { rows } = await pool.query(query);
     if (rows.length === 0) {
-      return res.status(404).send();
+      res.status(404).send();
+      return;
     }
     res.status(200).json({ code: rows[0].code });
   } catch (err) {
@@ -81,7 +83,8 @@ export const joinShiftTree = async (req: Request, res: Response) => {
     const scheduleResult = await pool.query(findScheduleQuery);
     const UserID = await getUserId(req);
     if (scheduleResult.rows.length === 0) {
-      return res.status(404).send("Invalid join code");
+      res.status(404).send("Invalid join code");
+      return;
     }
 
     const scheduleID = scheduleResult.rows[0].id;
