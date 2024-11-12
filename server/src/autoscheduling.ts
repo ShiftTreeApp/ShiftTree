@@ -103,9 +103,25 @@ export async function sendShifts(req: Request, res: Response) {
     },
     body: JSON.stringify({ shifts: results.rows[0].json }),
   });
-  console.log(await result.json());
-  //   const insertQuery = await pool.query({
-  //     text: "",
-  //   });
+  const responseData: ScheduleResponse = await result.json();
+  console.log(responseData);
+  // Not tested, should work but realisitcally need response to make sure there won't be any bugs
+  const insertQueryText = `
+  INSERT INTO user_shift_assignment (id, user_id, shift_id, requested_weight)
+  VALUES (gen_random_uuid(), $1, $2, $3)
+  ON CONFLICT (user_id, shift_id) DO NOTHING
+  `;
+
+  for (const assignment of responseData.assignments) {
+    await pool.query({
+      text: insertQueryText,
+      values: [
+        assignment.user_id,
+        assignment.shift_id,
+        assignment.requested_weight ?? 1,
+      ],
+    });
+  }
+
   res.status(204).send();
 }
