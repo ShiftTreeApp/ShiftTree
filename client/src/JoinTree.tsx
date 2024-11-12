@@ -34,6 +34,7 @@ export default function JoinTree({ joinType }: JoinTreeProps) {
     empActions
       .join({ joinCode: joinCode })
       .then(() => {
+        notifier.message("Joined successfully");
         queries.refetchAllSchedules();
         MC.setModalOpen(false);
       })
