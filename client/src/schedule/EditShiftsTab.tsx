@@ -148,6 +148,9 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
           startIcon={<AddIcon />}
           variant="contained"
           onClick={createNewShiftAndEdit}
+          sx={{
+            backgroundColor: theme => theme.palette.info.light,
+          }}
         >
           Create first shift
         </Button>
@@ -194,24 +197,39 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       {shifts?.length !== 0 && (
         <>
           <Box sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}>
-            <CustomTooltip title="To view mode" placement="top">
-              <IconButton
-                component={RouterLink}
-                to={`/schedule/${props.scheduleId}`}
-              >
-                <PreviewIcon />
-              </IconButton>
-            </CustomTooltip>
-            <CustomTooltip title="Add Shift" placement="top">
-              <IconButton onClick={createNewShiftAndEdit}>
-                <AddIcon />
-              </IconButton>
-            </CustomTooltip>
-            <CustomTooltip title="Generate schedule" placement="top">
-              <IconButton onClick={handleOpenModal}>
-                <GenerateSchedule />
-              </IconButton>
-            </CustomTooltip>
+            <Button
+              variant="contained"
+              component={RouterLink}
+              to={`/schedule/${props.scheduleId}`}
+              startIcon={<PreviewIcon />}
+              sx={{
+                backgroundColor: theme => theme.palette.info.main,
+              }}
+            >
+              <Typography>View mode</Typography>
+            </Button>
+            <Button
+              variant="contained"
+              onClick={createNewShiftAndEdit}
+              startIcon={<AddIcon />}
+              sx={{
+                backgroundColor: theme => theme.palette.info.light,
+              }}
+            >
+              <Typography>Add Shift</Typography>
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={handleOpenModal}
+              startIcon={<GenerateSchedule />}
+              sx={{
+                backgroundColor: theme => theme.palette.info.dark,
+              }}
+            >
+              <Typography>Generate</Typography>
+            </Button>
+
             <GenerateShiftModal
               open={modalOpen}
               onClose={handleCloseModal}
