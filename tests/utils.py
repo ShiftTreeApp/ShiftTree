@@ -4,6 +4,8 @@ import st
 import st.api.default.get_schedules
 import st.api.default.post_login
 import st.models.credentials
+import st.api.default.post_register
+import st.models.registration_credentials
 
 base_url = "http://localhost:3000"
 
@@ -27,3 +29,18 @@ def random_creds():
     password = uuid.uuid4().hex[:12]
 
     return email, password
+
+
+async def create_account_and_login():
+    client = st.Client(base_url=base_url)
+    email, password = random_creds()
+    await st.api.default.post_register.asyncio_detailed(
+        client=client,
+        body=st.models.registration_credentials.RegistrationCredentials(
+            email=email,
+            password=password,
+            username="Test User",
+        ),
+    )
+    client = await create_authed_client(email=email, password=password)
+    return client, email
