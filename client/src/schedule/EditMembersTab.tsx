@@ -148,7 +148,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
   );
 }
 
-function createRandomPfpUrl(name: string, id: string) {
+export function createRandomPfpUrl(name: string, id: string) {
   const r = Math.floor(parseInt(id.substring(0, 2), 16) / 2)
     .toString(16)
     .padStart(2, "0");
