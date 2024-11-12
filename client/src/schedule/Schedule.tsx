@@ -172,8 +172,8 @@ export default function Schedule() {
           </EditShiftDrawer>
           <ShiftCalendar
             onClickShift={shiftId => setSelectedShift(shiftId)}
-            startDate={dayjs("2024-10-27, 8:00")}
-            endDate={dayjs("2024-11-20, 3:00")}
+            startDate={dayjs(scheduleData?.startTime ?? dayjs().toISOString())}
+            endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
             customContentMap={signedUpIndicators}
             shifts={formattedShifts}
