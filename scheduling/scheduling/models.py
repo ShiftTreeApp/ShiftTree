@@ -10,7 +10,7 @@ type UserId = str
 
 
 class Signup(BaseModel):
-    weight: float
+    weight: float = Field(default=1.0)
     user_id: UserId
 
 

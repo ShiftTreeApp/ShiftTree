@@ -126,7 +126,7 @@ def prevent_consecutive_shifts(
                 model.add(assignments[(e, s1)] + assignments[(e, s2)] <= 1)
 
 
-def solve(config: Config, rules: Iterable[Rule]):
+def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
     model = cp_model.CpModel()
     # Creates shift variables.
     # shift_asgn[(e, s)]: employee 'e' works shift 's'.
@@ -148,6 +148,10 @@ def solve(config: Config, rules: Iterable[Rule]):
             for e, s in itertools.product(config.employees, config.shifts)
         )
     )
+
+    def requested_weight_or_none(employee: EmployeeId, shift: ShiftId) -> float | None:
+        req = config.employees[employee].requests.get(shift, None)
+        return req.weight if req is not None else None
 
     solver = cp_model.CpSolver()
     status = solver.solve(model)
@@ -178,6 +182,18 @@ def solve(config: Config, rules: Iterable[Rule]):
     print(f" - branches : {solver.num_branches}")
     print(f" - wall time: {solver.wall_time}s")
 
+    return models.ScheduleResponse(
+        assignments=[
+            models.Assignment(
+                shift_id=s,
+                user_id=e,
+                requested_weight=requested_weight_or_none(employee=e, shift=s),
+            )
+            for (e, s) in itertools.product(config.employees, config.shifts)
+            if solver.value(shift_asgn[(e, s)]) == 1
+        ]
+    )
+
 
 def main() -> None:
     config = Config(
@@ -197,15 +213,18 @@ def main() -> None:
         },
     )
 
-    solve(
+    solve_res = solve(
         config,
         rules=(
             exactly_one_shift_per_employee,
             evenly_distribute_shifts,
             prevent_overlapping_shifts,
-            prevent_consecutive_shifts,
+            # FIXME: Causes runtime error
+            # prevent_consecutive_shifts,
         ),
     )
+
+    print(solve_res)
 
 
 if __name__ == "__main__":
