@@ -220,7 +220,11 @@ function MemberItem(props: MemberItemProps) {
             <ShiftDisplay userId={props.userId} scheduleId={props.scheduleId} />
           )}
 
-          <Typography variant="body1">UserID: {props.userId}</Typography>
+          <Typography variant="body1">
+            <br></br>
+            <br></br>
+            <br></br>UserID: {props.userId}
+          </Typography>
           <Button color="error" onClick={props.onKick}>
             Kick
           </Button>
@@ -270,7 +274,21 @@ function ShiftDisplay(props: ShiftDisplayProps) {
       endTime: dayjs(shift.endTime),
     }));
 
-  return <Box></Box>;
+  return (
+    <Box>
+      {filteredSignups !== undefined && filteredSignups.length > 0 ? (
+        filteredSignups.map((signup, index) => (
+          <Typography key={index}>
+            {signup.startTime.format("dddd")} {signup.name} -{" "}
+            {signup.startTime.format("HH:mm")} to{" "}
+            {signup.endTime.format("HH:mm")}
+          </Typography>
+        ))
+      ) : (
+        <Typography>Loading signup data...</Typography>
+      )}
+    </Box>
+  );
 }
 
 interface KickDialogProps {
