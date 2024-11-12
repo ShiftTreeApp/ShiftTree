@@ -21,13 +21,13 @@ import {
 } from "@mui/icons-material";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { useApi } from "../client";
+import { useMemo, useState, useEffect } from "react";
 
+import { useApi } from "../client";
 import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
-import { useMemo } from "react";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
@@ -62,15 +62,8 @@ function useSelectedShiftParam() {
 
 export default function Schedule() {
   const { scheduleId } = useParams();
-  const empActions = useEmployeeActions();
+  const empActions = useEmployeeActions(scheduleId ? scheduleId : "");
 
-  const handleRegister = async () => {
-    console.log(selectedShift);
-    empActions.signup({
-      shiftId: selectedShift,
-      userId: "none",
-    });
-  };
   // TODO: Change this to useSearchParam
   const { selectedShift, setSelectedShift, clearSelectedShift } =
     useSelectedShiftParam();
@@ -79,13 +72,23 @@ export default function Schedule() {
 
   const api = useApi();
 
-  // TODO: Get this from API
-  const signedUpShifts = useMemo(() => ["1", "3"], []);
+  const [signedUpShifts, setSignedUpShifts] = useState(
+    empActions.signedUpShifts,
+  );
+
+  useEffect(() => {
+    const getUpdatedUserSignups = async () => {
+      empActions.refetchUserSignups();
+      setSignedUpShifts(empActions.signedUpShifts);
+    };
+
+    getUpdatedUserSignups();
+  }, [empActions.signedUpShifts]);
 
   const signedUpIndicators = useMemo(
     () =>
       Object.fromEntries(
-        signedUpShifts.map(shiftId => [shiftId, SignedUpIndicator]),
+        signedUpShifts.map((shiftId: string) => [shiftId, SignedUpIndicator]),
       ),
     [signedUpShifts],
   );
@@ -108,6 +111,16 @@ export default function Schedule() {
     startTime: dayjs(shift.startTime),
     endTime: dayjs(shift.endTime),
   }));
+
+  const handleRegister = async () => {
+    console.log(selectedShift);
+    empActions.signup({
+      shiftId: selectedShift ? selectedShift : "",
+      userId: "none",
+    });
+
+    empActions.refetchUserSignups();
+  };
 
   return (
     <Grid container direction="column" spacing={1}>
