@@ -127,6 +127,9 @@ def prevent_consecutive_shifts(
 
 
 def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
+    if not config.employees or not config.shifts:
+        return models.ScheduleResponse(assignments=[])
+
     model = cp_model.CpModel()
     # Creates shift variables.
     # shift_asgn[(e, s)]: employee 'e' works shift 's'.
@@ -193,39 +196,3 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
             if solver.value(shift_asgn[(e, s)]) == 1
         ]
     )
-
-
-def main() -> None:
-    config = Config(
-        shifts={
-            f"{d}-{s}": Shift(start_time=datetime.now(), end_time=datetime.now())
-            for d, s in itertools.product({1, 2, 3, 4, 5, 6, 7}, {1, 2, 3})
-        },
-        employees={
-            k: Employee(requests={s: Request() for s in v})
-            for k, v in {
-                "A": {"1-1", "3-2", "4-2", "5-1", "7-3"},
-                "B": {"1-3", "2-1", "3-2", "5-3", "6-2"},
-                "C": {"2-1", "3-1", "4-1", "6-3", "7-1"},
-                "D": {"2-1", "2-2", "4-3", "6-1", "7-2"},
-                "E": {"1-1", "2-3", "5-2", "6-2", "7-1"},
-            }.items()
-        },
-    )
-
-    solve_res = solve(
-        config,
-        rules=(
-            exactly_one_shift_per_employee,
-            evenly_distribute_shifts,
-            prevent_overlapping_shifts,
-            # FIXME: Causes runtime error
-            # prevent_consecutive_shifts,
-        ),
-    )
-
-    print(solve_res)
-
-
-if __name__ == "__main__":
-    main()
