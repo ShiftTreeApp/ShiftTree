@@ -1,7 +1,8 @@
 import itertools
+import json
 from collections.abc import Iterable, Mapping
 from datetime import datetime
-from typing import Protocol, Self
+from typing import Any, Protocol, Self
 
 from ortools.sat.python import cp_model
 from pydantic import BaseModel, Field
@@ -46,6 +47,10 @@ class Config(BaseModel):
                 for signup in shift.signups
             },
         )
+
+
+def constraint_name(rule: str, **kwargs: Any) -> str:
+    return json.dumps({"rule_name": rule, "subjects": kwargs})
 
 
 class Rule(Protocol):
@@ -106,7 +111,18 @@ def prevent_overlapping_shifts(
                 shift1.start_time < shift2.end_time
                 and shift2.start_time < shift1.end_time
             ):
-                model.add(assignments[(e, s1)] + assignments[(e, s2)] <= 1)
+                enforcement_var = model.new_bool_var(
+                    constraint_name(
+                        "prevent_overlapping_shifts",
+                        user=f"user:{e}",
+                        shift1=f"shift:{s1}",
+                        shift2=f"shift:{s2}",
+                    )
+                )
+                model.add(
+                    assignments[(e, s1)] + assignments[(e, s2)] <= 1
+                ).only_enforce_if(enforcement_var)
+                model.add_assumption(enforcement_var)
 
 
 def prevent_consecutive_shifts(
@@ -123,12 +139,27 @@ def prevent_consecutive_shifts(
                 abs((shift2.start_time - shift1.end_time).total_seconds()) < 8 * 3600
                 or abs((shift1.start_time - shift2.end_time).total_seconds()) < 8 * 3600
             ):
-                model.add(assignments[(e, s1)] + assignments[(e, s2)] <= 1)
+                enforcement_var = model.new_bool_var(
+                    constraint_name(
+                        "prevent_consecutive_shifts",
+                        user=f"user:{e}",
+                        shift1=f"shift:{s1}",
+                        shift2=f"shift:{s2}",
+                    )
+                )
+                model.add(
+                    assignments[(e, s1)] + assignments[(e, s2)] <= 1
+                ).only_enforce_if(enforcement_var)
+                model.add_assumption(enforcement_var)
 
 
 def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
     if not config.employees or not config.shifts:
-        return models.ScheduleResponse(assignments=[])
+        return models.ScheduleResponse(
+            assignments=[],
+            conflicts=[],
+            status="optimal",
+        )
 
     model = cp_model.CpModel()
     # Creates shift variables.
@@ -152,12 +183,16 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
         )
     )
 
+    print(model.validate())
+
     def requested_weight_or_none(employee: EmployeeId, shift: ShiftId) -> float | None:
         req = config.employees[employee].requests.get(shift, None)
         return req.weight if req is not None else None
 
     solver = cp_model.CpSolver()
     status = solver.solve(model)
+
+    assert status != cp_model.MODEL_INVALID, "Invalid model"
 
     if status == cp_model.OPTIMAL:
         print("Solution:")
@@ -194,5 +229,10 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
             )
             for (e, s) in itertools.product(config.employees, config.shifts)
             if solver.value(shift_asgn[(e, s)]) == 1
-        ]
+        ],
+        conflicts=[
+            models.Conflict(**json.loads(model.var_index_to_var_proto(var_index).name))
+            for var_index in solver.sufficient_assumptions_for_infeasibility()
+        ],
+        status="optimal" if status == cp_model.OPTIMAL else "infeasible",
     )

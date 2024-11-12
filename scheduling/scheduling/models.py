@@ -1,5 +1,6 @@
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import datetime
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -31,8 +32,15 @@ class Assignment(BaseModel):
     requested_weight: float | None
 
 
+class Conflict(BaseModel):
+    rule_name: str
+    subjects: Mapping[str, Any]
+
+
 class ScheduleResponse(BaseModel):
+    conflicts: Sequence[Conflict]
     assignments: Sequence[Assignment]
+    status: Literal["optimal", "infeasible"]
 
 
 class Config(BaseModel):
