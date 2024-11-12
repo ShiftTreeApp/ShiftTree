@@ -673,3 +673,40 @@ export async function deleteSignup(req: Request, res: Response) {
 
   res.status(204).send();
 }
+
+export async function getUserSignups(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId;
+
+  const query = /* sql */ `
+      with shifts as (
+        select *
+        from shift as s
+        where s.schedule_id = $1
+      ),
+      user_signups as (
+        select *
+        from user_shift_signup as uss
+        join shifts as s on uss.shift_id = s.id
+      )
+      select coalesce(json_agg(json_build_object(
+        'id', s.id
+      )), json_build_array()) as json
+      from user_signups as s
+      where s.user_id = $2
+    `;
+
+  const result = await pool.query({
+    text: query,
+    values: [scheduleId, userId],
+  });
+
+  if (result.rows.length < 1) {
+    res
+      .status(404)
+      .json({ error: "No signups found OR user/schedule not found" });
+    return;
+  }
+
+  res.json(result.rows[0].json);
+}
