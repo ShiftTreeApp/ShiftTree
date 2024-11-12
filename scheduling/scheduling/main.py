@@ -17,8 +17,7 @@ def generate_schedule(req: ScheduleRequest) -> ScheduleResponse:
             schedule.exactly_one_shift_per_employee,
             schedule.evenly_distribute_shifts,
             schedule.prevent_overlapping_shifts,
-            # FIXME: This causes a runtime error
-            # schedule.prevent_consecutive_shifts,
+            schedule.prevent_consecutive_shifts,
         ),
     )
 
