@@ -4,22 +4,30 @@ import { Alert, Snackbar } from "@mui/material";
 import { createContext, PropsWithChildren, useContext, useState } from "react";
 
 function useNotifierState() {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"message" | "error" | null>(
+    null,
+  );
   return {
     error: (error: any) => {
       console.error(error);
       if (error instanceof Error) {
-        setErrorMessage(error.message);
+        setMessage(error.message);
       } else {
-        setErrorMessage(error.toString());
+        setMessage(error.toString());
       }
-      setSnackbarOpen(true);
+      setMessageType("error");
     },
-    _errorMessage: errorMessage,
-    _snackbarOpen: snackbarOpen,
+    message: (text: string) => {
+      console.log(text);
+      setMessage(text);
+      setMessageType("message");
+    },
+    _message: message,
+    _snackbarOpen: messageType !== null,
+    _messageType: messageType,
     _closeSnackbar: () => {
-      setSnackbarOpen(false);
+      setMessageType(null);
     },
   };
 }
@@ -40,11 +48,11 @@ export function NotifierProvider(props: PropsWithChildren) {
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
-          color="error"
+          color={notifierState._messageType === "error" ? "error" : "success"}
           onClose={notifierState._closeSnackbar}
           icon={<ErrorOutlineIcon />}
         >
-          {notifierState._errorMessage}
+          {notifierState._message}
         </Alert>
       </Snackbar>
       {props.children}
