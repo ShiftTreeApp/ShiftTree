@@ -86,6 +86,12 @@ app.delete(
 );
 
 app.get(
+  "/schedules/:scheduleId/user-signups",
+  auth.authorizationCheck,
+  schedules.getUserSignups,
+);
+
+app.get(
   "/shiftTreeCodeExisting",
   auth.authorizationCheck,
   invites.getExistingJoinCode,
@@ -101,12 +107,6 @@ app.delete(
   "/removeUser/:scheduleID",
   auth.authorizationCheck,
   invites.removeUserFromShiftTree,
-);
-
-app.get(
-  "/schedules/:scheduleId/user-signups",
-  auth.authorizationCheck,
-  schedules.getUserSignups,
 );
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
