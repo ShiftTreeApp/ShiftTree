@@ -11,6 +11,10 @@ export function useEmployeeActions() {
     "post",
     "/signups/{shiftId}",
   );
+  const { mutateAsync: getUserSignups } = api.useMutation(
+    "get",
+    "/schedules/{scheduleId}/user-signups",
+  );
 
   /*
    * Changed structure to separately build functions and return them
@@ -56,5 +60,28 @@ export function useEmployeeActions() {
     console.log("Signed up for shift");
   }
 
-  return { join, signup };
+  /*
+   * Take shiftTreeId and scan the shifts in that schedule.
+   * Return a list of the shifts that the current user signed up for
+   * from that list.
+   */
+  async function getSignups({
+    shiftTreeId,
+  }: {
+    shiftTreeId: string;
+  }): Promise<string[] | undefined> {
+    const shiftIds = await getUserSignups({
+      params: {
+        path: {
+          scheduleId: shiftTreeId,
+        },
+      },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+    return shiftIds;
+  }
+
+  return { getSignups, join, signup };
 }
