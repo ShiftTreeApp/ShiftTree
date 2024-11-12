@@ -88,11 +88,9 @@ export default function Navbar() {
   };
 
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [joinType, setJoinType] = React.useState<"ShiftTree" | "Organization">(
-    "ShiftTree",
-  );
+  const [joinType, setJoinType] = React.useState<"ShiftTree">("ShiftTree");
 
-  const handleModalOpen = (type: "ShiftTree" | "Organization") => {
+  const handleModalOpen = (type: "ShiftTree") => {
     setJoinType(type);
     setModalOpen(true);
   };
@@ -153,14 +151,8 @@ export default function Navbar() {
                     Create ShiftTree
                   </Button>
                 </MenuItem>
-                <MenuItem onClick={handleClose}>
-                  <Button>Create Organization</Button>
-                </MenuItem>
                 <MenuItem onClick={() => handleModalOpen("ShiftTree")}>
                   <Button>Join ShiftTree</Button>
-                </MenuItem>
-                <MenuItem onClick={() => handleModalOpen("Organization")}>
-                  <Button>Join Organization</Button>
                 </MenuItem>
               </Menu>
               <CustomTooltip title="Notifications" placement="bottom">
