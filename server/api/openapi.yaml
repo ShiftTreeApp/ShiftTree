@@ -432,6 +432,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /schedules/{scheduleId}/user-signups:
+    get:
+      security:
+        - Bearer: []
+      summary: Get schedule signups for the current user
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+        404:
+          description: Schedule with specified ID does not exist/inaccessible, or user has not signed up for any shifts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: User does not have permission to view the signups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /shifts/{shiftId}:
     put:
