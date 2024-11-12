@@ -1,0 +1,23 @@
+[project]
+name = "shifttree-tests"
+version = "0.1.0"
+description = "Tests for ShiftTree"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pytest-asyncio>=0.24.0",
+    "pytest>=8.3.3",
+    "shifttree-api-client",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.7.2"]
+
+[tool.pyright]
+typeCheckingMode = "standard"
+
+[tool.uv.sources]
+shifttree-api-client = { path = "shifttree-api-client" }
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"

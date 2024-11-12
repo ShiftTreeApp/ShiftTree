@@ -5,27 +5,39 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 
 import { type paths } from "@/generated/v1";
+import { useNotifier } from "@/notifier";
 
-const fetchClient = createFetchClient<paths>({
-  baseUrl: import.meta.env.VITE_SHIFTTREE_BASE_URL ?? "http://localhost:3000/",
-});
+function createApi({ onError }: { onError: (message: string) => void }) {
+  const fetchClient = createFetchClient<paths>({
+    baseUrl:
+      import.meta.env.VITE_SHIFTTREE_BASE_URL ?? "http://localhost:3000/",
+  });
 
-fetchClient.use({
-  onRequest({ request }) {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      request.headers.set("Authorization", `Bearer ${token}`);
-    }
-  },
-});
+  fetchClient.use({
+    onRequest: ({ request }) => {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        request.headers.set("Authorization", `Bearer ${token}`);
+      }
+    },
+  });
 
-export const api = createClient(fetchClient);
+  fetchClient.use({
+    onResponse: ({ response }) => {
+      if (!response.ok) {
+        onError(response.statusText);
+      }
+    },
+  });
 
-export type Api = typeof api;
+  const api = createClient(fetchClient);
+  return api;
+}
+export type Api = ReturnType<typeof createApi>;
 
 // More info: https://www.npmjs.com/package/openapi-react-query#usage
 
-const ApiContext = createContext(api);
+const ApiContext = createContext<Api | null>(null);
 
 interface ApiProviderProps {
   api: Api;
@@ -33,7 +45,8 @@ interface ApiProviderProps {
 }
 
 export function ApiProvider(props0: Partial<ApiProviderProps>) {
-  const props = { ...props0, api };
+  const notifier = useNotifier();
+  const props = { ...props0, api: createApi({ onError: notifier.error }) };
   return (
     <QueryClientProvider client={new QueryClient()}>
       <ApiContext.Provider value={props.api}>
@@ -44,5 +57,9 @@ export function ApiProvider(props0: Partial<ApiProviderProps>) {
 }
 
 export function useApi(): Api {
-  return useContext(ApiContext);
+  const api = useContext(ApiContext);
+  if (!api) {
+    throw new Error("useApi must be used within a ApiProvider");
+  }
+  return api;
 }

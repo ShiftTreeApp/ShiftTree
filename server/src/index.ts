@@ -14,6 +14,7 @@ import * as auth from "@/auth";
 import * as registration from "@/registration";
 import * as schedules from "@/schedules";
 import * as invites from "@/invites";
+import * as autoschedule from "@/autoscheduling";
 
 //Setup
 const app = express();
@@ -86,6 +87,12 @@ app.delete(
 );
 
 app.get(
+  "/schedules/:scheduleId/user-signups",
+  auth.authorizationCheck,
+  schedules.getUserSignups,
+);
+
+app.get(
   "/shiftTreeCodeExisting",
   auth.authorizationCheck,
   invites.getExistingJoinCode,
@@ -96,7 +103,11 @@ app.get(
   invites.generateJoinCode,
 );
 app.put("/joinShiftTree", auth.authorizationCheck, invites.joinShiftTree);
-
+app.post(
+  "/autoschedule/:scheduleId",
+  auth.authorizationCheck,
+  autoschedule.sendShifts,
+);
 app.delete(
   "/removeUser/:scheduleID",
   auth.authorizationCheck,
