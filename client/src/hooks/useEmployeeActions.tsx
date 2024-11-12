@@ -1,6 +1,6 @@
 import { useApi } from "@/client";
 
-export function useEmployeeActions(shiftTreeId: string) {
+export function useEmployeeActions(shiftTreeId?: string) {
   const api = useApi();
 
   const { mutateAsync: joinShiftTree } = api.useMutation(
