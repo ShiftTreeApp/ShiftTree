@@ -19,6 +19,7 @@ import { useParams } from "react-router";
 import {
   Edit as EditIcon,
   HowToReg as RegisterIcon,
+  EventBusy as LeaveShiftTreeIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
@@ -27,10 +28,9 @@ import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
 import { useMemo } from "react";
 
-
 import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
-import { createRandomPfpUrl } from "./EditMembersTab"
+import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
@@ -130,17 +130,30 @@ export default function Schedule() {
               <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
             <Grid>
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                component={RouterLink}
-                to={`/schedule/${scheduleId}/edit`}
-                sx={{
-                  backgroundColor: theme => theme.palette.info.main,
-                }}
+              <Box
+                sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}
               >
-                Edit mode
-              </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
+                  component={RouterLink}
+                  to={`/schedule/${scheduleId}/edit`}
+                  sx={{
+                    backgroundColor: theme => theme.palette.info.main,
+                  }}
+                >
+                  <Typography>Edit mode</Typography>
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<LeaveShiftTreeIcon />}
+                  sx={{
+                    backgroundColor: theme => theme.palette.error.dark,
+                  }}
+                >
+                  <Typography>Leave Shift Tree</Typography>
+                </Button>
+              </Box>
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
@@ -227,24 +240,28 @@ function UserChips(props: UserChipsProps) {
     { params: { path: { scheduleId: props.scheduleId as string } } },
   );
 
-  const userIds = scheduleSignups
-    ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
-    .flatMap((shift: any) => shift.signups.map((signup: any) => signup.user.id)) || [];
+  const userIds =
+    scheduleSignups
+      ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
+      .flatMap((shift: any) =>
+        shift.signups.map((signup: any) => signup.user.id),
+      ) || [];
 
-
-  return (<Box>
-
-  {userIds.map(userId => {
-          // Find the corresponding member data by userId
-          const member = membersData?.find((member: any) => member.id === userId);
-          return member ? (
-            <Chip
-              avatar={<Avatar src={createRandomPfpUrl(member.displayName, member.id)} />}
-              label={member.displayName}
-              variant="outlined"
-            />
-          ) : null;
-        })}
-
-  </Box>);
+  return (
+    <Box>
+      {userIds.map(userId => {
+        // Find the corresponding member data by userId
+        const member = membersData?.find((member: any) => member.id === userId);
+        return member ? (
+          <Chip
+            avatar={
+              <Avatar src={createRandomPfpUrl(member.displayName, member.id)} />
+            }
+            label={member.displayName}
+            variant="outlined"
+          />
+        ) : null;
+      })}
+    </Box>
+  );
 }
