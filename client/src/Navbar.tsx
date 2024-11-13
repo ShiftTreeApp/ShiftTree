@@ -23,6 +23,8 @@ import {
   ListItemButton,
   ListItemIcon,
   Dialog,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -98,124 +100,146 @@ export default function Navbar() {
     setModalOpen(false);
   };
 
-  return (
-    <Grid container>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar
-          position="fixed"
-          sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}
-        >
-          <Toolbar
-            sx={{ justifyContent: "space-between", backgroundColor: "primary" }}
-          >
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { md: "none" } }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Link component={RouterLink} to="/">
-              <Typography fontSize={24} color={"white"}>
-                ShiftTree
-              </Typography>
-            </Link>
+  // notification snackbar for joining a ShiftTree
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
 
-            <Grid>
-              <CustomTooltip title="Create/Join" placement="bottom">
-                <IconButton
-                  id="add-button"
-                  aria-controls={open ? "basic-menu" : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? "true" : undefined}
-                  onClick={handleClick}
-                  aria-label="add"
-                  size="small"
-                >
-                  <AddIcon fontSize="medium" />
-                </IconButton>
-              </CustomTooltip>
-              <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                  "aria-labelledby": "add-button",
-                }}
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  return (
+    <>
+      <Grid container>
+        <Box sx={{ flexGrow: 1 }}>
+          <AppBar
+            position="fixed"
+            sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}
+          >
+            <Toolbar
+              sx={{
+                justifyContent: "space-between",
+                backgroundColor: "primary",
+              }}
+            >
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2, display: { md: "none" } }}
               >
-                <MenuItem onClick={handleClose}>
-                  <Button component={RouterLink} to="/create">
-                    Create ShiftTree
-                  </Button>
-                </MenuItem>
-                <MenuItem onClick={() => handleModalOpen("ShiftTree")}>
-                  <Button>Join ShiftTree</Button>
-                </MenuItem>
-              </Menu>
-              <CustomTooltip title="Notifications" placement="bottom">
-                <IconButton aria-label="notif" size="small" sx={{ ml: 2 }}>
-                  <NotificationsIcon fontSize="medium" />
-                </IconButton>
-              </CustomTooltip>
-              <CustomTooltip title="Profile" placement="bottom">
-                <IconButton
-                  aria-label="profile"
-                  size="small"
-                  sx={{ ml: 2 }}
-                  onClick={handleDrawerOpen}
+                <MenuIcon />
+              </IconButton>
+              <Link component={RouterLink} to="/">
+                <Typography fontSize={24} color={"white"}>
+                  ShiftTree
+                </Typography>
+              </Link>
+
+              <Grid>
+                <CustomTooltip title="Create/Join" placement="bottom">
+                  <IconButton
+                    id="add-button"
+                    aria-controls={open ? "basic-menu" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? "true" : undefined}
+                    onClick={handleClick}
+                    aria-label="add"
+                    size="small"
+                  >
+                    <AddIcon fontSize="medium" />
+                  </IconButton>
+                </CustomTooltip>
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  MenuListProps={{
+                    "aria-labelledby": "add-button",
+                  }}
                 >
-                  <AccountCircleIcon fontSize="medium" />
-                </IconButton>
-              </CustomTooltip>
-              {/* <Button color="inherit" onClick={onLogout}>
+                  <MenuItem onClick={handleClose}>
+                    <Button component={RouterLink} to="/create">
+                      Create ShiftTree
+                    </Button>
+                  </MenuItem>
+                  <MenuItem onClick={() => handleModalOpen("ShiftTree")}>
+                    <Button>Join ShiftTree</Button>
+                  </MenuItem>
+                </Menu>
+                <CustomTooltip title="Notifications" placement="bottom">
+                  <IconButton aria-label="notif" size="small" sx={{ ml: 2 }}>
+                    <NotificationsIcon fontSize="medium" />
+                  </IconButton>
+                </CustomTooltip>
+                <CustomTooltip title="Profile" placement="bottom">
+                  <IconButton
+                    aria-label="profile"
+                    size="small"
+                    sx={{ ml: 2 }}
+                    onClick={handleDrawerOpen}
+                  >
+                    <AccountCircleIcon fontSize="medium" />
+                  </IconButton>
+                </CustomTooltip>
+                {/* <Button color="inherit" onClick={onLogout}>
                 Log out
               </Button> */}
-            </Grid>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          anchor="right"
-          open={drawerOpen}
-          onClose={handleDrawerClose}
-          sx={{ zIndex: theme => theme.zIndex.drawer + 1000 }}
-        >
-          <Box
-            sx={{ width: 250 }}
-            role="presentation"
-            onClick={handleDrawerClose}
-            onKeyDown={handleDrawerClose}
+              </Grid>
+            </Toolbar>
+          </AppBar>
+          <Drawer
+            anchor="right"
+            open={drawerOpen}
+            onClose={handleDrawerClose}
+            sx={{ zIndex: theme => theme.zIndex.drawer + 1000 }}
           >
-            <List>
-              <ListItemButton>
-                <ListItemIcon>
-                  <AccountCircleIcon />
-                </ListItemIcon>
-                <ListItemText primary="Edit Profile" />
-              </ListItemButton>
-              <ListItemButton>
-                <ListItemIcon>
-                  <SettingsIcon />
-                </ListItemIcon>
-                <ListItemText primary="Settings" />
-              </ListItemButton>
-              <ListItemButton onClick={onLogout}>
-                <ListItemIcon>
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText primary="Logout" />
-              </ListItemButton>
-            </List>
-          </Box>
-        </Drawer>
-        <Dialog open={modalOpen} onClose={handleModalClose}>
-          <ModalContext.Provider value={{ modalOpen, setModalOpen }}>
-            <JoinTree joinType={joinType} />
-          </ModalContext.Provider>
-        </Dialog>
-      </Box>
-    </Grid>
+            <Box
+              sx={{ width: 250 }}
+              role="presentation"
+              onClick={handleDrawerClose}
+              onKeyDown={handleDrawerClose}
+            >
+              <List>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <AccountCircleIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Edit Profile" />
+                </ListItemButton>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <SettingsIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Settings" />
+                </ListItemButton>
+                <ListItemButton onClick={onLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Logout" />
+                </ListItemButton>
+              </List>
+            </Box>
+          </Drawer>
+          <Dialog open={modalOpen} onClose={handleModalClose}>
+            <ModalContext.Provider value={{ modalOpen, setModalOpen }}>
+              <JoinTree joinType={joinType} setSnackbarOpen={setSnackbarOpen} />
+            </ModalContext.Provider>
+          </Dialog>
+        </Box>
+      </Grid>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success">
+          Successfully joined ShiftTree!
+        </Alert>
+      </Snackbar>
+    </>
   );
 }

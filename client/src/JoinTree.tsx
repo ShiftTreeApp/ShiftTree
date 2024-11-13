@@ -16,9 +16,10 @@ import { useNotifier } from "@/notifier";
 
 interface JoinTreeProps {
   joinType: "ShiftTree" | "Organization";
+  setSnackbarOpen: (open: boolean) => void;
 }
 
-export default function JoinTree({ joinType }: JoinTreeProps) {
+export default function JoinTree({ joinType, setSnackbarOpen }: JoinTreeProps) {
   const [joinCode, setJoinCode] = useState("");
   const MC = React.useContext(ModalContext);
   const empActions = useEmployeeActions();
@@ -35,9 +36,15 @@ export default function JoinTree({ joinType }: JoinTreeProps) {
       .join({ joinCode: joinCode })
       .then(() => {
         queries.refetchAllSchedules();
+        setSnackbarOpen(true);
         MC.setModalOpen(false);
       })
-      .catch(notifier.error);
+      .catch(error => {
+        notifier.error(
+          "Failed to join the ShiftTree. Ensure you have the correct join code.",
+        ); // Show error notification
+        console.error(error);
+      });
   };
 
   return (
