@@ -36,6 +36,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "@/auth";
 import JoinTree from "./JoinTree";
 import { LeftDrawerContext } from "./Home";
+import { useNotifier } from "./notifier";
 
 interface ModalContextType {
   modalOpen: boolean;
@@ -101,11 +102,7 @@ export default function Navbar() {
   };
 
   // notification snackbar for joining a ShiftTree
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
+  const notifier = useNotifier();
 
   return (
     <>
@@ -225,21 +222,11 @@ export default function Navbar() {
           </Drawer>
           <Dialog open={modalOpen} onClose={handleModalClose}>
             <ModalContext.Provider value={{ modalOpen, setModalOpen }}>
-              <JoinTree joinType={joinType} setSnackbarOpen={setSnackbarOpen} />
+              <JoinTree joinType={joinType} />
             </ModalContext.Provider>
           </Dialog>
         </Box>
       </Grid>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleSnackbarClose} severity="success">
-          Successfully joined ShiftTree!
-        </Alert>
-      </Snackbar>
     </>
   );
 }

@@ -16,10 +16,9 @@ import { useNotifier } from "@/notifier";
 
 interface JoinTreeProps {
   joinType: "ShiftTree" | "Organization";
-  setSnackbarOpen: (open: boolean) => void;
 }
 
-export default function JoinTree({ joinType, setSnackbarOpen }: JoinTreeProps) {
+export default function JoinTree({ joinType }: JoinTreeProps) {
   const [joinCode, setJoinCode] = useState("");
   const MC = React.useContext(ModalContext);
   const empActions = useEmployeeActions();
@@ -36,7 +35,7 @@ export default function JoinTree({ joinType, setSnackbarOpen }: JoinTreeProps) {
       .join({ joinCode: joinCode })
       .then(() => {
         queries.refetchAllSchedules();
-        setSnackbarOpen(true);
+        notifier.message("Successfully joined ShiftTree!"); // Show success notification
         MC.setModalOpen(false);
       })
       .catch(error => {
