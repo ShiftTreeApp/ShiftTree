@@ -4,12 +4,7 @@ import {
   Typography,
   Paper,
   Divider,
-  IconButton,
   Button,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
   Chip,
   Box,
   Slider,
@@ -27,22 +22,10 @@ import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
 import { useMemo } from "react";
 
-
 import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
-import { createRandomPfpUrl } from "./EditMembersTab"
+import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
-
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -69,10 +52,14 @@ export default function Schedule() {
 
   const handleRegister = async () => {
     console.log(selectedShift);
-    empActions.signup({
-      shiftId: selectedShift,
-      userId: "none",
-    });
+    if (selectedShift) {
+      empActions.signup({
+        shiftId: selectedShift,
+        userId: "none",
+      });
+    } else {
+      console.error("No shift selected");
+    }
   };
   // TODO: Change this to useSearchParam
   const { selectedShift, setSelectedShift, clearSelectedShift } =
@@ -181,7 +168,7 @@ export default function Schedule() {
                 {scheduleData?.role == "owner" && (
                   <UserChips
                     scheduleId={scheduleId}
-                    shiftId={selectedShift}
+                    shiftId={selectedShift ?? undefined}
                   ></UserChips>
                 )}
               </Box>
@@ -227,24 +214,28 @@ function UserChips(props: UserChipsProps) {
     { params: { path: { scheduleId: props.scheduleId as string } } },
   );
 
-  const userIds = scheduleSignups
-    ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
-    .flatMap((shift: any) => shift.signups.map((signup: any) => signup.user.id)) || [];
+  const userIds =
+    scheduleSignups
+      ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
+      .flatMap((shift: any) =>
+        shift.signups.map((signup: any) => signup.user.id),
+      ) || [];
 
-
-  return (<Box>
-
-  {userIds.map(userId => {
-          // Find the corresponding member data by userId
-          const member = membersData?.find((member: any) => member.id === userId);
-          return member ? (
-            <Chip
-              avatar={<Avatar src={createRandomPfpUrl(member.displayName, member.id)} />}
-              label={member.displayName}
-              variant="outlined"
-            />
-          ) : null;
-        })}
-
-  </Box>);
+  return (
+    <Box>
+      {userIds.map(userId => {
+        // Find the corresponding member data by userId
+        const member = membersData?.find((member: any) => member.id === userId);
+        return member ? (
+          <Chip
+            avatar={
+              <Avatar src={createRandomPfpUrl(member.displayName, member.id)} />
+            }
+            label={member.displayName}
+            variant="outlined"
+          />
+        ) : null;
+      })}
+    </Box>
+  );
 }
