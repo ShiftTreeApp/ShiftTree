@@ -4,12 +4,7 @@ import {
   Typography,
   Paper,
   Divider,
-  IconButton,
   Button,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
   Chip,
   Box,
   Slider,
@@ -32,17 +27,6 @@ import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
-
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -69,10 +53,14 @@ export default function Schedule() {
 
   const handleRegister = async () => {
     console.log(selectedShift);
-    empActions.signup({
-      shiftId: selectedShift,
-      userId: "none",
-    });
+    if (selectedShift) {
+      empActions.signup({
+        shiftId: selectedShift,
+        userId: "none",
+      });
+    } else {
+      console.error("No shift selected");
+    }
   };
   // TODO: Change this to useSearchParam
   const { selectedShift, setSelectedShift, clearSelectedShift } =
@@ -194,7 +182,7 @@ export default function Schedule() {
                 {scheduleData?.role == "owner" && (
                   <UserChips
                     scheduleId={scheduleId}
-                    shiftId={selectedShift}
+                    shiftId={selectedShift ?? undefined}
                   ></UserChips>
                 )}
               </Box>
