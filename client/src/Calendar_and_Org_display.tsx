@@ -9,9 +9,7 @@ import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import "dayjs/locale/en";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs, { Dayjs } from "dayjs";
-
-import Org_display from "./Org_display";
+import { Dayjs } from "dayjs";
 
 export default function Calendar_and_Org() {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
@@ -41,9 +39,6 @@ export default function Calendar_and_Org() {
             onChange={handleDateChange}
           />
         </LocalizationProvider>
-
-        {/* Grid that contains Organizations */}
-        <Org_display />
       </Paper>
     </Grid>
   );

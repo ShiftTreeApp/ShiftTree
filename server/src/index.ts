@@ -93,6 +93,12 @@ app.get(
 );
 
 app.get(
+  "/schedules/:scheduleId/user-assigned",
+  auth.authorizationCheck,
+  schedules.getUserAssignments,
+);
+
+app.get(
   "/shiftTreeCodeExisting",
   auth.authorizationCheck,
   invites.getExistingJoinCode,

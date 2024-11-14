@@ -50,8 +50,9 @@ const GenerateShiftModal: React.FC<GenerateShiftModalProps> = ({
         >
           {!loading ? (
             <>
-              <Typography variant="h6">
-                Do you want to generate the schedule?
+              <Typography variant="body1">
+                Are you sure want to generate the schedule? <br /> (This will
+                automatically close the ShiftTree)
               </Typography>
               <Button variant="contained" onClick={handleConfirm}>
                 Confirm

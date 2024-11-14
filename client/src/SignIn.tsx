@@ -53,9 +53,10 @@ export default function SignIn() {
           alignItems: "center",
         }}
       >
-        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-          <LockOutlinedIcon />
-        </Avatar>
+        <Avatar
+          sx={{ m: 2, bgcolor: "secondary.main", width: 64, height: 64 }}
+          src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/shiftTreeImages/shiftTree_avatar.png?raw=true"
+        />
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>

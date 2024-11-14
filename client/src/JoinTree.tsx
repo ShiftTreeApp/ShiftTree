@@ -35,9 +35,15 @@ export default function JoinTree({ joinType }: JoinTreeProps) {
       .join({ joinCode: joinCode })
       .then(() => {
         queries.refetchAllSchedules();
+        notifier.message("Successfully joined ShiftTree!"); // Show success notification
         MC.setModalOpen(false);
       })
-      .catch(notifier.error);
+      .catch(error => {
+        notifier.error(
+          "Failed to join the ShiftTree. Ensure you have the correct join code.",
+        ); // Show error notification
+        console.error(error);
+      });
   };
 
   return (
