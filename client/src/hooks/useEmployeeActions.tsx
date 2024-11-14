@@ -112,7 +112,7 @@ export function useEmployeeActions(shiftTreeId?: string) {
   }
 
   const signedUpShifts = userSignups;
-  const userAssignments = userAssignedShifts;
+  const assignedShifts = userAssignedShifts;
 
   return {
     join,
@@ -121,6 +121,6 @@ export function useEmployeeActions(shiftTreeId?: string) {
     refetchUserSignups,
     refetchUserAssignments,
     signedUpShifts,
-    userAssignments,
+    assignedShifts,
   };
 }
