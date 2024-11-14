@@ -116,18 +116,61 @@ export const joinShiftTree = async (req: Request, res: Response) => {
 };
 
 export const removeUserFromShiftTree = async (req: Request, res: Response) => {
+  const currentUserId = await getUserId(req);
   const ShiftTreeID = req.params.scheduleID;
-  const UserID = req.query.userID;
+  const targetUserId = req.query.userID ?? currentUserId;
+
+  // If the target user is not the current user, check if the current user is the owner
+  if (targetUserId !== currentUserId) {
+    const results = await pool.query({
+      text: /* sql */ `
+        select *
+        from schedule_info as info
+        where info.schedule_id = $1 and info.user_id = $2
+      `,
+      values: [ShiftTreeID, currentUserId],
+    });
+
+    if (results.rows.length === 0) {
+      res.status(404).send({ error: "Schedule not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (role !== "owner") {
+      res.status(403).send({
+        error: "Current user does not have permission to remove other users",
+      });
+      return;
+    }
+  }
+
+  // Check if the target user is the owner
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select *
+        from schedule_info as info
+        where info.schedule_id = $1 and info.user_id = $2 and info.user_role = 'owner'
+      `,
+      values: [ShiftTreeID, targetUserId],
+    });
+
+    if (results.rows.length !== 0) {
+      res.status(403).send({ error: "Owner cannot be removed from schedule" });
+    }
+  }
+
+  // Otherwise the current user is the target user, so they can remove themself
+
   const statement = `
     DELETE FROM user_schedule_membership
     WHERE user_id = $1 AND schedule_id = $2;
   `;
   const query = {
     text: statement,
-    values: [UserID, ShiftTreeID],
+    values: [targetUserId, ShiftTreeID],
   };
-  //TODO: Add check actually removed user
   await pool.query(query);
-  await pool.query(query);
-  res.status(204).send("User removed from ShiftTree");
+  res.sendStatus(204);
 };
