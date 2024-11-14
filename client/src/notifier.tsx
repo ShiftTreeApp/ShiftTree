@@ -13,6 +13,8 @@ function useNotifierState() {
       console.error(error);
       if (error instanceof Error) {
         setMessage(error.message);
+      } else if (error["error"] !== undefined) {
+        setMessage(error.error.toString());
       } else {
         setMessage(error.toString());
       }
