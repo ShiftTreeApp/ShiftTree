@@ -1,7 +1,11 @@
 import { useApi } from "@/client";
+import { useNotifier } from "@/notifier";
 
 export function useEmployeeActions() {
   const api = useApi();
+  const notifier = useNotifier();
+
+  const { refetch: refetchSchedules } = api.useQuery("get", "/schedules");
 
   const { mutateAsync: joinShiftTree } = api.useMutation(
     "put",
@@ -10,6 +14,16 @@ export function useEmployeeActions() {
   const { mutateAsync: signupForShift } = api.useMutation(
     "post",
     "/signups/{shiftId}",
+  );
+  const { mutateAsync: removeUser } = api.useMutation(
+    "delete",
+    "/removeUser/{scheduleID}",
+    {
+      onSuccess: () => {
+        refetchSchedules();
+      },
+      onError: notifier.error,
+    },
   );
 
   /*
@@ -56,5 +70,9 @@ export function useEmployeeActions() {
     console.log("Signed up for shift");
   }
 
-  return { join, signup };
+  async function leaveSchedule({ scheduleId }: { scheduleId: string }) {
+    await removeUser({ params: { path: { scheduleID: scheduleId } } });
+  }
+
+  return { join, signup, leaveSchedule };
 }

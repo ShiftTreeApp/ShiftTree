@@ -277,14 +277,17 @@ paths:
     delete:
       security:
         - Bearer: []
-      summary: Remove a user from the specified schedule
+      summary: |
+        Remove a user from the specified schedule. If no user is passed, the current user is removed.
+        Otherwise, the current user must the owner of the schedule, and the specified user will be removed.
       parameters:
         - name: userID
           in: query
-          required: true
+          required: false
           schema:
             type: string
             format: uuid
+            nullable: true
         - name: scheduleID
           in: path
           required: true
@@ -294,8 +297,18 @@ paths:
       responses:
         204:
           description: Success
-        401:
-          description: User Not in Schedule
+        404:
+          description: Schedule does not exist or user not in schedule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: Current user does not have permission to remove target user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         default:
           description: Unexpected Error
           content:
