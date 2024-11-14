@@ -5,11 +5,6 @@ import {
   Link,
   TextField,
   Typography,
-  IconButton,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
 } from "@mui/material";
 import dayjs from "dayjs";
 import {
@@ -35,17 +30,6 @@ import EditShiftDrawer from "./EditShiftDrawer";
 import { useSearchParam } from "@/useSearchParam";
 import { useApi } from "@/client";
 import GenerateShiftModal from "./GenerateShiftModal";
-
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
 
 interface EditShiftsTabProps {
   scheduleId: string;

@@ -14,7 +14,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { Fragment, useState, useMemo, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import EditMembersDrawer from "./EditMembersDrawer";
 import { useApi } from "@/client";
 import dayjs from "dayjs";
