@@ -62,7 +62,7 @@ export default function SignUp() {
         }}
       >
         <Avatar
-          sx={{ m: 2, bgcolor: "secondary.main", width: 64, height: 64 }}
+          sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
           src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/shiftTreeImages/shiftSprout_avatar.png?raw=true"
         />
         <Typography component="h1" variant="h5">
