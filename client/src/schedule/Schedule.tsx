@@ -78,14 +78,20 @@ export default function Schedule() {
     empActions.signedUpShifts,
   );
 
+  const [assignedShifts, setAssignedShifts] = useState(
+    empActions.assignedShifts,
+  );
+
   useEffect(() => {
-    const getUpdatedUserSignups = async () => {
+    const getUpdatedShiftStatuses = async () => {
       empActions.refetchUserSignups();
+      empActions.refetchUserAssignments();
       setSignedUpShifts(empActions.signedUpShifts);
+      setAssignedShifts(empActions.assignedShifts);
     };
 
-    getUpdatedUserSignups();
-  }, [empActions.signedUpShifts]);
+    getUpdatedShiftStatuses();
+  }, [empActions.signedUpShifts, empActions.assignedShifts]);
 
   const signedUpIndicators = useMemo(
     () =>
@@ -93,6 +99,19 @@ export default function Schedule() {
         signedUpShifts.map((shiftId: string) => [shiftId, SignedUpIndicator]),
       ),
     [signedUpShifts],
+  );
+
+  const assignedIndicators = useMemo(
+    () =>
+      Object.fromEntries(
+        assignedShifts.map((shiftId: string) => [shiftId, AssignedIndicator]),
+      ),
+    [assignedShifts],
+  );
+
+  const bothIndicators = useMemo(
+    () => ({ ...signedUpIndicators, ...assignedIndicators }),
+    [signedUpIndicators, assignedIndicators],
   );
 
   const { data: scheduleData } = api.useQuery(
@@ -204,7 +223,7 @@ export default function Schedule() {
             startDate={dayjs(scheduleData?.startTime ?? dayjs().toISOString())}
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
-            customContentMap={signedUpIndicators}
+            customContentMap={bothIndicators}
             shifts={formattedShifts}
           />
         </Paper>
@@ -215,6 +234,10 @@ export default function Schedule() {
 
 function SignedUpIndicator() {
   return <Chip icon={<RegisterIcon />} label="Signed up" color="info" />;
+}
+
+function AssignedIndicator() {
+  return <Chip icon={<RegisterIcon />} label="Assigned" color="primary" />;
 }
 
 interface UserChipsProps {
