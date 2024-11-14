@@ -4,7 +4,12 @@ import {
   Typography,
   Paper,
   Divider,
+  IconButton,
   Button,
+  Tooltip,
+  TooltipProps,
+  tooltipClasses,
+  styled,
   Chip,
   Box,
   Slider,
@@ -16,16 +21,27 @@ import {
   HowToReg as RegisterIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
 import dayjs from "dayjs";
+
 import { useApi } from "../client";
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
-import { useMemo } from "react";
-
-import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
+import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
+
+const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
+}));
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,19 +64,8 @@ function useSelectedShiftParam() {
 
 export default function Schedule() {
   const { scheduleId } = useParams();
-  const empActions = useEmployeeActions();
+  const empActions = useEmployeeActions(scheduleId ? scheduleId : "");
 
-  const handleRegister = async () => {
-    console.log(selectedShift);
-    if (selectedShift) {
-      empActions.signup({
-        shiftId: selectedShift,
-        userId: "none",
-      });
-    } else {
-      console.error("No shift selected");
-    }
-  };
   // TODO: Change this to useSearchParam
   const { selectedShift, setSelectedShift, clearSelectedShift } =
     useSelectedShiftParam();
@@ -69,15 +74,44 @@ export default function Schedule() {
 
   const api = useApi();
 
-  // TODO: Get this from API
-  const signedUpShifts = useMemo(() => ["1", "3"], []);
+  const [signedUpShifts, setSignedUpShifts] = useState(
+    empActions.signedUpShifts,
+  );
+
+  const [assignedShifts, setAssignedShifts] = useState(
+    empActions.assignedShifts,
+  );
+
+  useEffect(() => {
+    const getUpdatedShiftStatuses = async () => {
+      empActions.refetchUserSignups();
+      empActions.refetchUserAssignments();
+      setSignedUpShifts(empActions.signedUpShifts);
+      setAssignedShifts(empActions.assignedShifts);
+    };
+
+    getUpdatedShiftStatuses();
+  }, [empActions.signedUpShifts, empActions.assignedShifts]);
 
   const signedUpIndicators = useMemo(
     () =>
       Object.fromEntries(
-        signedUpShifts.map(shiftId => [shiftId, SignedUpIndicator]),
+        signedUpShifts.map((shiftId: string) => [shiftId, SignedUpIndicator]),
       ),
     [signedUpShifts],
+  );
+
+  const assignedIndicators = useMemo(
+    () =>
+      Object.fromEntries(
+        assignedShifts.map((shiftId: string) => [shiftId, AssignedIndicator]),
+      ),
+    [assignedShifts],
+  );
+
+  const bothIndicators = useMemo(
+    () => ({ ...signedUpIndicators, ...assignedIndicators }),
+    [signedUpIndicators, assignedIndicators],
   );
 
   const { data: scheduleData } = api.useQuery(
@@ -98,6 +132,16 @@ export default function Schedule() {
     startTime: dayjs(shift.startTime),
     endTime: dayjs(shift.endTime),
   }));
+
+  const handleRegister = async () => {
+    console.log(selectedShift);
+    await empActions.signup({
+      shiftId: selectedShift ? selectedShift : "",
+      userId: "none",
+    });
+
+    empActions.refetchUserSignups();
+  };
 
   return (
     <Grid container direction="column" spacing={1}>
@@ -179,7 +223,7 @@ export default function Schedule() {
             startDate={dayjs(scheduleData?.startTime ?? dayjs().toISOString())}
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
-            customContentMap={signedUpIndicators}
+            customContentMap={bothIndicators}
             shifts={formattedShifts}
           />
         </Paper>
@@ -190,6 +234,10 @@ export default function Schedule() {
 
 function SignedUpIndicator() {
   return <Chip icon={<RegisterIcon />} label="Signed up" color="info" />;
+}
+
+function AssignedIndicator() {
+  return <Chip icon={<RegisterIcon />} label="Assigned" color="primary" />;
 }
 
 interface UserChipsProps {

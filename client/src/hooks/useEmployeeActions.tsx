@@ -1,7 +1,7 @@
 import { useApi } from "@/client";
 import { useNotifier } from "@/notifier";
 
-export function useEmployeeActions() {
+export function useEmployeeActions(shiftTreeId?: string) {
   const api = useApi();
   const notifier = useNotifier();
 
@@ -70,9 +70,57 @@ export function useEmployeeActions() {
     console.log("Signed up for shift");
   }
 
+  /*
+   * Take shiftTreeId and scan the shifts in that schedule.
+   * Return a list of the shifts that the current user signed up for
+   * from that list.
+   */
+  const { data: userSignups = [], refetch: refetchUserSignups } = shiftTreeId
+    ? api.useQuery("get", "/schedules/{scheduleId}/user-signups", {
+        params: {
+          path: {
+            scheduleId: shiftTreeId ? shiftTreeId : "",
+          },
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+    : { data: [], refetch: () => {} };
+
+  /*
+   * Take shiftTreeId and scan the shifts in that schedule.
+   * Return a list of the shifts that the current user is assigned to
+   * from that list.
+   */
+  const { data: userAssignedShifts = [], refetch: refetchUserAssignments } =
+    shiftTreeId
+      ? api.useQuery("get", "/schedules/{scheduleId}/user-assigned", {
+          params: {
+            path: {
+              scheduleId: shiftTreeId ? shiftTreeId : "",
+            },
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        })
+      : { data: [], refetch: () => {} };
+
   async function leaveSchedule({ scheduleId }: { scheduleId: string }) {
     await removeUser({ params: { path: { scheduleID: scheduleId } } });
   }
 
-  return { join, signup, leaveSchedule };
+  const signedUpShifts = userSignups;
+  const assignedShifts = userAssignedShifts;
+
+  return {
+    join,
+    signup,
+    leaveSchedule,
+    refetchUserSignups,
+    refetchUserAssignments,
+    signedUpShifts,
+    assignedShifts,
+  };
 }
