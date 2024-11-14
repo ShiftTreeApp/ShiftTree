@@ -88,11 +88,39 @@ export function useEmployeeActions(shiftTreeId?: string) {
       })
     : { data: [], refetch: () => {} };
 
+  /*
+   * Take shiftTreeId and scan the shifts in that schedule.
+   * Return a list of the shifts that the current user is assigned to
+   * from that list.
+   */
+  const { data: userAssignedShifts = [], refetch: refetchUserAssignments } =
+    shiftTreeId
+      ? api.useQuery("get", "/schedules/{scheduleId}/user-assigned", {
+          params: {
+            path: {
+              scheduleId: shiftTreeId ? shiftTreeId : "",
+            },
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        })
+      : { data: [], refetch: () => {} };
+
   async function leaveSchedule({ scheduleId }: { scheduleId: string }) {
     await removeUser({ params: { path: { scheduleID: scheduleId } } });
   }
 
   const signedUpShifts = userSignups;
+  const userAssignments = userAssignedShifts;
 
-  return { join, signup, signedUpShifts, refetchUserSignups, leaveSchedule };
+  return {
+    join,
+    signup,
+    leaveSchedule,
+    refetchUserSignups,
+    refetchUserAssignments,
+    signedUpShifts,
+    userAssignments,
+  };
 }
