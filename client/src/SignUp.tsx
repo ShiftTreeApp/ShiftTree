@@ -8,7 +8,6 @@ import TextField from "@mui/material/TextField";
 import Link from "@mui/material/Link";
 import { Grid2 as Grid } from "@mui/material";
 import Box from "@mui/material/Box";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { useNavigate } from "react-router";
@@ -62,7 +61,7 @@ export default function SignUp() {
         }}
       >
         <Avatar
-          sx={{ m: 2, bgcolor: "secondary.main", width: 64, height: 64 }}
+          sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
           src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/shiftTreeImages/shiftSprout_avatar.png?raw=true"
         />
         <Typography component="h1" variant="h5">

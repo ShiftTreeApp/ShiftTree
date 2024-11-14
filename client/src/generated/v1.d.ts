@@ -486,11 +486,13 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Remove a user from the specified schedule */
+        /** Remove a user from the specified schedule. If no user is passed, the current user is removed.
+         *     Otherwise, the current user must the owner of the schedule, and the specified user will be removed.
+         *      */
         delete: {
             parameters: {
-                query: {
-                    userID: string;
+                query?: {
+                    userID?: string | null;
                 };
                 header?: never;
                 path: {
@@ -507,12 +509,23 @@ export interface paths {
                     };
                     content?: never;
                 };
-                /** @description User Not in Schedule */
-                401: {
+                /** @description Current user does not have permission to remove target user */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Schedule does not exist or user not in schedule */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
                 /** @description Unexpected Error */
                 default: {

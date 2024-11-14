@@ -21,18 +21,16 @@ import {
   HowToReg as RegisterIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
-import dayjs from "dayjs";
 import { useMemo, useState, useEffect } from "react";
+import dayjs from "dayjs";
 
 import { useApi } from "../client";
-
+import Navbar from "@/Navbar";
+import NavbarPadding from "@/NavbarPadding";
+import EditShiftDrawer from "./EditShiftDrawer";
 import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
-
-import EditShiftDrawer from "./EditShiftDrawer";
-import Navbar from "@/Navbar";
-import NavbarPadding from "@/NavbarPadding";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -195,7 +193,7 @@ export default function Schedule() {
                 {scheduleData?.role == "owner" && (
                   <UserChips
                     scheduleId={scheduleId}
-                    shiftId={selectedShift}
+                    shiftId={selectedShift ?? undefined}
                   ></UserChips>
                 )}
               </Box>
