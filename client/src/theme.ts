@@ -1,4 +1,3 @@
-import { Info } from "@mui/icons-material";
 import { createTheme } from "@mui/material/styles";
 import { PaletteColorOptions } from "@mui/material/styles";
 
@@ -42,7 +41,7 @@ const customTheme = createTheme({
       main: "#58A4B0",
       light: "#527B6A", // used for green buttons that are not primary
       light2: "#9BC1BC",
-      dark: "#A833B9", // purple used for generate shifts button
+      dark: "#A491D3", // purple used for generate shifts button
     },
     error: {
       main: "#f26868",
