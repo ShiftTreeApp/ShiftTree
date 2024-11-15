@@ -223,10 +223,11 @@ function WeekRow(props: WeekRowProps) {
                 sx={{
                   display: "inline-flex",
                   gap: 1,
-                  borderBottom: dayjs().isSame(date, "day")
-                    ? "3px solid"
-                    : "none",
-                  borderColor: theme => theme.palette.primary.main,
+                  borderBottom: "3px solid",
+                  borderColor: theme =>
+                    dayjs().isSame(date, "day")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
                 {date.date() === 1 && (
