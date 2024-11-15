@@ -14,6 +14,7 @@ import {
   Preview as PreviewIcon,
   //EventRepeat as GenerateSchedule,
   AutoMode as GenerateSchedule,
+  DeleteForever as DeleteShiftTreeIcon,
 } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import "dayjs/locale/en";
@@ -30,6 +31,7 @@ import EditShiftDrawer from "./EditShiftDrawer";
 import { useSearchParam } from "@/useSearchParam";
 import { useApi } from "@/client";
 import GenerateShiftModal from "./GenerateShiftModal";
+import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 
 interface EditShiftsTabProps {
   scheduleId: string;
@@ -161,6 +163,20 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     }, 2000);
   };
 
+  // Delete ShiftTree modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const handleDeleteShiftTreeClick = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    // Add logic to delete the ShiftTree here
+    // For now, we'll just close the modal after a delay to simulate loading
+    setTimeout(() => {
+      setDeleteModalOpen(false);
+    }, 2000);
+  };
+
   return (
     <Box
       sx={{
@@ -213,17 +229,27 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             >
               <Typography>Generate</Typography>
             </Button>
+            <Button
+              variant="contained"
+              startIcon={<DeleteShiftTreeIcon />}
+              onClick={handleDeleteShiftTreeClick}
+              sx={{
+                backgroundColor: theme => theme.palette.error.dark,
+              }}
+            >
+              <Typography>Delete ShiftTree</Typography>
+            </Button>
 
             <GenerateShiftModal
               open={modalOpen}
               onClose={handleCloseModal}
               onConfirm={handleConfirmModal}
             />
-            {/* <Button
-              startIcon={<AddIcon />}
-              variant="contained"
-              onClick={createNewShiftAndEdit}
-            /> */}
+            <DeleteShiftTreeModal
+              open={deleteModalOpen}
+              onClose={() => setDeleteModalOpen(false)}
+              onConfirm={handleDeleteConfirm}
+            />
           </Box>
           <ShiftCalendar
             shifts={shifts ?? []}

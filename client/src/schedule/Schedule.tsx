@@ -19,6 +19,7 @@ import { useParams } from "react-router";
 import {
   Edit as EditIcon,
   HowToReg as RegisterIcon,
+  EventBusy as LeaveShiftTreeIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
@@ -161,7 +162,9 @@ export default function Schedule() {
             <Grid sx={{ paddingLeft: 2 }}>
               <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
-            <Grid>
+            <Grid
+              sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}
+            >
               {scheduleData?.role == "owner" ||
               scheduleData?.role == "manager" ? (
                 <Button
@@ -176,6 +179,15 @@ export default function Schedule() {
                   Edit mode
                 </Button>
               ) : null}
+              <Button
+                variant="contained"
+                startIcon={<LeaveShiftTreeIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.error.dark,
+                }}
+              >
+                <Typography>Leave Shift Tree</Typography>
+              </Button>
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />

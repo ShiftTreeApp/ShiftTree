@@ -47,6 +47,7 @@ const customTheme = createTheme({
       main: "#f26868",
       light: "#f58686",
       veryLight: "#f8d7da",
+      dark: "#C20114", // #F40000
     },
     background: {
       default: "#e0ebc9", // Default background
