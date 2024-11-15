@@ -14,7 +14,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { Fragment, useState, useMemo, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import EditMembersDrawer from "./EditMembersDrawer";
 import { useApi } from "@/client";
 import dayjs from "dayjs";
@@ -62,6 +62,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
     {
       onSuccess: async () => {
         await refetchMembers();
+        setUserToKick(undefined);
       },
     },
   );
@@ -124,8 +125,8 @@ export default function EditMembersTab(props: EditMembersTabProps) {
       </Box>
       <KickDialog
         user={userToKick}
-        onClose={() => setUserToKick(undefined)}
         onKick={kickUser}
+        onClose={() => setUserToKick(undefined)}
       />
       <Typography variant="h5">Members</Typography>
       {membersData?.map((member, i) => (
@@ -148,7 +149,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
   );
 }
 
-function createRandomPfpUrl(name: string, id: string) {
+export function createRandomPfpUrl(name: string, id: string) {
   const r = Math.floor(parseInt(id.substring(0, 2), 16) / 2)
     .toString(16)
     .padStart(2, "0");
@@ -315,8 +316,10 @@ function KickDialog(props: KickDialogProps) {
     <Dialog open={props.user !== undefined} onClose={props.onClose}>
       <DialogTitle>{`Kick ${props.user?.displayName}?`}</DialogTitle>
       <DialogContent>
-        This will remove the user from the current ShiftTree. They can still
-        rejoin using a join code.
+        <Typography>
+          This will remove the user from the current ShiftTree. They can still
+          rejoin using a join code.
+        </Typography>
       </DialogContent>
       <DialogActions>
         <Button onClick={props.onClose}>Cancel</Button>

@@ -708,3 +708,38 @@ export async function getUserSignups(req: Request, res: Response) {
 
   res.json(result.rows[0].json);
 }
+
+export async function getUserAssignments(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId;
+
+  const query = /* sql */ `
+      with shifts as (
+        select *
+        from shift as s
+        where s.schedule_id = $1
+      ),
+      user_assignments as (
+        select usa.*
+        from user_shift_assignment as usa
+        join shifts as s on usa.shift_id = s.id
+      )
+      select coalesce(json_agg(ua.shift_id), json_build_array()) as json
+      from user_assignments as ua
+      where ua.user_id = $2
+    `;
+
+  const result = await pool.query({
+    text: query,
+    values: [scheduleId, userId],
+  });
+
+  if (result.rows.length < 1) {
+    res
+      .status(404)
+      .json({ error: "No signups found OR user/schedule not found" });
+    return;
+  }
+
+  res.json(result.rows[0].json);
+}

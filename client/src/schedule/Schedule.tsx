@@ -13,6 +13,7 @@ import {
   Chip,
   Box,
   Slider,
+  Avatar,
 } from "@mui/material";
 import { useParams } from "react-router";
 import {
@@ -20,14 +21,15 @@ import {
   HowToReg as RegisterIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
 import dayjs from "dayjs";
-import { useApi } from "../client";
 
-import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
-import EditShiftDrawer from "./EditShiftDrawer";
+import { useApi } from "../client";
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
-import { useMemo } from "react";
+import EditShiftDrawer from "./EditShiftDrawer";
+import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
+import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
@@ -62,15 +64,8 @@ function useSelectedShiftParam() {
 
 export default function Schedule() {
   const { scheduleId } = useParams();
-  const empActions = useEmployeeActions();
+  const empActions = useEmployeeActions(scheduleId ? scheduleId : "");
 
-  const handleRegister = async () => {
-    console.log(selectedShift);
-    empActions.signup({
-      shiftId: selectedShift,
-      userId: "none",
-    });
-  };
   // TODO: Change this to useSearchParam
   const { selectedShift, setSelectedShift, clearSelectedShift } =
     useSelectedShiftParam();
@@ -79,15 +74,44 @@ export default function Schedule() {
 
   const api = useApi();
 
-  // TODO: Get this from API
-  const signedUpShifts = useMemo(() => ["1", "3"], []);
+  const [signedUpShifts, setSignedUpShifts] = useState(
+    empActions.signedUpShifts,
+  );
+
+  const [assignedShifts, setAssignedShifts] = useState(
+    empActions.assignedShifts,
+  );
+
+  useEffect(() => {
+    const getUpdatedShiftStatuses = async () => {
+      empActions.refetchUserSignups();
+      empActions.refetchUserAssignments();
+      setSignedUpShifts(empActions.signedUpShifts);
+      setAssignedShifts(empActions.assignedShifts);
+    };
+
+    getUpdatedShiftStatuses();
+  }, [empActions.signedUpShifts, empActions.assignedShifts]);
 
   const signedUpIndicators = useMemo(
     () =>
       Object.fromEntries(
-        signedUpShifts.map(shiftId => [shiftId, SignedUpIndicator]),
+        signedUpShifts.map((shiftId: string) => [shiftId, SignedUpIndicator]),
       ),
     [signedUpShifts],
+  );
+
+  const assignedIndicators = useMemo(
+    () =>
+      Object.fromEntries(
+        assignedShifts.map((shiftId: string) => [shiftId, AssignedIndicator]),
+      ),
+    [assignedShifts],
+  );
+
+  const bothIndicators = useMemo(
+    () => ({ ...signedUpIndicators, ...assignedIndicators }),
+    [signedUpIndicators, assignedIndicators],
   );
 
   const { data: scheduleData } = api.useQuery(
@@ -109,6 +133,16 @@ export default function Schedule() {
     endTime: dayjs(shift.endTime),
   }));
 
+  const handleRegister = async () => {
+    console.log(selectedShift);
+    await empActions.signup({
+      shiftId: selectedShift ? selectedShift : "",
+      userId: "none",
+    });
+
+    empActions.refetchUserSignups();
+  };
+
   return (
     <Grid container direction="column" spacing={1}>
       <Navbar />
@@ -127,14 +161,20 @@ export default function Schedule() {
               <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
             <Grid>
-              <CustomTooltip title="Edit ShiftTree" placement="bottom">
-                <IconButton
+              {scheduleData?.role == "owner" ||
+              scheduleData?.role == "manager" ? (
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
                   component={RouterLink}
                   to={`/schedule/${scheduleId}/edit`}
+                  sx={{
+                    backgroundColor: theme => theme.palette.info.main,
+                  }}
                 >
-                  <EditIcon />
-                </IconButton>
-              </CustomTooltip>
+                  Edit mode
+                </Button>
+              ) : null}
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
@@ -168,6 +208,17 @@ export default function Schedule() {
               >
                 Register
               </Button>
+
+              <Box>
+                <Typography>Members signed up:</Typography>
+                {/* Chips for users that are signed up */}
+                {scheduleData?.role == "owner" && (
+                  <UserChips
+                    scheduleId={scheduleId}
+                    shiftId={selectedShift ?? undefined}
+                  ></UserChips>
+                )}
+              </Box>
             </Box>
           </EditShiftDrawer>
           <ShiftCalendar
@@ -175,7 +226,7 @@ export default function Schedule() {
             startDate={dayjs(scheduleData?.startTime ?? dayjs().toISOString())}
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
-            customContentMap={signedUpIndicators}
+            customContentMap={bothIndicators}
             shifts={formattedShifts}
           />
         </Paper>
@@ -186,4 +237,56 @@ export default function Schedule() {
 
 function SignedUpIndicator() {
   return <Chip icon={<RegisterIcon />} label="Signed up" color="info" />;
+}
+
+function AssignedIndicator() {
+  return <Chip icon={<RegisterIcon />} label="Assigned" color="primary" />;
+}
+
+interface UserChipsProps {
+  scheduleId?: string;
+  shiftId?: string;
+}
+
+function UserChips(props: UserChipsProps) {
+  const api = useApi();
+
+  // This request is required to get the users avatars/names for the chips
+  const { data: membersData } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/members",
+    { params: { path: { scheduleId: props.scheduleId as string } } },
+  );
+
+  // This request is required to get the users that are signed up in each schedule
+  const { data: scheduleSignups } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/signups",
+    { params: { path: { scheduleId: props.scheduleId as string } } },
+  );
+
+  const userIds =
+    scheduleSignups
+      ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
+      .flatMap((shift: any) =>
+        shift.signups.map((signup: any) => signup.user.id),
+      ) || [];
+
+  return (
+    <Box>
+      {userIds.map(userId => {
+        // Find the corresponding member data by userId
+        const member = membersData?.find((member: any) => member.id === userId);
+        return member ? (
+          <Chip
+            avatar={
+              <Avatar src={createRandomPfpUrl(member.displayName, member.id)} />
+            }
+            label={member.displayName}
+            variant="outlined"
+          />
+        ) : null;
+      })}
+    </Box>
+  );
 }

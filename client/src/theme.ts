@@ -32,6 +32,11 @@ const customTheme = createTheme({
       light: "#ffca70",
       veryLight: "#ffe082",
     },
+    info: {
+      main: "#58A4B0",
+      light: "#426A5A",
+      dark: "#A833B9",
+    },
     error: {
       main: "#f26868", //'#e63205'   #e53935
       light: "#f58686",
