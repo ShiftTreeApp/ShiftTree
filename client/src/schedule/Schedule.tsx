@@ -162,7 +162,9 @@ export default function Schedule() {
             <Grid sx={{ paddingLeft: 2 }}>
               <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
-            <Grid>
+            <Grid
+              sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}
+            >
               {scheduleData?.role == "owner" ||
               scheduleData?.role == "manager" ? (
                 <Button
