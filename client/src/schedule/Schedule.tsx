@@ -204,8 +204,13 @@ export default function Schedule() {
               <Slider
                 defaultValue={50}
                 aria-label="Request weight"
-                valueLabelDisplay="off"
+                valueLabelDisplay="auto"
                 sx={{ marginBottom: 1 }}
+                shiftStep={30}
+                step={10}
+                marks
+                max={100}
+                min={10}
               />
 
               <Button
