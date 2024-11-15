@@ -31,6 +31,7 @@ import EditShiftDrawer from "./EditShiftDrawer";
 import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
+import theme from "@/theme";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -233,11 +234,30 @@ export default function Schedule() {
 }
 
 function SignedUpIndicator() {
-  return <Chip icon={<RegisterIcon />} label="Signed up" color="info" />;
+  return (
+    <Chip
+      icon={<RegisterIcon sx={{ "&&": { color: "white" } }} />}
+      label="Signed up"
+      sx={{
+        backgroundColor: theme.palette.info.main,
+        color: "white",
+      }}
+    />
+  );
 }
 
 function AssignedIndicator() {
-  return <Chip icon={<RegisterIcon />} label="Assigned" color="primary" />;
+  return (
+    <Chip
+      icon={<RegisterIcon />}
+      sx={{
+        backgroundColor: theme.palette.primary.main,
+        color: "white",
+      }}
+      label="Assigned"
+      color="primary"
+    />
+  );
 }
 
 interface UserChipsProps {
