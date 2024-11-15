@@ -4,12 +4,7 @@ import {
   Typography,
   Paper,
   Divider,
-  IconButton,
   Button,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
   Chip,
   Box,
   Slider,
@@ -33,17 +28,6 @@ import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import theme from "@/theme";
-
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -179,7 +163,8 @@ export default function Schedule() {
                   Edit mode
                 </Button>
               ) : null}
-              {scheduleData?.role == "member" ? (
+              {scheduleData?.role == "member" ||
+              scheduleData?.role == "manager" ? (
                 <Button
                   variant="contained"
                   startIcon={<LeaveShiftTreeIcon />}

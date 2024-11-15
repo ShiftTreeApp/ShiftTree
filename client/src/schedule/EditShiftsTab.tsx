@@ -208,37 +208,47 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             >
               <Typography>View mode</Typography>
             </Button>
-            <Button
-              variant="contained"
-              onClick={createNewShiftAndEdit}
-              startIcon={<AddIcon />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.light,
-              }}
-            >
-              <Typography>Add Shift</Typography>
-            </Button>
+            {scheduleData?.role == "owner" ||
+            scheduleData?.role == "manager" ? (
+              <Button
+                variant="contained"
+                onClick={createNewShiftAndEdit}
+                startIcon={<AddIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.light,
+                }}
+              >
+                <Typography>Add Shift</Typography>
+              </Button>
+            ) : null}
 
-            <Button
-              variant="contained"
-              onClick={handleOpenModal}
-              startIcon={<GenerateSchedule />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.dark,
-              }}
-            >
-              <Typography>Generate</Typography>
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<DeleteShiftTreeIcon />}
-              onClick={handleDeleteShiftTreeClick}
-              sx={{
-                backgroundColor: theme => theme.palette.error.dark,
-              }}
-            >
-              <Typography>Delete ShiftTree</Typography>
-            </Button>
+            {scheduleData?.role == "owner" ||
+            scheduleData?.role == "manager" ? (
+              <Button
+                variant="contained"
+                onClick={handleOpenModal}
+                startIcon={<GenerateSchedule />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.dark,
+                }}
+              >
+                <Typography>Generate</Typography>
+              </Button>
+            ) : null}
+
+            {scheduleData?.role == "owner" ||
+            scheduleData?.role == "manager" ? (
+              <Button
+                variant="contained"
+                startIcon={<DeleteShiftTreeIcon />}
+                onClick={handleDeleteShiftTreeClick}
+                sx={{
+                  backgroundColor: theme => theme.palette.error.dark,
+                }}
+              >
+                <Typography>Delete ShiftTree</Typography>
+              </Button>
+            ) : null}
 
             <GenerateShiftModal
               open={modalOpen}

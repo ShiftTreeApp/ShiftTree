@@ -16,6 +16,8 @@ import { useParams } from "react-router";
 import { useNavigate } from "react-router";
 import EditMembersTab from "./EditMembersTab";
 import EditSignupsTab from "./EditSignupsTab";
+import { useApi } from "../client";
+import { useEffect } from "react";
 
 const tabNames = {
   shifts: "shifts",
@@ -28,6 +30,7 @@ type TabName = (typeof tabNames)[keyof typeof tabNames];
 
 export default function EditTree() {
   const { scheduleId } = useParams();
+  const api = useApi();
 
   // Get the state of the selected tab
   const [selectedTab, setSelectedTab] = useSearchParam<TabName>("tab", {
@@ -42,9 +45,18 @@ export default function EditTree() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const navigate = useNavigate();
-  function toView() {
-    navigate("/schedule/:scheduleId/view");
-  }
+
+  const { data: scheduleData } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}",
+    { params: { path: { scheduleId: scheduleId as string } } },
+  );
+
+  useEffect(() => {
+    if (scheduleData?.role === "member") {
+      navigate(`/schedule/${scheduleId}`);
+    }
+  }, [scheduleData, history, scheduleId]);
 
   return (
     <Grid container direction="column" spacing={1}>
@@ -105,7 +117,7 @@ export default function EditTree() {
             )}
             {/* Signups Settings */}
             {selectedTab === "signups" && (
-                <EditSignupsTab scheduleId={scheduleId as string} />
+              <EditSignupsTab scheduleId={scheduleId as string} />
             )}
             {/* Assign Settings */}
             {selectedTab === "assign" && (
