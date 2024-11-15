@@ -291,7 +291,7 @@ function ShiftCard(props: ShiftCardProps) {
         backgroundColor: props.selected
           ? theme => theme.palette.primary.light
           : (props.colorMap[props.id] ??
-            (theme => theme.palette.secondary.veryLight)),
+            (theme => theme.palette.secondary.light2)),
         // NOTE: colorMap gets priority over default color, but selection color overrides colorMap.
         // This enables the following:
         // eventually, I want functionality to change the color of the card based on the status of the shift:
