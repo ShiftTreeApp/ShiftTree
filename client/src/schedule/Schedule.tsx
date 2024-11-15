@@ -179,15 +179,17 @@ export default function Schedule() {
                   Edit mode
                 </Button>
               ) : null}
-              <Button
-                variant="contained"
-                startIcon={<LeaveShiftTreeIcon />}
-                sx={{
-                  backgroundColor: theme => theme.palette.error.dark,
-                }}
-              >
-                <Typography>Leave Shift Tree</Typography>
-              </Button>
+              {scheduleData?.role == "member" ? (
+                <Button
+                  variant="contained"
+                  startIcon={<LeaveShiftTreeIcon />}
+                  sx={{
+                    backgroundColor: theme => theme.palette.error.dark,
+                  }}
+                >
+                  <Typography>Leave Shift Tree</Typography>
+                </Button>
+              ) : null}
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
