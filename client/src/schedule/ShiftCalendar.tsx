@@ -223,10 +223,11 @@ function WeekRow(props: WeekRowProps) {
                 sx={{
                   display: "inline-flex",
                   gap: 1,
-                  borderBottom: dayjs().isSame(date, "day")
-                    ? "3px solid"
-                    : "none",
-                  borderColor: theme => theme.palette.primary.main,
+                  borderBottom: "3px solid",
+                  borderColor: theme =>
+                    dayjs().isSame(date, "day")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
                 {date.date() === 1 && (
@@ -292,7 +293,7 @@ function ShiftCard(props: ShiftCardProps) {
         backgroundColor: props.selected
           ? theme => theme.palette.primary.light
           : (props.colorMap[props.id] ??
-            (theme => theme.palette.secondary.veryLight)),
+            (theme => theme.palette.secondary.light2)),
         // NOTE: colorMap gets priority over default color, but selection color overrides colorMap.
         // This enables the following:
         // eventually, I want functionality to change the color of the card based on the status of the shift:
