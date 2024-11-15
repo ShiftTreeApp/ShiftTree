@@ -30,7 +30,34 @@ async function getUserId(req: Request) {
 // Fetches the join-code for a ShiftTree
 export const getExistingJoinCode = async (req: Request, res: Response) => {
   try {
+    const userId = await getUserId(req);
     const { ShiftTreeID } = req.query;
+
+    const schedulesQuery = /* sql */ `
+    select * from schedule_info
+    where schedule_info.user_id = $1 and schedule_info.schedule_id = $2
+  `;
+
+    const schedulesResult = await pool.query({
+      text: schedulesQuery,
+      values: [userId, ShiftTreeID],
+    });
+    console.log(schedulesResult.rows[0]);
+
+    if (schedulesResult.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    const schedule = schedulesResult.rows[0];
+
+    if (!(schedule.user_role === "owner" || schedule.user_role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to invite users to this schedule",
+      });
+      return;
+    }
+
     const statement = "SELECT code FROM schedule WHERE id = $1";
     const query = {
       text: statement,
@@ -51,8 +78,31 @@ export const getExistingJoinCode = async (req: Request, res: Response) => {
 // Generates a new join-code for a ShiftTree
 export const generateJoinCode = async (req: Request, res: Response) => {
   try {
+    const userId = await getUserId(req);
     const { ShiftTreeID } = req.query;
-    console.log(ShiftTreeID);
+    const schedulesQuery = /* sql */ `
+    select * from schedule_info
+    where schedule_info.user_id = $1 and schedule_info.schedule_id = $2
+  `;
+
+    const schedulesResult = await pool.query({
+      text: schedulesQuery,
+      values: [userId, ShiftTreeID],
+    });
+    console.log(schedulesResult.rows[0]);
+    if (schedulesResult.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    const schedule = schedulesResult.rows[0];
+
+    if (!(schedule.user_role === "owner" || schedule.user_role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to invite users to this schedule",
+      });
+      return;
+    }
     const statement =
       "UPDATE schedule SET code = gen_random_uuid() WHERE id = $1 RETURNING code";
     const query = {
@@ -119,7 +169,29 @@ export const removeUserFromShiftTree = async (req: Request, res: Response) => {
   const currentUserId = await getUserId(req);
   const ShiftTreeID = req.params.scheduleID;
   const targetUserId = req.query.userID ?? currentUserId;
+  const schedulesQuery = /* sql */ `
+  select * from schedule_info
+  where schedule_info.user_id = $1 and schedule_info.schedule_id = $2
+`;
 
+  const schedulesResult = await pool.query({
+    text: schedulesQuery,
+    values: [currentUserId, ShiftTreeID],
+  });
+
+  if (schedulesResult.rows.length < 1) {
+    res.status(404).json({ error: "Schedule not found" });
+    return;
+  }
+
+  const schedule = schedulesResult.rows[0];
+
+  if (!(schedule.user_role === "owner" || schedule.user_role === "manager")) {
+    res.status(403).json({
+      error: "You do not have permission to invite users to this schedule",
+    });
+    return;
+  }
   // If the target user is not the current user, check if the current user is the owner
   if (targetUserId !== currentUserId) {
     const results = await pool.query({
