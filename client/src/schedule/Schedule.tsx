@@ -161,17 +161,20 @@ export default function Schedule() {
               <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
             <Grid>
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                component={RouterLink}
-                to={`/schedule/${scheduleId}/edit`}
-                sx={{
-                  backgroundColor: theme => theme.palette.info.main,
-                }}
-              >
-                Edit mode
-              </Button>
+              {scheduleData?.role == "owner" ||
+              scheduleData?.role == "manager" ? (
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
+                  component={RouterLink}
+                  to={`/schedule/${scheduleId}/edit`}
+                  sx={{
+                    backgroundColor: theme => theme.palette.info.main,
+                  }}
+                >
+                  Edit mode
+                </Button>
+              ) : null}
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
