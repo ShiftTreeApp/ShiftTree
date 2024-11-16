@@ -35,6 +35,7 @@ import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 import MultiDateCalendar from "@/schedule/MultiDateCalendar";
 import { useNotifier } from "@/notifier";
 import useSchedule from "@/hooks/useSchedule";
+import { downloadFile } from "@/utils";
 
 interface EditShiftsTabProps {
   scheduleId: string;
@@ -129,6 +130,14 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     }, 2000);
   };
 
+  async function downloadCsv() {
+    const csv = await schedule.getAssignmentsCsv();
+    downloadFile({
+      data: new Blob([csv], { type: "text/csv" }),
+      filename: `${schedule.name ?? ""} - Assigned Shifts.csv`,
+    });
+  }
+
   return (
     <Box
       sx={{
@@ -212,6 +221,10 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               onClose={() => setDeleteModalOpen(false)}
               onConfirm={handleDeleteConfirm}
             />
+
+            <Button color="info" onClick={downloadCsv}>
+              Download CSV
+            </Button>
           </Box>
           <ShiftCalendar
             shifts={schedule.shifts}
