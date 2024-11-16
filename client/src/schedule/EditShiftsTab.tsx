@@ -27,14 +27,14 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Link as RouterLink } from "react-router-dom";
 
-import { ShiftCalendar, type ShiftDetails } from "./ShiftCalendar";
+import { ShiftCalendar } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import { useSearchParam } from "@/useSearchParam";
-import { useApi } from "@/client";
 import GenerateShiftModal from "./GenerateShiftModal";
 import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 import MultiDateCalendar from "@/schedule/MultiDateCalendar";
 import { useNotifier } from "@/notifier";
+import useSchedule from "@/hooks/useSchedule";
 
 interface EditShiftsTabProps {
   scheduleId: string;
@@ -43,79 +43,27 @@ interface EditShiftsTabProps {
 export default function EditShiftsTab(props: EditShiftsTabProps) {
   const [currentlyEditing, setCurrentlyEditing] = useSearchParam("shift");
 
-  const api = useApi();
-
-  const { data: scheduleData, refetch: refetchSchedule } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}",
-    { params: { path: { scheduleId: props.scheduleId } } },
-  );
-  const startTime = useMemo(
-    () => (scheduleData?.startTime ? dayjs(scheduleData.startTime) : dayjs()),
-    [scheduleData?.startTime],
-  );
-  const endTime = useMemo(
-    () => (scheduleData?.endTime ? dayjs(scheduleData.endTime) : dayjs()),
-    [scheduleData?.endTime],
-  );
-  useEffect(() => console.log(scheduleData), [scheduleData]);
-
-  const { data: shiftsData, refetch: refetchShifts } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/shifts",
-    {
-      params: { path: { scheduleId: props.scheduleId } },
-    },
-  );
-  const shifts = useMemo(
-    () =>
-      shiftsData?.map(
-        shift =>
-          ({
-            id: shift.id,
-            name: shift.name,
-            startTime: dayjs(shift.startTime),
-            endTime: dayjs(shift.endTime),
-          }) satisfies ShiftDetails,
-      ),
-    [shiftsData],
-  );
-
-  const { mutateAsync: postShift } = api.useMutation(
-    "post",
-    "/schedules/{scheduleId}/shifts",
-    {
-      onSuccess: async () => {
-        await refetchSchedule();
-        await refetchShifts();
-      },
-    },
-  );
+  const schedule = useSchedule({ scheduleId: props.scheduleId });
 
   async function createNewShiftAndEdit() {
-    if (shifts == undefined) {
-      return;
-    }
-    if (shifts.length === 0) {
+    if (schedule.shifts.length === 0) {
       const now = dayjs().startOf("hour");
-      const { id } = await postShift({
-        params: { path: { scheduleId: props.scheduleId } },
-        body: {
-          name: "First shift",
-          startTime: now.toISOString(),
-          endTime: now.add(1, "hour").toISOString(),
-        },
+      const { id } = await schedule.createShift({
+        name: "First shift",
+        description: "",
+        startTime: now,
+        endTime: now.add(1, "hour"),
       });
       setCurrentlyEditing(id);
     } else {
-      const lastEnd = dayjs(shifts[shifts?.length - 1].endTime);
-      const { id } = await postShift({
-        params: { path: { scheduleId: props.scheduleId } },
-        body: {
-          name: "New shift",
-          startTime: lastEnd.toISOString(),
-          endTime: lastEnd.add(1, "hour").toISOString(),
-        },
+      const lastEnd = dayjs(
+        schedule.shifts[schedule.shifts?.length - 1].endTime,
+      );
+      const { id } = await schedule.createShift({
+        name: "New shift",
+        description: "",
+        startTime: lastEnd,
+        endTime: lastEnd.add(1, "hour"),
       });
       setCurrentlyEditing(id);
     }
@@ -193,12 +141,12 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     >
       <Breadcrumbs>
         <Link component={RouterLink} to={`/schedule/${props.scheduleId}`}>
-          {scheduleData?.name ?? scheduleData?.id ?? "Schedule"}
+          {schedule.name ?? schedule.data?.id ?? "Schedule"}
         </Link>
         <Typography>Edit shifts</Typography>
       </Breadcrumbs>
-      {shifts?.length === 0 && <EmptyShifts />}
-      {shifts?.length !== 0 && (
+      {schedule.shifts.length === 0 && <EmptyShifts />}
+      {schedule.shifts.length !== 0 && (
         <>
           <Box sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}>
             <Button
@@ -212,8 +160,8 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             >
               <Typography>View mode</Typography>
             </Button>
-            {scheduleData?.role == "owner" ||
-            scheduleData?.role == "manager" ? (
+            {schedule.data?.role == "owner" ||
+            schedule.data?.role == "manager" ? (
               <Button
                 variant="contained"
                 onClick={createNewShiftAndEdit}
@@ -226,8 +174,8 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               </Button>
             ) : null}
 
-            {scheduleData?.role == "owner" ||
-            scheduleData?.role == "manager" ? (
+            {schedule.data?.role == "owner" ||
+            schedule.data?.role == "manager" ? (
               <Button
                 variant="contained"
                 onClick={handleOpenModal}
@@ -240,8 +188,8 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               </Button>
             ) : null}
 
-            {scheduleData?.role == "owner" ||
-            scheduleData?.role == "manager" ? (
+            {schedule.data?.role == "owner" ||
+            schedule.data?.role == "manager" ? (
               <Button
                 variant="contained"
                 startIcon={<DeleteShiftTreeIcon />}
@@ -266,9 +214,9 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             />
           </Box>
           <ShiftCalendar
-            shifts={shifts ?? []}
-            startDate={startTime}
-            endDate={endTime}
+            shifts={schedule.shifts}
+            startDate={schedule.startTime}
+            endDate={schedule.endTime}
             onClickShift={shiftId => setCurrentlyEditing(shiftId)}
             selectedShifts={currentlyEditing ? [currentlyEditing] : []}
           />
@@ -281,6 +229,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       >
         {currentlyEditing && (
           <EditShift
+            key={props.scheduleId}
             scheduleId={props.scheduleId}
             shiftId={currentlyEditing}
             onClose={() => setCurrentlyEditing(null)}
@@ -299,47 +248,13 @@ interface EditShiftProps {
 
 function EditShift(props: EditShiftProps) {
   const notifier = useNotifier();
-  const api = useApi();
-  const { refetch: refetchSchedule } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}",
-    { params: { path: { scheduleId: props.scheduleId } } },
-  );
 
-  const { data: shiftsData, refetch: refetchShifts } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/shifts",
-    { params: { path: { scheduleId: props.scheduleId } } },
-  );
-  const shiftData = useMemo(
-    () => shiftsData?.find(shift => shift.id === props.shiftId),
-    [props.shiftId, shiftsData],
-  );
-
-  const { mutateAsync: sendDelete } = api.useMutation(
-    "delete",
-    "/shifts/{shiftId}",
-    {
-      onSuccess: async () => {
-        await refetchShifts();
-        await refetchSchedule();
-      },
-    },
-  );
-
-  const { mutateAsync: postShift } = api.useMutation(
-    "post",
-    "/schedules/{scheduleId}/shifts",
-    {
-      onSuccess: async () => {
-        await refetchShifts();
-        await refetchSchedule();
-      },
-    },
-  );
+  const schedule = useSchedule({ scheduleId: props.scheduleId });
+  const shift = schedule.useShift({ shiftId: props.shiftId });
 
   async function deleteShift() {
-    await sendDelete({ params: { path: { shiftId: props.shiftId } } });
+    await shift.delete_();
+    notifier.message("Shift deleted");
     props.onClose();
   }
 
@@ -348,13 +263,13 @@ function EditShift(props: EditShiftProps) {
   const [newStartTime, setNewStartTime] = useState(dayjs());
   const [newEndTime, setNewEndTime] = useState(dayjs());
   useEffect(() => {
-    if (shiftData) {
-      setNewName(shiftData.name);
-      setNewDesc(shiftData.description);
-      setNewStartTime(dayjs(shiftData.startTime));
-      setNewEndTime(dayjs(shiftData.endTime));
+    if (shift.data) {
+      setNewName(shift.data.name);
+      setNewDesc(shift.data.description);
+      setNewStartTime(dayjs(shift.data.startTime));
+      setNewEndTime(dayjs(shift.data.endTime));
     }
-  }, [shiftData]);
+  }, [shift.data]);
 
   useEffect(() => {
     if (newStartTime.isAfter(newEndTime)) {
@@ -362,26 +277,12 @@ function EditShift(props: EditShiftProps) {
     }
   }, [newStartTime, newEndTime]);
 
-  const { mutateAsync: updateShift } = api.useMutation(
-    "put",
-    "/shifts/{shiftId}",
-    {
-      onSuccess: async () => {
-        await refetchShifts();
-        await refetchSchedule();
-      },
-    },
-  );
-
   async function saveChanges() {
-    await updateShift({
-      params: { path: { shiftId: props.shiftId } },
-      body: {
-        name: newName,
-        description: newDesc,
-        startTime: newStartTime.toISOString(),
-        endTime: newEndTime.toISOString(),
-      },
+    await shift.update({
+      name: newName,
+      description: newDesc,
+      startTime: newStartTime,
+      endTime: newEndTime,
     });
     props.onClose();
   }
@@ -429,14 +330,11 @@ function EditShift(props: EditShiftProps) {
         const endTimeOffsetMin = newEndTime.diff(newStartTime, "minute");
         const startTime = date.startOf("day").add(startTimeOffsetMin, "minute");
         const endTime = startTime.add(endTimeOffsetMin, "minute");
-        await postShift({
-          params: { path: { scheduleId: props.scheduleId } },
-          body: {
-            name: newName,
-            description: newDesc,
-            startTime: startTime.toISOString(),
-            endTime: endTime.toISOString(),
-          },
+        await schedule.createShift({
+          name: newName,
+          description: newDesc,
+          startTime: startTime,
+          endTime: endTime,
         });
       }),
     ).catch(notifier.error);
