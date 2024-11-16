@@ -2,6 +2,7 @@ import {
   Box,
   Breadcrumbs,
   Button,
+  Divider,
   Link,
   TextField,
   Typography,
@@ -32,6 +33,8 @@ import { useSearchParam } from "@/useSearchParam";
 import { useApi } from "@/client";
 import GenerateShiftModal from "./GenerateShiftModal";
 import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
+import MultiDateCalendar from "@/schedule/MultiDateCalendar";
+import { useNotifier } from "@/notifier";
 
 interface EditShiftsTabProps {
   scheduleId: string;
@@ -42,7 +45,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
 
   const api = useApi();
 
-  const { data: scheduleData } = api.useQuery(
+  const { data: scheduleData, refetch: refetchSchedule } = api.useQuery(
     "get",
     "/schedules/{scheduleId}",
     { params: { path: { scheduleId: props.scheduleId } } },
@@ -83,6 +86,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     "/schedules/{scheduleId}/shifts",
     {
       onSuccess: async () => {
+        await refetchSchedule();
         await refetchShifts();
       },
     },
@@ -294,6 +298,7 @@ interface EditShiftProps {
 }
 
 function EditShift(props: EditShiftProps) {
+  const notifier = useNotifier();
   const api = useApi();
   const { refetch: refetchSchedule } = api.useQuery(
     "get",
@@ -314,6 +319,17 @@ function EditShift(props: EditShiftProps) {
   const { mutateAsync: sendDelete } = api.useMutation(
     "delete",
     "/shifts/{shiftId}",
+    {
+      onSuccess: async () => {
+        await refetchShifts();
+        await refetchSchedule();
+      },
+    },
+  );
+
+  const { mutateAsync: postShift } = api.useMutation(
+    "post",
+    "/schedules/{scheduleId}/shifts",
     {
       onSuccess: async () => {
         await refetchShifts();
@@ -344,7 +360,7 @@ function EditShift(props: EditShiftProps) {
     if (newStartTime.isAfter(newEndTime)) {
       setNewEndTime(newStartTime.add(1, "hour"));
     }
-  }, [newStartTime]);
+  }, [newStartTime, newEndTime]);
 
   const { mutateAsync: updateShift } = api.useMutation(
     "put",
@@ -367,6 +383,65 @@ function EditShift(props: EditShiftProps) {
         endTime: newEndTime.toISOString(),
       },
     });
+    props.onClose();
+  }
+
+  const [copyTargetDates, setCopyTargetDates] = useState<dayjs.Dayjs[]>([]);
+
+  const copyDatesDescription = useMemo(() => {
+    const sorted = copyTargetDates.sort((a, b) => a.diff(b));
+    // Consecutive runs of days
+    const runs = sorted.reduce((acc, date, i) => {
+      if (i === 0) {
+        return [[date]];
+      }
+      const lastRun = acc[acc.length - 1];
+      const lastDate = lastRun[lastRun.length - 1];
+      if (date.diff(lastDate, "day") === 1) {
+        lastRun.push(date);
+        return acc;
+      } else {
+        return [...acc, [date]];
+      }
+    }, [] as dayjs.Dayjs[][]);
+    const runStrings = runs.map(run => {
+      if (run.length === 1) {
+        return run[0].format("MMM DD");
+      } else {
+        const start = run[0].format("MMM DD");
+        const endDate = run[run.length - 1];
+        const end = run[0].isSame(endDate, "month")
+          ? endDate.format("DD")
+          : endDate.format("MMM DD");
+        return `${start} - ${end}`;
+      }
+    });
+    return runStrings.join(", ");
+  }, [copyTargetDates]);
+
+  async function copyShift() {
+    if (copyTargetDates.length === 0) {
+      notifier.error("No dates selected to copy shift to");
+    }
+    await Promise.all(
+      copyTargetDates.map(async date => {
+        const startTimeOffsetMin = date.diff(date.startOf("day"), "minute");
+        const endTimeOffsetMin = newEndTime.diff(newStartTime, "minute");
+        const startTime = date.startOf("day").add(startTimeOffsetMin, "minute");
+        const endTime = startTime.add(endTimeOffsetMin, "minute");
+        await postShift({
+          params: { path: { scheduleId: props.scheduleId } },
+          body: {
+            name: newName,
+            description: newDesc,
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString(),
+          },
+        });
+      }),
+    ).catch(notifier.error);
+    notifier.message(`Copied shift to ${copyTargetDates.length} dates`);
+
     props.onClose();
   }
 
@@ -443,6 +518,41 @@ function EditShift(props: EditShiftProps) {
         >
           Delete shift
         </Button>
+      </Box>
+      <Divider sx={{ paddingTop: 1, paddingBottom: 1 }} />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          justifyContent: "flex-start",
+          alignItems: "stretch",
+        }}
+      >
+        <MultiDateCalendar
+          selectedDates={copyTargetDates}
+          onSelectedDatesChange={setCopyTargetDates}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 1,
+          }}
+        >
+          <Typography>
+            {copyDatesDescription &&
+              `This shift will be copied to ${copyDatesDescription}.`}
+          </Typography>
+          {copyTargetDates.length !== 0 && (
+            <Button variant="contained" onClick={copyShift}>
+              Copy Shift
+            </Button>
+          )}
+          {copyTargetDates.length === 0 && (
+            <Typography>Select dates to copy this shift to</Typography>
+          )}
+        </Box>
       </Box>
     </>
   );
