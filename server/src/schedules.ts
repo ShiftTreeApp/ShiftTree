@@ -801,9 +801,12 @@ export async function getCsv(req: Request, res: Response) {
       select json_agg(json_build_object(
         'name', ua.username,
         'email', ua.email,
-        'shift_start', (to_json(s.start_time)#>>'{}')||'Z',
-        'shift_end', (to_json(s.end_time)#>>'{}')||'Z',
+        'shift_start', to_char(s.start_time, 'YYYY-MM-DD'),
+        'shift_end', to_char(s.end_time, 'YYYY-MM-DD'),
+        'shift_start_time', to_char(s.start_time, 'HH24:MI:SS'),
+        'shift_end_time', to_char(s.end_time, 'HH24:MI:SS'),
         'shift_name', s.shift_name,
+        'multi_day', case when s.start_time::date <> s.end_time::date then 'yes' else 'no' end,
         'shift_description', s.shift_description
       )) as json
       from user_shift_assignment as usa
@@ -817,8 +820,11 @@ export async function getCsv(req: Request, res: Response) {
   const columns = {
     name: "Name",
     email: "Email",
-    shift_start: "Shift Start",
-    shift_end: "Shift End",
+    shift_start: "Shift Start Date",
+    shift_end: "Shift End Date",
+    shift_start_time: "Shift Start Time",
+    shift_end_time: "Shift End Time",
+    multi_day: "Spans Multiple Days?",
     shift_name: "Shift Name",
     shift_description: "Shift Description",
   };
