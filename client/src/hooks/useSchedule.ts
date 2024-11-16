@@ -38,6 +38,18 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     },
   );
 
+  const { refetch: refetchAssignmentsCsv } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/csv",
+    {
+      params: {
+        path: { scheduleId: scheduleId },
+        query: { type: "assignments" },
+      },
+    },
+    { enabled: false },
+  );
+
   const shifts = useMemo(
     () =>
       shiftsData?.map(
@@ -114,6 +126,11 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     });
   }
 
+  async function getAssignmentsCsv() {
+    const res = await refetchAssignmentsCsv({ throwOnError: true });
+    return res.data?.csv ?? "";
+  }
+
   function useShift({ shiftId }: { shiftId: string }) {
     const data = useMemo(() => shifts.find(s => s.id === shiftId), [shiftId]);
 
@@ -139,5 +156,6 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     useShift,
     deleteShift,
     updateShift,
+    getAssignmentsCsv,
   };
 }
