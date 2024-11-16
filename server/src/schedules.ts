@@ -62,9 +62,10 @@ export async function list(req: Request, res: Response) {
 
   const query = /* sql */ `
     with filtered as (
-      select info.*, se.start_time, se.end_time
+      select info.*, se.start_time, se.end_time, ss.schedule_state
       from schedule_info as info
       join schedule_start_end as se on info.schedule_id = se.schedule_id
+      join schedule_state as ss on info.schedule_id = ss.schedule_id
       where true
         and info.user_id = $1
         and info.user_role in (select json_array_elements($2) #>> '{}' as r)
@@ -87,7 +88,7 @@ export async function list(req: Request, res: Response) {
       'role', s.user_role,
       'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
       'endTime', (to_json(s.end_time)#>>'{}')||'Z',
-      'state', 'open'
+      'state', s.schedule_state
     )), json_array()) as json
     from filtered as s
   `;
@@ -106,9 +107,10 @@ export async function getSchedule(req: Request, res: Response) {
 
   const query = /* sql */ `
     with selected_schedule as (
-      select info.*, se.start_time, se.end_time
+      select info.*, se.start_time, se.end_time, ss.schedule_state
       from schedule_info as info
       join schedule_start_end as se on info.schedule_id = se.schedule_id
+      join schedule_state as ss on info.schedule_id = ss.schedule_id
       where info.user_id = $1 and info.schedule_id = $2
     )
     select json_build_object(
@@ -128,7 +130,7 @@ export async function getSchedule(req: Request, res: Response) {
       'role', s.user_role,
       'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
       'endTime', (to_json(s.end_time)#>>'{}')||'Z',
-      'state', 'open'
+      'state', s.schedule_state
     ) as json
     from selected_schedule as s
   `;
