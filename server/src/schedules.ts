@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import * as jwt from "jsonwebtoken";
+import * as csv from "csv-stringify";
 
 import { pool } from "@/pool";
 
@@ -742,4 +743,99 @@ export async function getUserAssignments(req: Request, res: Response) {
   }
 
   res.json(result.rows[0].json);
+}
+
+async function getUserRole({
+  userId,
+  scheduleId,
+}: {
+  userId: string;
+  scheduleId: string;
+}): Promise<"owner" | "manager" | "member" | null> {
+  const query = /* sql */ `
+    select *
+    from schedule_info as info
+    where info.user_id = $1 and info.schedule_id = $2
+  `;
+
+  const results = await pool.query({
+    text: query,
+    values: [userId, scheduleId],
+  });
+
+  if (results.rows.length < 1) {
+    return null;
+  }
+
+  return results.rows[0].user_role;
+}
+
+export async function getCsv(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const { scheduleId, type } = req.params as {
+    scheduleId: string;
+    type: "shifts" | "assignments";
+  };
+
+  if (type === "shifts") {
+    console.error("not implemented");
+    res.sendStatus(500);
+    return;
+  }
+
+  const userRole = await getUserRole({ userId, scheduleId });
+  if (!userRole) {
+    res.status(404).json({ error: "Schedule not found" });
+    return;
+  }
+
+  if (userRole === "member") {
+    res.status(403).json({
+      error: "You do not have permission to view assignments for this schedule",
+    });
+    return;
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      select json_agg(json_build_object(
+        'name', ua.username,
+        'email', ua.email,
+        'shift_start', (to_json(s.start_time)#>>'{}')||'Z',
+        'shift_end', (to_json(s.end_time)#>>'{}')||'Z',
+        'shift_name', s.shift_name,
+        'shift_description', s.shift_description
+      )) as json
+      from user_shift_assignment as usa
+      join shift as s on usa.shift_id = s.id
+      join user_account as ua on usa.user_id = ua.id
+      where s.schedule_id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  const columns = {
+    name: "Name",
+    email: "Email",
+    shift_start: "Shift Start",
+    shift_end: "Shift End",
+    shift_name: "Shift Name",
+    shift_description: "Shift Description",
+  };
+
+  const csvString = await new Promise<string>((resolve, reject) =>
+    csv.stringify(
+      results.rows[0].json,
+      { header: true, columns },
+      (err, str) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(str);
+        }
+      },
+    ),
+  );
+
+  res.status(200).send({ csv: csvString });
 }
