@@ -439,6 +439,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        400:
+          description: Shift start time must be before shift end time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /schedules/{scheduleId}/signups:
     get:
@@ -603,7 +609,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
         400:
-          description: Start time must be before End Time
+          description: Shift start time must be before shift end time
           content:
             application/json:
               schema:
