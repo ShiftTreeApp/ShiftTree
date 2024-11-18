@@ -16,6 +16,7 @@ import {
   //EventRepeat as GenerateSchedule,
   AutoMode as GenerateSchedule,
   DeleteForever as DeleteShiftTreeIcon,
+  CloudDownload as DownloadIcon,
 } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import "dayjs/locale/en";
@@ -222,7 +223,14 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               onConfirm={handleDeleteConfirm}
             />
 
-            <Button color="info" onClick={downloadCsv}>
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              sx={{
+                backgroundColor: theme => theme.palette.info.main,
+              }}
+              onClick={downloadCsv}
+            >
               Download CSV
             </Button>
           </Box>
