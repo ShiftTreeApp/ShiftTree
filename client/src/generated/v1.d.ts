@@ -514,6 +514,7 @@ export interface paths {
             parameters: {
                 query: {
                     type: "shifts" | "assignments";
+                    tz: string;
                 };
                 header?: never;
                 path: {

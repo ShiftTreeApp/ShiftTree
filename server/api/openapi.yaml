@@ -321,6 +321,11 @@ paths:
             enum:
               - shifts
               - assignments
+        - name: tz
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: Successful

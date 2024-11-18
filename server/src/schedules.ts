@@ -4,6 +4,12 @@ import * as jwt from "jsonwebtoken";
 import * as csv from "csv-stringify";
 
 import { pool } from "@/pool";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const tokenPayload = z.object({ email: z.string(), name: z.string() });
 
@@ -772,9 +778,10 @@ async function getUserRole({
 
 export async function getCsv(req: Request, res: Response) {
   const userId = await getUserId(req);
-  const { scheduleId, type } = req.params as {
+  const { scheduleId, type, tz } = req.params as {
     scheduleId: string;
     type: "shifts" | "assignments";
+    tz: string;
   };
 
   if (type === "shifts") {
@@ -801,10 +808,8 @@ export async function getCsv(req: Request, res: Response) {
       select json_agg(json_build_object(
         'name', ua.username,
         'email', ua.email,
-        'shift_start', to_char(s.start_time, 'YYYY-MM-DD'),
-        'shift_end', to_char(s.end_time, 'YYYY-MM-DD'),
-        'shift_start_time', to_char(s.start_time, 'HH24:MI:SS'),
-        'shift_end_time', to_char(s.end_time, 'HH24:MI:SS'),
+        'start_time', (to_json(s.start_time)#>>'{}')||'Z',
+        'end_time', (to_json(s.end_time)#>>'{}')||'Z',
         'shift_name', s.shift_name,
         'multi_day', case when s.start_time::date <> s.end_time::date then 'yes' else 'no' end,
         'shift_description', s.shift_description
@@ -815,6 +820,17 @@ export async function getCsv(req: Request, res: Response) {
       where s.schedule_id = $1
     `,
     values: [scheduleId],
+  });
+
+  const rows = results.rows[0].json.map((row: Record<string, any>) => {
+    const start = dayjs(row.start_time).tz(tz);
+    const end = dayjs(row.end_time).tz(tz);
+    return Object.assign(row, {
+      shift_start: start.format("YYYY-MM-DD"),
+      shift_start_time: start.format("HH:mm"),
+      shift_end: end.format("YYYY-MM-DD"),
+      shift_end_time: end.format("HH:mm"),
+    });
   });
 
   const columns = {
@@ -830,17 +846,13 @@ export async function getCsv(req: Request, res: Response) {
   };
 
   const csvString = await new Promise<string>((resolve, reject) =>
-    csv.stringify(
-      results.rows[0].json,
-      { header: true, columns },
-      (err, str) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(str);
-        }
-      },
-    ),
+    csv.stringify(rows, { header: true, columns }, (err, str) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(str);
+      }
+    }),
   );
 
   res.status(200).send({ csv: csvString });

@@ -1,5 +1,10 @@
 import { useMemo } from "react";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 import { useApi } from "@/client";
 
@@ -44,7 +49,7 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     {
       params: {
         path: { scheduleId: scheduleId },
-        query: { type: "assignments" },
+        query: { type: "assignments", tz: dayjs.tz.guess() },
       },
     },
     { enabled: false },
