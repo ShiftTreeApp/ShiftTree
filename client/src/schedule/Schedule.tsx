@@ -28,6 +28,7 @@ import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import theme from "@/theme";
+import { useNotifier } from "@/notifier";
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,6 +52,7 @@ function useSelectedShiftParam() {
 export default function Schedule() {
   const { scheduleId } = useParams();
   const empActions = useEmployeeActions(scheduleId ? scheduleId : "");
+  const notifier = useNotifier();
 
   // TODO: Change this to useSearchParam
   const { selectedShift, setSelectedShift, clearSelectedShift } =
@@ -77,7 +79,7 @@ export default function Schedule() {
     };
 
     getUpdatedShiftStatuses();
-  }, [empActions.signedUpShifts, empActions.assignedShifts]);
+  }, [empActions.signedUpShifts, empActions.assignedShifts, empActions]);
 
   const signedUpIndicators = useMemo(
     () =>
@@ -127,7 +129,12 @@ export default function Schedule() {
     });
 
     empActions.refetchUserSignups();
+    notifier.message("Registered for shift");
+    clearSelectedShift();
   };
+
+  const isManager =
+    scheduleData?.role == "manager" || scheduleData?.role == "owner";
 
   return (
     <Grid container direction="column" spacing={1}>
@@ -149,8 +156,7 @@ export default function Schedule() {
             <Grid
               sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}
             >
-              {scheduleData?.role == "owner" ||
-              scheduleData?.role == "manager" ? (
+              {isManager ? (
                 <Button
                   variant="contained"
                   startIcon={<EditIcon />}
@@ -163,8 +169,7 @@ export default function Schedule() {
                   Edit mode
                 </Button>
               ) : null}
-              {scheduleData?.role == "member" ||
-              scheduleData?.role == "manager" ? (
+              {!isManager ? (
                 <Button
                   variant="contained"
                   startIcon={<LeaveShiftTreeIcon />}
@@ -181,50 +186,60 @@ export default function Schedule() {
           <EditShiftDrawer
             open={drawerOpen}
             onClose={clearSelectedShift}
-            title="Sign-Up"
+            title={isManager ? "Shift Info" : "Sign-Up"}
           >
-            <Divider sx={{ marginBottom: 2 }} />
-            <Box width={300}>
-              <Typography sx={{ marginBottom: 0.5 }}>Request Weight</Typography>
-              <Slider
-                defaultValue={50}
-                aria-label="Request weight"
-                valueLabelDisplay="auto"
-                sx={{ marginBottom: 1 }}
-                shiftStep={30}
-                step={10}
-                marks
-                max={100}
-                min={10}
-              />
+            {!isManager && (
+              <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: 1,
+                  }}
+                >
+                  <Typography gutterBottom>Request Weight</Typography>
+                  <Slider
+                    defaultValue={50}
+                    aria-label="Request weight"
+                    valueLabelDisplay="auto"
+                    sx={{ width: { md: 300 } }}
+                    shiftStep={30}
+                    step={10}
+                    marks
+                    max={100}
+                    min={10}
+                  />
 
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<RegisterIcon />}
-                sx={{
-                  backgroundColor: theme => theme.palette.success.main,
-                  "&:hover": {
-                    backgroundColor: theme => theme.palette.success.dark,
-                  },
-                  color: "white",
-                }}
-                onClick={handleRegister}
-              >
-                Register
-              </Button>
-
-              <Box>
-                <Typography>Members signed up:</Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<RegisterIcon />}
+                    sx={{
+                      backgroundColor: theme => theme.palette.success.main,
+                      "&:hover": {
+                        backgroundColor: theme => theme.palette.success.dark,
+                      },
+                      color: "white",
+                    }}
+                    onClick={handleRegister}
+                  >
+                    Register
+                  </Button>
+                </Box>
+              </>
+            )}
+            {isManager && (
+              <>
+                <Typography variant="h6">Registered Members</Typography>
                 {/* Chips for users that are signed up */}
-                {scheduleData?.role == "owner" && (
-                  <UserChips
-                    scheduleId={scheduleId}
-                    shiftId={selectedShift ?? undefined}
-                  ></UserChips>
-                )}
-              </Box>
-            </Box>
+
+                <UserChips
+                  scheduleId={scheduleId}
+                  shiftId={selectedShift ?? undefined}
+                ></UserChips>
+              </>
+            )}
           </EditShiftDrawer>
           <ShiftCalendar
             onClickShift={shiftId => setSelectedShift(shiftId)}

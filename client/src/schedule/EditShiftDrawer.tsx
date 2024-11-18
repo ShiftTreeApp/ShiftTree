@@ -8,6 +8,7 @@ import {
   TooltipProps,
   tooltipClasses,
   styled,
+  Divider,
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import { HowToReg as RegisterIcon } from "@mui/icons-material";
@@ -70,6 +71,7 @@ export default function EditShiftDrawer(props: EditShiftDrawerProps) {
             <CloseIcon />
           </IconButton>
         </Box>
+        <Divider sx={{ marginBottom: 1 }} />
         {props.children}
       </Box>
     </Drawer>
