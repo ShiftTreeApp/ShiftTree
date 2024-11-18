@@ -690,6 +690,15 @@ export interface paths {
                         "application/json": components["schemas"]["ShiftInfo"];
                     };
                 };
+                /** @description Shift start time must be before shift end time */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
                 /** @description User does not have permission to modify the schedule */
                 403: {
                     headers: {
@@ -957,6 +966,15 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+                /** @description Shift start time must be before shift end time */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
                 /** @description User does not have permission to modify the shift */
                 403: {
