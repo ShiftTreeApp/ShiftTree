@@ -25,7 +25,7 @@ import {
   renderTimeViewClock,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 import { ShiftCalendar } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
@@ -43,6 +43,8 @@ interface EditShiftsTabProps {
 export default function EditShiftsTab(props: EditShiftsTabProps) {
   const [currentlyEditing, setCurrentlyEditing] = useSearchParam("shift");
 
+  const navigate = useNavigate();
+  const notifier = useNotifier();
   const schedule = useSchedule({ scheduleId: props.scheduleId });
 
   async function createNewShiftAndEdit() {
@@ -122,11 +124,10 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
   };
 
   const handleDeleteConfirm = async () => {
-    // Add logic to delete the ShiftTree here
-    // For now, we'll just close the modal after a delay to simulate loading
-    setTimeout(() => {
-      setDeleteModalOpen(false);
-    }, 2000);
+    await schedule.deleteSchedule().catch(notifier.error);
+    notifier.message("ShiftTree deleted");
+    setDeleteModalOpen(false);
+    navigate("/");
   };
 
   return (
