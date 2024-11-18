@@ -439,6 +439,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        400:
+          description: Shift start time must be before shift end time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /schedules/{scheduleId}/signups:
     get:
@@ -598,6 +604,12 @@ paths:
                 $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to modify the shift
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        400:
+          description: Shift start time must be before shift end time
           content:
             application/json:
               schema:

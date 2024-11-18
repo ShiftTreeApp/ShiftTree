@@ -236,6 +236,16 @@ export async function createShift(req: Request, res: Response) {
   const userId = await getUserId(req);
   const scheduleId = req.params.scheduleId as string;
 
+  // Validate that the start date is before the end date
+  if (req.body.startTime && req.body.endTime) {
+    if (new Date(req.body.startTime) > new Date(req.body.endTime)) {
+      res.status(400).json({
+        error: "Shift start time must be before shift end time",
+      });
+      return;
+    }
+  }
+
   // Check that user can access the schedule and has permission to create shifts
   {
     const results = await pool.query({
@@ -440,7 +450,15 @@ export async function editShift(req: Request, res: Response) {
   const userId = await getUserId(req);
   const shiftId = req.params.shiftId as string;
 
-  // TODO: Validate that the start date is before the end date
+  // Validate that the start date is before the end date
+  if (req.body.startTime && req.body.endTime) {
+    if (new Date(req.body.startTime) > new Date(req.body.endTime)) {
+      res.status(400).json({
+        error: "Shift start time must be before shift end time",
+      });
+      return;
+    }
+  }
 
   // Check that user can access the shift
   {
