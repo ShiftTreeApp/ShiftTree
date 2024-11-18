@@ -1,29 +1,7 @@
-import {
-  Box,
-  Drawer,
-  Typography,
-  IconButton,
-  Button,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
-  Divider,
-} from "@mui/material";
+import { Box, Drawer, Typography, IconButton, Divider } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { HowToReg as RegisterIcon } from "@mui/icons-material";
 import NavbarPadding from "@/NavbarPadding";
 import { type ReactNode } from "react";
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
 
 export interface EditShiftDrawerProps {
   open: boolean;
