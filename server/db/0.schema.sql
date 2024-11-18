@@ -133,3 +133,22 @@ SELECT
         LIMIT 1
     ) AS end_time
 FROM schedule;
+
+CREATE VIEW schedule_state AS
+WITH
+    asgn_count AS (
+        SELECT
+            info.schedule_id,
+            COALESCE(COUNT(asgn.id), 0) AS asgn_count
+        FROM schedule_info AS info
+        LEFT JOIN shift ON info.schedule_id = shift.schedule_id
+        LEFT JOIN user_shift_assignment AS asgn ON shift.id = asgn.shift_id
+        GROUP BY info.schedule_id
+    )
+SELECT
+    CASE
+        WHEN asgn_count.asgn_count = 0 THEN 'open'
+        ELSE 'closed'
+    END AS schedule_state,
+    asgn_count.schedule_id
+FROM asgn_count;
