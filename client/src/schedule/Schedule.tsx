@@ -133,8 +133,19 @@ export default function Schedule() {
     clearSelectedShift();
   };
 
+  async function handleUnregister() {
+    await empActions.unregister({ shiftId: selectedShift as string });
+    notifier.message("Unregistered from shift");
+    clearSelectedShift();
+  }
+
   const isManager =
     scheduleData?.role == "manager" || scheduleData?.role == "owner";
+
+  const isSignedUpForSelectedShift = useMemo(
+    () => selectedShift && signedUpShifts.includes(selectedShift),
+    [selectedShift, signedUpShifts],
+  );
 
   return (
     <Grid container direction="column" spacing={1}>
@@ -222,9 +233,13 @@ export default function Schedule() {
                       },
                       color: "white",
                     }}
-                    onClick={handleRegister}
+                    onClick={
+                      isSignedUpForSelectedShift
+                        ? handleUnregister
+                        : handleRegister
+                    }
                   >
-                    Register
+                    {isSignedUpForSelectedShift ? "Unregister" : "Register"}
                   </Button>
                 </Box>
               </>
