@@ -602,6 +602,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        400:
+          description: Start time must be before End Time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     delete:
       security:
         - Bearer: []
