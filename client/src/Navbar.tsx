@@ -28,9 +28,9 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MenuIcon from "@mui/icons-material/Menu";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+//import NotificationsIcon from "@mui/icons-material/Notifications"; // Will return once we have notifs implemented
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import SettingsIcon from "@mui/icons-material/Settings";
+//import SettingsIcon from "@mui/icons-material/Settings"; // Will return once we have a use for settings page
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import { useAuth } from "@/auth";
@@ -165,11 +165,13 @@ export default function Navbar() {
                     <Button>Join ShiftTree</Button>
                   </MenuItem>
                 </Menu>
+                {/* TODO: Implement notifications later on
                 <CustomTooltip title="Notifications" placement="bottom">
                   <IconButton aria-label="notif" size="small" sx={{ ml: 2 }}>
                     <NotificationsIcon fontSize="medium" />
                   </IconButton>
                 </CustomTooltip>
+                */}
                 <CustomTooltip title="Profile" placement="bottom">
                   <IconButton
                     aria-label="profile"
@@ -199,18 +201,22 @@ export default function Navbar() {
               onKeyDown={handleDrawerClose}
             >
               <List>
+                {/* TODO: Implement user profiles later on
                 <ListItemButton>
                   <ListItemIcon>
                     <AccountCircleIcon />
                   </ListItemIcon>
                   <ListItemText primary="Edit Profile" />
                 </ListItemButton>
+                */}
+                {/* TODO: Implement settings page
                 <ListItemButton>
                   <ListItemIcon>
                     <SettingsIcon />
                   </ListItemIcon>
                   <ListItemText primary="Settings" />
                 </ListItemButton>
+                */}
                 <ListItemButton onClick={onLogout}>
                   <ListItemIcon>
                     <LogoutIcon />

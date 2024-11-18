@@ -15,7 +15,7 @@ import {
 import { useParams } from "react-router";
 import { useNavigate } from "react-router";
 import EditMembersTab from "./EditMembersTab";
-import EditSignupsTab from "./EditSignupsTab";
+//import EditSignupsTab from "./EditSignupsTab"; // Will be added back later
 import { useApi } from "../client";
 import { useEffect } from "react";
 
@@ -92,8 +92,10 @@ export default function EditTree() {
           >
             <Tab label="Shifts" value={tabNames.shifts} />
             <Tab label="Members" value={tabNames.members} />
+            {/* TODO: Add back the signups and assign tabs once they do something
             <Tab label="Signups" value={tabNames.signups} />
             <Tab label="Assign" value={tabNames.assign} />
+            */}
           </Tabs>
           <Grid
             sx={{
@@ -115,11 +117,14 @@ export default function EditTree() {
                 <EditMembersTab scheduleId={scheduleId as string} />
               </>
             )}
-            {/* Signups Settings */}
+            {/* TODO: Add Signups Settings */}
+            {/*
             {selectedTab === "signups" && (
               <EditSignupsTab scheduleId={scheduleId as string} />
             )}
-            {/* Assign Settings */}
+            */}
+            {/* TODO: Add Assign Settings */}
+            {/*
             {selectedTab === "assign" && (
               <Paper
                 sx={{
@@ -134,6 +139,7 @@ export default function EditTree() {
                 Assign Settings
               </Paper>
             )}
+            */}
           </Grid>
         </Paper>
       </Container>

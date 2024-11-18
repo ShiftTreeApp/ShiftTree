@@ -7,7 +7,7 @@ import { Authenticated, AuthProvider } from "@/auth";
 import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
 import Profile from "@/Profile.tsx";
-import EditProfile from "@/EditProfile.tsx";
+//import EditProfile from "@/EditProfile.tsx"; // To be added later
 import Schedule from "@/schedule/Schedule.tsx";
 import EditTree from "@/schedule/EditTree";
 import NotFoundPage from "@/NotFound.tsx";
@@ -51,6 +51,7 @@ export default function App() {
                     </Authenticated>
                   }
                 />
+                {/* Will be re-added once implemented
                 <Route
                   path="/edit_profile"
                   element={
@@ -59,6 +60,7 @@ export default function App() {
                     </Authenticated>
                   }
                 />
+                */}
                 <Route
                   path="/schedule/:scheduleId/edit"
                   element={
