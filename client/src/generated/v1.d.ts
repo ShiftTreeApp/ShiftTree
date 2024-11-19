@@ -120,6 +120,8 @@ export interface paths {
                 query?: {
                     /** @description Filter schedules by role */
                     role?: ("owner" | "member" | "manager")[];
+                    /** @description Filter schedules if date is within schedule dates */
+                    date?: string;
                 };
                 header?: never;
                 path?: never;
@@ -925,7 +927,11 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": string[];
+                        "application/json": {
+                            /** Format: uuid */
+                            shiftId?: string;
+                            user?: components["schemas"]["UserInfoPreview"];
+                        }[];
                     };
                 };
                 /** @description User does not have permission to view the assignments */
