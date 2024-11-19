@@ -1,7 +1,11 @@
 import { useApi } from "@/client";
+import { useNotifier } from "@/notifier";
 
-export function useEmployeeActions() {
+export function useEmployeeActions(shiftTreeId?: string) {
   const api = useApi();
+  const notifier = useNotifier();
+
+  const { refetch: refetchSchedules } = api.useQuery("get", "/schedules");
 
   const { mutateAsync: joinShiftTree } = api.useMutation(
     "put",
@@ -10,6 +14,26 @@ export function useEmployeeActions() {
   const { mutateAsync: signupForShift } = api.useMutation(
     "post",
     "/signups/{shiftId}",
+  );
+  const { mutateAsync: removeUser } = api.useMutation(
+    "delete",
+    "/removeUser/{scheduleID}",
+    {
+      onSuccess: () => {
+        refetchSchedules();
+      },
+      onError: notifier.error,
+    },
+  );
+  const { mutateAsync: unregisterFromShift } = api.useMutation(
+    "delete",
+    "/signups/{shiftId}",
+    {
+      onSuccess: async () => {
+        await refetchUserSignups();
+      },
+      onError: notifier.error,
+    },
   );
 
   /*
@@ -56,5 +80,64 @@ export function useEmployeeActions() {
     console.log("Signed up for shift");
   }
 
-  return { join, signup };
+  /*
+   * Take shiftTreeId and scan the shifts in that schedule.
+   * Return a list of the shifts that the current user signed up for
+   * from that list.
+   */
+  const { data: userSignups = [], refetch: refetchUserSignups } = shiftTreeId
+    ? api.useQuery("get", "/schedules/{scheduleId}/user-signups", {
+        params: {
+          path: {
+            scheduleId: shiftTreeId ? shiftTreeId : "",
+          },
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+    : { data: [], refetch: () => {} };
+
+  /*
+   * Take shiftTreeId and scan the shifts in that schedule.
+   * Return a list of the shifts that the current user is assigned to
+   * from that list.
+   */
+  const { data: userAssignedShifts = [], refetch: refetchUserAssignments } =
+    shiftTreeId
+      ? api.useQuery("get", "/schedules/{scheduleId}/user-assigned", {
+          params: {
+            path: {
+              scheduleId: shiftTreeId ? shiftTreeId : "",
+            },
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        })
+      : { data: [], refetch: () => {} };
+
+  async function leaveSchedule({ scheduleId }: { scheduleId: string }) {
+    await removeUser({ params: { path: { scheduleID: scheduleId } } });
+  }
+
+  async function unregister({ shiftId }: { shiftId: string }) {
+    await unregisterFromShift({
+      params: { path: { shiftId: shiftId } },
+    });
+  }
+
+  const signedUpShifts = userSignups;
+  const assignedShifts = userAssignedShifts;
+
+  return {
+    join,
+    signup,
+    leaveSchedule,
+    refetchUserSignups,
+    refetchUserAssignments,
+    signedUpShifts,
+    assignedShifts,
+    unregister,
+  };
 }

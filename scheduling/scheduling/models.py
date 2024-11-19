@@ -44,5 +44,5 @@ class ScheduleResponse(BaseModel):
 
 
 class Config(BaseModel):
-    host: str = Field(default="::", validation_alias="SHIFTTREE_SCHEDULING_HOST")
+    host: str = Field(default="0.0.0.0", validation_alias="SHIFTTREE_SCHEDULING_HOST")
     port: int = Field(default=8080, validation_alias="SHIFTTREE_SCHEDULING_PORT")

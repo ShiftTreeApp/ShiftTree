@@ -1,8 +1,15 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import * as jwt from "jsonwebtoken";
+import * as csv from "csv-stringify";
 
 import { pool } from "@/pool";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const tokenPayload = z.object({ email: z.string(), name: z.string() });
 
@@ -62,9 +69,10 @@ export async function list(req: Request, res: Response) {
 
   const query = /* sql */ `
     with filtered as (
-      select info.*, se.start_time, se.end_time
+      select info.*, se.start_time, se.end_time, ss.schedule_state
       from schedule_info as info
       join schedule_start_end as se on info.schedule_id = se.schedule_id
+      join schedule_state as ss on info.schedule_id = ss.schedule_id
       where true
         and info.user_id = $1
         and info.user_role in (select json_array_elements($2) #>> '{}' as r)
@@ -87,7 +95,7 @@ export async function list(req: Request, res: Response) {
       'role', s.user_role,
       'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
       'endTime', (to_json(s.end_time)#>>'{}')||'Z',
-      'state', 'open'
+      'state', s.schedule_state
     )), json_array()) as json
     from filtered as s
   `;
@@ -106,9 +114,10 @@ export async function getSchedule(req: Request, res: Response) {
 
   const query = /* sql */ `
     with selected_schedule as (
-      select info.*, se.start_time, se.end_time
+      select info.*, se.start_time, se.end_time, ss.schedule_state
       from schedule_info as info
       join schedule_start_end as se on info.schedule_id = se.schedule_id
+      join schedule_state as ss on info.schedule_id = ss.schedule_id
       where info.user_id = $1 and info.schedule_id = $2
     )
     select json_build_object(
@@ -128,7 +137,7 @@ export async function getSchedule(req: Request, res: Response) {
       'role', s.user_role,
       'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
       'endTime', (to_json(s.end_time)#>>'{}')||'Z',
-      'state', 'open'
+      'state', s.schedule_state
     ) as json
     from selected_schedule as s
   `;
@@ -233,6 +242,16 @@ export async function getShifts(req: Request, res: Response) {
 export async function createShift(req: Request, res: Response) {
   const userId = await getUserId(req);
   const scheduleId = req.params.scheduleId as string;
+
+  // Validate that the start date is before the end date
+  if (req.body.startTime && req.body.endTime) {
+    if (new Date(req.body.startTime) > new Date(req.body.endTime)) {
+      res.status(400).json({
+        error: "Shift start time must be before shift end time",
+      });
+      return;
+    }
+  }
 
   // Check that user can access the schedule and has permission to create shifts
   {
@@ -499,7 +518,15 @@ export async function editShift(req: Request, res: Response) {
   const userId = await getUserId(req);
   const shiftId = req.params.shiftId as string;
 
-  // TODO: Validate that the start date is before the end date
+  // Validate that the start date is before the end date
+  if (req.body.startTime && req.body.endTime) {
+    if (new Date(req.body.startTime) > new Date(req.body.endTime)) {
+      res.status(400).json({
+        error: "Shift start time must be before shift end time",
+      });
+      return;
+    }
+  }
 
   // Check that user can access the shift
   {
@@ -803,4 +830,111 @@ export async function getUserAssignments(req: Request, res: Response) {
   }
 
   res.json(result.rows[0].json);
+}
+
+async function getUserRole({
+  userId,
+  scheduleId,
+}: {
+  userId: string;
+  scheduleId: string;
+}): Promise<"owner" | "manager" | "member" | null> {
+  const query = /* sql */ `
+    select *
+    from schedule_info as info
+    where info.user_id = $1 and info.schedule_id = $2
+  `;
+
+  const results = await pool.query({
+    text: query,
+    values: [userId, scheduleId],
+  });
+
+  if (results.rows.length < 1) {
+    return null;
+  }
+
+  return results.rows[0].user_role;
+}
+
+export async function getCsv(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const { scheduleId, type, tz } = req.params as {
+    scheduleId: string;
+    type: "shifts" | "assignments";
+    tz: string;
+  };
+
+  if (type === "shifts") {
+    console.error("not implemented");
+    res.sendStatus(500);
+    return;
+  }
+
+  const userRole = await getUserRole({ userId, scheduleId });
+  if (!userRole) {
+    res.status(404).json({ error: "Schedule not found" });
+    return;
+  }
+
+  if (userRole === "member") {
+    res.status(403).json({
+      error: "You do not have permission to view assignments for this schedule",
+    });
+    return;
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      select json_agg(json_build_object(
+        'name', ua.username,
+        'email', ua.email,
+        'start_time', (to_json(s.start_time)#>>'{}')||'Z',
+        'end_time', (to_json(s.end_time)#>>'{}')||'Z',
+        'shift_name', s.shift_name,
+        'multi_day', case when s.start_time::date <> s.end_time::date then 'yes' else 'no' end,
+        'shift_description', s.shift_description
+      )) as json
+      from user_shift_assignment as usa
+      join shift as s on usa.shift_id = s.id
+      join user_account as ua on usa.user_id = ua.id
+      where s.schedule_id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  const rows = results.rows[0].json.map((row: Record<string, any>) => {
+    const start = dayjs(row.start_time).tz(tz);
+    const end = dayjs(row.end_time).tz(tz);
+    return Object.assign(row, {
+      shift_start: start.format("YYYY-MM-DD"),
+      shift_start_time: start.format("HH:mm"),
+      shift_end: end.format("YYYY-MM-DD"),
+      shift_end_time: end.format("HH:mm"),
+    });
+  });
+
+  const columns = {
+    name: "Name",
+    email: "Email",
+    shift_start: "Shift Start Date",
+    shift_end: "Shift End Date",
+    shift_start_time: "Shift Start Time",
+    shift_end_time: "Shift End Time",
+    multi_day: "Spans Multiple Days?",
+    shift_name: "Shift Name",
+    shift_description: "Shift Description",
+  };
+
+  const csvString = await new Promise<string>((resolve, reject) =>
+    csv.stringify(rows, { header: true, columns }, (err, str) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(str);
+      }
+    }),
+  );
+
+  res.status(200).send({ csv: csvString });
 }

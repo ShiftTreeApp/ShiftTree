@@ -27,6 +27,16 @@ export type ShiftColorMap = NonNullable<ShiftCalendarProps["colorMap"]>;
 export function ShiftCalendar(props: ShiftCalendarProps) {
   // Start date is the Sunday of the week that contains the start date
   const weekStartDates = useMemo(() => {
+    // Prevent infinite loop from invalid input dates
+    if (props.startDate.isAfter(props.endDate)) {
+      console.error(
+        "Start date is after end date",
+        props.startDate,
+        props.endDate,
+      );
+      return [];
+    }
+
     const dates: dayjs.Dayjs[] = [];
     const startDate = props.startDate.startOf("week");
     for (
@@ -213,10 +223,11 @@ function WeekRow(props: WeekRowProps) {
                 sx={{
                   display: "inline-flex",
                   gap: 1,
-                  borderBottom: dayjs().isSame(date, "day")
-                    ? "3px solid"
-                    : "none",
-                  borderColor: theme => theme.palette.primary.main,
+                  borderBottom: "3px solid",
+                  borderColor: theme =>
+                    dayjs().isSame(date, "day")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
                 {date.date() === 1 && (
@@ -267,6 +278,8 @@ type BackgroundColorType = Extract<
 >["backgroundColor"];
 
 function ShiftCard(props: ShiftCardProps) {
+  const isDifferentDay = !props.startTime.isSame(props.endTime, "day");
+
   return (
     <Card
       sx={{
@@ -280,7 +293,7 @@ function ShiftCard(props: ShiftCardProps) {
         backgroundColor: props.selected
           ? theme => theme.palette.primary.light
           : (props.colorMap[props.id] ??
-            (theme => theme.palette.secondary.veryLight)),
+            (theme => theme.palette.secondary.light2)),
         // NOTE: colorMap gets priority over default color, but selection color overrides colorMap.
         // This enables the following:
         // eventually, I want functionality to change the color of the card based on the status of the shift:
@@ -291,9 +304,20 @@ function ShiftCard(props: ShiftCardProps) {
     >
       <Typography variant="h6">{props.name}</Typography>
       <Typography>
-        {props.startTime.format("HH:mm")}
-        {" - "}
-        {props.endTime.format("HH:mm")}
+        {isDifferentDay && (
+          <>
+            {props.startTime.format("MMM DD, HH:mm")}
+            {" - "}
+            {props.endTime.format("MMM DD, HH:mm")}
+          </>
+        )}
+        {!isDifferentDay && (
+          <>
+            {props.startTime.format("HH:mm")}
+            {" - "}
+            {props.endTime.format("HH:mm")}
+          </>
+        )}
       </Typography>
       <CustomContent map={props.customContentMap} id={props.id} />
     </Card>

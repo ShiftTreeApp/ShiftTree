@@ -147,8 +147,22 @@ paths:
       responses:
         401:
           description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: User does not have permission to view the code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         404:
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         200:
           description: ID Found
           content:
@@ -173,8 +187,22 @@ paths:
       responses:
         401:
           description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: User does not have permission to view the code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         404:
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         200:
           description: ID Found
           content:
@@ -273,18 +301,70 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /removeUser/{scheduleID}:
-    delete:
+  /schedules/{scheduleId}/csv:
+    get:
       security:
         - Bearer: []
-      summary: Remove a user from the specified schedule
+      summary: Get schedule in CSV format
       parameters:
-        - name: userID
-          in: query
+        - name: scheduleId
+          in: path
           required: true
           schema:
             type: string
             format: uuid
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - shifts
+              - assignments
+        - name: tz
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - csv
+                properties:
+                  csv:
+                    type: string
+        403:
+          description: User does not have permission to view the type of data requested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /removeUser/{scheduleID}:
+    delete:
+      security:
+        - Bearer: []
+      summary: |
+        Remove a user from the specified schedule. If no user is passed, the current user is removed.
+        Otherwise, the current user must the owner of the schedule, and the specified user will be removed.
+      parameters:
+        - name: userID
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+            nullable: true
         - name: scheduleID
           in: path
           required: true
@@ -294,8 +374,18 @@ paths:
       responses:
         204:
           description: Success
-        401:
-          description: User Not in Schedule
+        404:
+          description: Schedule does not exist or user not in schedule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: Current user does not have permission to remove target user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         default:
           description: Unexpected Error
           content:
@@ -394,6 +484,12 @@ paths:
                 $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to modify the schedule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        400:
+          description: Shift start time must be before shift end time
           content:
             application/json:
               schema:
@@ -593,6 +689,12 @@ paths:
                 $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to modify the shift
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        400:
+          description: Shift start time must be before shift end time
           content:
             application/json:
               schema:

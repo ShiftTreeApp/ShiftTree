@@ -234,14 +234,27 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description User does not have permission to view the code */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
                 /** @description Not found */
                 404: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
                 /** @description Unexpected Error */
                 default: {
@@ -301,14 +314,27 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description User does not have permission to view the code */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
                 /** @description Not found */
                 404: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
                 /** @description Unexpected Error */
                 default: {
@@ -476,6 +502,67 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/schedules/{scheduleId}/csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get schedule in CSV format */
+        get: {
+            parameters: {
+                query: {
+                    type: "shifts" | "assignments";
+                    tz: string;
+                };
+                header?: never;
+                path: {
+                    scheduleId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successful */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            csv: string;
+                        };
+                    };
+                };
+                /** @description User does not have permission to view the type of data requested */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Schedule with specified ID does not exist, or user does not have access to it */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/removeUser/{scheduleID}": {
         parameters: {
             query?: never;
@@ -486,11 +573,13 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Remove a user from the specified schedule */
+        /** Remove a user from the specified schedule. If no user is passed, the current user is removed.
+         *     Otherwise, the current user must the owner of the schedule, and the specified user will be removed.
+         *      */
         delete: {
             parameters: {
-                query: {
-                    userID: string;
+                query?: {
+                    userID?: string | null;
                 };
                 header?: never;
                 path: {
@@ -507,12 +596,23 @@ export interface paths {
                     };
                     content?: never;
                 };
-                /** @description User Not in Schedule */
-                401: {
+                /** @description Current user does not have permission to remove target user */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Schedule does not exist or user not in schedule */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
                 /** @description Unexpected Error */
                 default: {
@@ -649,6 +749,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["ShiftInfo"];
+                    };
+                };
+                /** @description Shift start time must be before shift end time */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description User does not have permission to modify the schedule */
@@ -918,6 +1027,15 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+                /** @description Shift start time must be before shift end time */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
                 };
                 /** @description User does not have permission to modify the shift */
                 403: {

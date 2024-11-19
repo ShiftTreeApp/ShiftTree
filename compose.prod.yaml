@@ -20,6 +20,11 @@ services:
       SHIFTTREE_PG_PORT: "5432"
       SHIFTTREE_PG_DATABASE: dev
       SHIFTTREE_JWT_PK: ShiftTree
+      SHIFTTREE_PYTHON_HOST: scheduler:8080
+  scheduler:
+    image: ghcr.io/shifttreeapp/scheduler:latest
+    environment:
+      SHIFTTREE_SCHEDULING_PORT: 8080
   proxy:
     image: caddy:alpine
     volumes:

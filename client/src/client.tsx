@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 
 import { type paths } from "@/generated/v1";
-import { useNotifier } from "@/notifier";
 
 function createApi({ onError }: { onError: (message: string) => void }) {
   const fetchClient = createFetchClient<paths>({
@@ -45,8 +44,7 @@ interface ApiProviderProps {
 }
 
 export function ApiProvider(props0: Partial<ApiProviderProps>) {
-  const notifier = useNotifier();
-  const props = { ...props0, api: createApi({ onError: notifier.error }) };
+  const props = { ...props0, api: createApi({ onError: () => {} }) };
   return (
     <QueryClientProvider client={new QueryClient()}>
       <ApiContext.Provider value={props.api}>

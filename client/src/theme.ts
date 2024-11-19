@@ -6,17 +6,21 @@ declare module "@mui/material/styles" {
     primary: PaletteColor;
     secondary: PaletteColor;
     error: PaletteColor;
+    Info: PaletteColor;
   }
   interface PaletteOptions {
     primary?: PaletteColorOptions;
     secondary?: PaletteColorOptions;
     error?: PaletteColorOptions;
+    Info?: PaletteColorOptions;
   }
   interface PaletteColor {
     veryLight?: string;
+    light2?: string;
   }
   interface SimplePaletteColorOptions {
     veryLight?: string;
+    light2?: string;
   }
 }
 
@@ -31,16 +35,19 @@ const customTheme = createTheme({
       main: "#ffa000",
       light: "#ffca70",
       veryLight: "#ffe082",
+      light2: "#ffecb0", // used for shift cards for better contrast
     },
     info: {
       main: "#58A4B0",
-      light: "#426A5A",
-      dark: "#A833B9",
+      light: "#527B6A", // used for green buttons that are not primary
+      light2: "#9BC1BC",
+      dark: "#A491D3", // purple used for generate shifts button
     },
     error: {
-      main: "#f26868", //'#e63205'   #e53935
+      main: "#f26868",
       light: "#f58686",
       veryLight: "#f8d7da",
+      dark: "#C20114", // #F40000
     },
     background: {
       default: "#e0ebc9", // Default background

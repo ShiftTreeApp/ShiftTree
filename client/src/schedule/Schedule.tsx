@@ -4,12 +4,7 @@ import {
   Typography,
   Paper,
   Divider,
-  IconButton,
   Button,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
   Chip,
   Box,
   Slider,
@@ -19,30 +14,21 @@ import { useParams } from "react-router";
 import {
   Edit as EditIcon,
   HowToReg as RegisterIcon,
+  EventBusy as LeaveShiftTreeIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
 import dayjs from "dayjs";
+
 import { useApi } from "../client";
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
-import { useMemo } from "react";
-
-
-import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
-import { createRandomPfpUrl } from "./EditMembersTab"
+import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
+import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
-
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
+import theme from "@/theme";
+import { useNotifier } from "@/notifier";
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,15 +51,9 @@ function useSelectedShiftParam() {
 
 export default function Schedule() {
   const { scheduleId } = useParams();
-  const empActions = useEmployeeActions();
+  const empActions = useEmployeeActions(scheduleId ? scheduleId : "");
+  const notifier = useNotifier();
 
-  const handleRegister = async () => {
-    console.log(selectedShift);
-    empActions.signup({
-      shiftId: selectedShift,
-      userId: "none",
-    });
-  };
   // TODO: Change this to useSearchParam
   const { selectedShift, setSelectedShift, clearSelectedShift } =
     useSelectedShiftParam();
@@ -82,15 +62,44 @@ export default function Schedule() {
 
   const api = useApi();
 
-  // TODO: Get this from API
-  const signedUpShifts = useMemo(() => ["1", "3"], []);
+  const [signedUpShifts, setSignedUpShifts] = useState(
+    empActions.signedUpShifts,
+  );
+
+  const [assignedShifts, setAssignedShifts] = useState(
+    empActions.assignedShifts,
+  );
+
+  useEffect(() => {
+    const getUpdatedShiftStatuses = async () => {
+      empActions.refetchUserSignups();
+      empActions.refetchUserAssignments();
+      setSignedUpShifts(empActions.signedUpShifts);
+      setAssignedShifts(empActions.assignedShifts);
+    };
+
+    getUpdatedShiftStatuses();
+  }, [empActions.signedUpShifts, empActions.assignedShifts, empActions]);
 
   const signedUpIndicators = useMemo(
     () =>
       Object.fromEntries(
-        signedUpShifts.map(shiftId => [shiftId, SignedUpIndicator]),
+        signedUpShifts.map((shiftId: string) => [shiftId, SignedUpIndicator]),
       ),
     [signedUpShifts],
+  );
+
+  const assignedIndicators = useMemo(
+    () =>
+      Object.fromEntries(
+        assignedShifts.map((shiftId: string) => [shiftId, AssignedIndicator]),
+      ),
+    [assignedShifts],
+  );
+
+  const bothIndicators = useMemo(
+    () => ({ ...signedUpIndicators, ...assignedIndicators }),
+    [signedUpIndicators, assignedIndicators],
   );
 
   const { data: scheduleData } = api.useQuery(
@@ -112,6 +121,32 @@ export default function Schedule() {
     endTime: dayjs(shift.endTime),
   }));
 
+  const handleRegister = async () => {
+    console.log(selectedShift);
+    await empActions.signup({
+      shiftId: selectedShift ? selectedShift : "",
+      userId: "none",
+    });
+
+    empActions.refetchUserSignups();
+    notifier.message("Registered for shift");
+    clearSelectedShift();
+  };
+
+  async function handleUnregister() {
+    await empActions.unregister({ shiftId: selectedShift as string });
+    notifier.message("Unregistered from shift");
+    clearSelectedShift();
+  }
+
+  const isManager =
+    scheduleData?.role == "manager" || scheduleData?.role == "owner";
+
+  const isSignedUpForSelectedShift = useMemo(
+    () => selectedShift && signedUpShifts.includes(selectedShift),
+    [selectedShift, signedUpShifts],
+  );
+
   return (
     <Grid container direction="column" spacing={1}>
       <Navbar />
@@ -129,71 +164,104 @@ export default function Schedule() {
             <Grid sx={{ paddingLeft: 2 }}>
               <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
-            <Grid>
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                component={RouterLink}
-                to={`/schedule/${scheduleId}/edit`}
-                sx={{
-                  backgroundColor: theme => theme.palette.info.main,
-                }}
-              >
-                Edit mode
-              </Button>
+            <Grid
+              sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}
+            >
+              {isManager ? (
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
+                  component={RouterLink}
+                  to={`/schedule/${scheduleId}/edit`}
+                  sx={{
+                    backgroundColor: theme => theme.palette.info.main,
+                  }}
+                >
+                  Edit mode
+                </Button>
+              ) : null}
+              {!isManager ? (
+                <Button
+                  variant="contained"
+                  startIcon={<LeaveShiftTreeIcon />}
+                  sx={{
+                    backgroundColor: theme => theme.palette.error.dark,
+                  }}
+                >
+                  <Typography>Leave Shift Tree</Typography>
+                </Button>
+              ) : null}
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
           <EditShiftDrawer
             open={drawerOpen}
             onClose={clearSelectedShift}
-            title="Sign-Up"
+            title={isManager ? "Shift Info" : "Sign-Up"}
           >
-            <Divider sx={{ marginBottom: 2 }} />
-            <Box width={300}>
-              <Typography sx={{ marginBottom: 0.5 }}>Request Weight</Typography>
-              <Slider
-                defaultValue={50}
-                aria-label="Request weight"
-                valueLabelDisplay="off"
-                sx={{ marginBottom: 1 }}
-              />
+            {!isManager && (
+              <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: 1,
+                  }}
+                >
+                  <Typography gutterBottom>Request Weight</Typography>
+                  <Slider
+                    defaultValue={50}
+                    aria-label="Request weight"
+                    valueLabelDisplay="auto"
+                    sx={{ width: { md: 300 } }}
+                    shiftStep={30}
+                    step={10}
+                    marks
+                    max={100}
+                    min={10}
+                  />
 
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<RegisterIcon />}
-                sx={{
-                  backgroundColor: theme => theme.palette.success.main,
-                  "&:hover": {
-                    backgroundColor: theme => theme.palette.success.dark,
-                  },
-                  color: "white",
-                }}
-                onClick={handleRegister}
-              >
-                Register
-              </Button>
-
-              <Box>
-                <Typography>Members signed up:</Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<RegisterIcon />}
+                    sx={{
+                      backgroundColor: theme => theme.palette.success.main,
+                      "&:hover": {
+                        backgroundColor: theme => theme.palette.success.dark,
+                      },
+                      color: "white",
+                    }}
+                    onClick={
+                      isSignedUpForSelectedShift
+                        ? handleUnregister
+                        : handleRegister
+                    }
+                  >
+                    {isSignedUpForSelectedShift ? "Unregister" : "Register"}
+                  </Button>
+                </Box>
+              </>
+            )}
+            {isManager && (
+              <>
+                <Typography variant="h6">Registered Members</Typography>
                 {/* Chips for users that are signed up */}
-                {scheduleData?.role == "owner" && (
-                  <UserChips
-                    scheduleId={scheduleId}
-                    shiftId={selectedShift}
-                  ></UserChips>
-                )}
-                
-              </Box>
-            </Box>
+
+                <UserChips
+                  scheduleId={scheduleId}
+                  shiftId={selectedShift ?? undefined}
+                ></UserChips>
+              </>
+            )}
           </EditShiftDrawer>
           <ShiftCalendar
             onClickShift={shiftId => setSelectedShift(shiftId)}
             startDate={dayjs(scheduleData?.startTime ?? dayjs().toISOString())}
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
-            customContentMap={signedUpIndicators}
+            customContentMap={bothIndicators}
             shifts={formattedShifts}
           />
         </Paper>
@@ -203,7 +271,30 @@ export default function Schedule() {
 }
 
 function SignedUpIndicator() {
-  return <Chip icon={<RegisterIcon />} label="Signed up" color="info" />;
+  return (
+    <Chip
+      icon={<RegisterIcon sx={{ "&&": { color: "white" } }} />}
+      label="Signed up"
+      sx={{
+        backgroundColor: theme.palette.info.main,
+        color: "white",
+      }}
+    />
+  );
+}
+
+function AssignedIndicator() {
+  return (
+    <Chip
+      icon={<RegisterIcon />}
+      sx={{
+        backgroundColor: theme.palette.primary.main,
+        color: "white",
+      }}
+      label="Assigned"
+      color="primary"
+    />
+  );
 }
 
 interface UserChipsProps {
@@ -228,24 +319,28 @@ function UserChips(props: UserChipsProps) {
     { params: { path: { scheduleId: props.scheduleId as string } } },
   );
 
-  const userIds = scheduleSignups
-    ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
-    .flatMap((shift: any) => shift.signups.map((signup: any) => signup.user.id)) || [];
+  const userIds =
+    scheduleSignups
+      ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
+      .flatMap((shift: any) =>
+        shift.signups.map((signup: any) => signup.user.id),
+      ) || [];
 
-
-  return (<Box>
-
-  {userIds.map(userId => {
-          // Find the corresponding member data by userId
-          const member = membersData?.find((member: any) => member.id === userId);
-          return member ? (
-            <Chip
-              avatar={<Avatar src={createRandomPfpUrl(member.displayName, member.id)} />}
-              label={member.displayName}
-              variant="outlined"
-            />
-          ) : null;
-        })}
-
-  </Box>);
+  return (
+    <Box>
+      {userIds.map(userId => {
+        // Find the corresponding member data by userId
+        const member = membersData?.find((member: any) => member.id === userId);
+        return member ? (
+          <Chip
+            avatar={
+              <Avatar src={createRandomPfpUrl(member.displayName, member.id)} />
+            }
+            label={member.displayName}
+            variant="outlined"
+          />
+        ) : null;
+      })}
+    </Box>
+  );
 }

@@ -124,6 +124,11 @@ app.delete(
   auth.authorizationCheck,
   invites.removeUserFromShiftTree,
 );
+app.get(
+  "/schedules/:scheduleId/csv",
+  auth.authorizationCheck,
+  schedules.getCsv,
+);
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);

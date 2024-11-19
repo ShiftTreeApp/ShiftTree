@@ -7,6 +7,8 @@ import {
   Typography,
   Paper,
   Divider,
+  Chip,
+  Box,
 } from "@mui/material";
 
 // Define a type for status
@@ -19,6 +21,7 @@ interface ShiftTreeCardProps {
   dates: string;
   description: string;
   id: string;
+  role?: "owner" | "manager" | "member";
 }
 
 export default function ShiftTreeCard(props: ShiftTreeCardProps) {
@@ -81,7 +84,28 @@ export default function ShiftTreeCard(props: ShiftTreeCardProps) {
 
           {/* Space for description or statistics */}
           <Grid size={12} sx={{ marginTop: "auto" }}>
-            <Typography variant="body2">{props.description}</Typography>
+            <Typography variant="body2" sx={{ mb: 5 }}>
+              {props.description}
+            </Typography>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+              {props.role && (
+                <Chip
+                  color="info"
+                  label={
+                    props.role.charAt(0).toUpperCase() + props.role.slice(1)
+                  }
+                ></Chip>
+              )}
+              {props.status == "open" && (
+                <Chip
+                  label="Open"
+                  sx={{ bgcolor: theme.palette.info.light }}
+                ></Chip>
+              )}
+              {props.status == "closed" && (
+                <Chip label="Closed" sx={{ bgcolor: "salmon" }}></Chip>
+              )}
+            </Box>
           </Grid>
         </Grid>
       </Paper>
