@@ -867,7 +867,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ShiftWithAssignment"][];
+                        "application/json": string[];
                     };
                 };
                 /** @description User does not have permission to view the assignments */
