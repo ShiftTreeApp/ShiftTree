@@ -2,6 +2,7 @@ import {
   Box,
   Breadcrumbs,
   Button,
+  Divider,
   Link,
   TextField,
   Typography,
@@ -14,6 +15,8 @@ import {
   Preview as PreviewIcon,
   //EventRepeat as GenerateSchedule,
   AutoMode as GenerateSchedule,
+  DeleteForever as DeleteShiftTreeIcon,
+  CloudDownload as DownloadIcon,
 } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import "dayjs/locale/en";
@@ -23,13 +26,17 @@ import {
   renderTimeViewClock,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
-import { ShiftCalendar, type ShiftDetails } from "./ShiftCalendar";
+import { ShiftCalendar } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import { useSearchParam } from "@/useSearchParam";
-import { useApi } from "@/client";
 import GenerateShiftModal from "./GenerateShiftModal";
+import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
+import MultiDateCalendar from "@/schedule/MultiDateCalendar";
+import { useNotifier } from "@/notifier";
+import useSchedule from "@/hooks/useSchedule";
+import { downloadFile } from "@/utils";
 
 interface EditShiftsTabProps {
   scheduleId: string;
@@ -38,78 +45,29 @@ interface EditShiftsTabProps {
 export default function EditShiftsTab(props: EditShiftsTabProps) {
   const [currentlyEditing, setCurrentlyEditing] = useSearchParam("shift");
 
-  const api = useApi();
-
-  const { data: scheduleData } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}",
-    { params: { path: { scheduleId: props.scheduleId } } },
-  );
-  const startTime = useMemo(
-    () => (scheduleData?.startTime ? dayjs(scheduleData.startTime) : dayjs()),
-    [scheduleData?.startTime],
-  );
-  const endTime = useMemo(
-    () => (scheduleData?.endTime ? dayjs(scheduleData.endTime) : dayjs()),
-    [scheduleData?.endTime],
-  );
-  useEffect(() => console.log(scheduleData), [scheduleData]);
-
-  const { data: shiftsData, refetch: refetchShifts } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/shifts",
-    {
-      params: { path: { scheduleId: props.scheduleId } },
-    },
-  );
-  const shifts = useMemo(
-    () =>
-      shiftsData?.map(
-        shift =>
-          ({
-            id: shift.id,
-            name: shift.name,
-            startTime: dayjs(shift.startTime),
-            endTime: dayjs(shift.endTime),
-          }) satisfies ShiftDetails,
-      ),
-    [shiftsData],
-  );
-
-  const { mutateAsync: postShift } = api.useMutation(
-    "post",
-    "/schedules/{scheduleId}/shifts",
-    {
-      onSuccess: async () => {
-        await refetchShifts();
-      },
-    },
-  );
+  const navigate = useNavigate();
+  const notifier = useNotifier();
+  const schedule = useSchedule({ scheduleId: props.scheduleId });
 
   async function createNewShiftAndEdit() {
-    if (shifts == undefined) {
-      return;
-    }
-    if (shifts.length === 0) {
+    if (schedule.shifts.length === 0) {
       const now = dayjs().startOf("hour");
-      const { id } = await postShift({
-        params: { path: { scheduleId: props.scheduleId } },
-        body: {
-          name: "First shift",
-          startTime: now.toISOString(),
-          endTime: now.add(1, "hour").toISOString(),
-        },
+      const { id } = await schedule.createShift({
+        name: "First shift",
+        description: "",
+        startTime: now,
+        endTime: now.add(1, "hour"),
       });
       setCurrentlyEditing(id);
     } else {
-      const lastEnd = dayjs(shifts[shifts?.length - 1].endTime);
-      const { id } = await postShift({
-        params: { path: { scheduleId: props.scheduleId } },
-        body: {
-          name: "New shift",
-          startTime: lastEnd.toISOString(),
-          endTime: lastEnd.add(1, "hour").toISOString(),
-        },
+      const lastEnd = dayjs(
+        schedule.shifts[schedule.shifts?.length - 1].endTime,
+      );
+      const { id } = await schedule.createShift({
+        name: "New shift",
+        description: "",
+        startTime: lastEnd,
+        endTime: lastEnd.add(1, "hour"),
       });
       setCurrentlyEditing(id);
     }
@@ -161,6 +119,27 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     }, 2000);
   };
 
+  // Delete ShiftTree modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const handleDeleteShiftTreeClick = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    await schedule.deleteSchedule().catch(notifier.error);
+    notifier.message("ShiftTree deleted");
+    setDeleteModalOpen(false);
+    navigate("/");
+  };
+
+  async function downloadCsv() {
+    const csv = await schedule.getAssignmentsCsv();
+    downloadFile({
+      data: new Blob([csv], { type: "text/csv" }),
+      filename: `${schedule.name ?? ""} - Assigned Shifts.csv`,
+    });
+  }
+
   return (
     <Box
       sx={{
@@ -173,12 +152,12 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     >
       <Breadcrumbs>
         <Link component={RouterLink} to={`/schedule/${props.scheduleId}`}>
-          {scheduleData?.name ?? scheduleData?.id ?? "Schedule"}
+          {schedule.name ?? schedule.data?.id ?? "Schedule"}
         </Link>
         <Typography>Edit shifts</Typography>
       </Breadcrumbs>
-      {shifts?.length === 0 && <EmptyShifts />}
-      {shifts?.length !== 0 && (
+      {schedule.shifts.length === 0 && <EmptyShifts />}
+      {schedule.shifts.length !== 0 && (
         <>
           <Box sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}>
             <Button
@@ -192,43 +171,74 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             >
               <Typography>View mode</Typography>
             </Button>
-            <Button
-              variant="contained"
-              onClick={createNewShiftAndEdit}
-              startIcon={<AddIcon />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.light,
-              }}
-            >
-              <Typography>Add Shift</Typography>
-            </Button>
+            {schedule.data?.role == "owner" ||
+            schedule.data?.role == "manager" ? (
+              <Button
+                variant="contained"
+                onClick={createNewShiftAndEdit}
+                startIcon={<AddIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.light,
+                }}
+              >
+                <Typography>Add Shift</Typography>
+              </Button>
+            ) : null}
 
-            <Button
-              variant="contained"
-              onClick={handleOpenModal}
-              startIcon={<GenerateSchedule />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.dark,
-              }}
-            >
-              <Typography>Generate</Typography>
-            </Button>
+            {schedule.data?.role == "owner" ||
+            schedule.data?.role == "manager" ? (
+              <Button
+                variant="contained"
+                onClick={handleOpenModal}
+                startIcon={<GenerateSchedule />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.dark,
+                }}
+              >
+                <Typography>Generate</Typography>
+              </Button>
+            ) : null}
+
+            {schedule.data?.role == "owner" ||
+            schedule.data?.role == "manager" ? (
+              <Button
+                variant="contained"
+                startIcon={<DeleteShiftTreeIcon />}
+                onClick={handleDeleteShiftTreeClick}
+                sx={{
+                  backgroundColor: theme => theme.palette.error.dark,
+                }}
+              >
+                <Typography>Delete ShiftTree</Typography>
+              </Button>
+            ) : null}
 
             <GenerateShiftModal
               open={modalOpen}
               onClose={handleCloseModal}
               onConfirm={handleConfirmModal}
             />
-            {/* <Button
-              startIcon={<AddIcon />}
+            <DeleteShiftTreeModal
+              open={deleteModalOpen}
+              onClose={() => setDeleteModalOpen(false)}
+              onConfirm={handleDeleteConfirm}
+            />
+
+            <Button
               variant="contained"
-              onClick={createNewShiftAndEdit}
-            /> */}
+              startIcon={<DownloadIcon />}
+              sx={{
+                backgroundColor: theme => theme.palette.info.main,
+              }}
+              onClick={downloadCsv}
+            >
+              Download CSV
+            </Button>
           </Box>
           <ShiftCalendar
-            shifts={shifts ?? []}
-            startDate={startTime}
-            endDate={endTime}
+            shifts={schedule.shifts}
+            startDate={schedule.startTime}
+            endDate={schedule.endTime}
             onClickShift={shiftId => setCurrentlyEditing(shiftId)}
             selectedShifts={currentlyEditing ? [currentlyEditing] : []}
           />
@@ -241,6 +251,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       >
         {currentlyEditing && (
           <EditShift
+            key={props.scheduleId}
             scheduleId={props.scheduleId}
             shiftId={currentlyEditing}
             onClose={() => setCurrentlyEditing(null)}
@@ -258,36 +269,14 @@ interface EditShiftProps {
 }
 
 function EditShift(props: EditShiftProps) {
-  const api = useApi();
-  const { refetch: refetchSchedule } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}",
-    { params: { path: { scheduleId: props.scheduleId } } },
-  );
+  const notifier = useNotifier();
 
-  const { data: shiftsData, refetch: refetchShifts } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/shifts",
-    { params: { path: { scheduleId: props.scheduleId } } },
-  );
-  const shiftData = useMemo(
-    () => shiftsData?.find(shift => shift.id === props.shiftId),
-    [props.shiftId, shiftsData],
-  );
-
-  const { mutateAsync: sendDelete } = api.useMutation(
-    "delete",
-    "/shifts/{shiftId}",
-    {
-      onSuccess: async () => {
-        await refetchShifts();
-        await refetchSchedule();
-      },
-    },
-  );
+  const schedule = useSchedule({ scheduleId: props.scheduleId });
+  const shift = schedule.useShift({ shiftId: props.shiftId });
 
   async function deleteShift() {
-    await sendDelete({ params: { path: { shiftId: props.shiftId } } });
+    await shift.delete_();
+    notifier.message("Shift deleted");
     props.onClose();
   }
 
@@ -296,41 +285,83 @@ function EditShift(props: EditShiftProps) {
   const [newStartTime, setNewStartTime] = useState(dayjs());
   const [newEndTime, setNewEndTime] = useState(dayjs());
   useEffect(() => {
-    if (shiftData) {
-      setNewName(shiftData.name);
-      setNewDesc(shiftData.description);
-      setNewStartTime(dayjs(shiftData.startTime));
-      setNewEndTime(dayjs(shiftData.endTime));
+    if (shift.data) {
+      setNewName(shift.data.name);
+      setNewDesc(shift.data.description);
+      setNewStartTime(dayjs(shift.data.startTime));
+      setNewEndTime(dayjs(shift.data.endTime));
     }
-  }, [shiftData]);
+  }, [shift.data]);
 
   useEffect(() => {
     if (newStartTime.isAfter(newEndTime)) {
       setNewEndTime(newStartTime.add(1, "hour"));
     }
-  }, [newStartTime]);
-
-  const { mutateAsync: updateShift } = api.useMutation(
-    "put",
-    "/shifts/{shiftId}",
-    {
-      onSuccess: async () => {
-        await refetchShifts();
-        await refetchSchedule();
-      },
-    },
-  );
+  }, [newStartTime, newEndTime]);
 
   async function saveChanges() {
-    await updateShift({
-      params: { path: { shiftId: props.shiftId } },
-      body: {
-        name: newName,
-        description: newDesc,
-        startTime: newStartTime.toISOString(),
-        endTime: newEndTime.toISOString(),
-      },
+    await shift.update({
+      name: newName,
+      description: newDesc,
+      startTime: newStartTime,
+      endTime: newEndTime,
     });
+    props.onClose();
+  }
+
+  const [copyTargetDates, setCopyTargetDates] = useState<dayjs.Dayjs[]>([]);
+
+  const copyDatesDescription = useMemo(() => {
+    const sorted = copyTargetDates.sort((a, b) => a.diff(b));
+    // Consecutive runs of days
+    const runs = sorted.reduce((acc, date, i) => {
+      if (i === 0) {
+        return [[date]];
+      }
+      const lastRun = acc[acc.length - 1];
+      const lastDate = lastRun[lastRun.length - 1];
+      if (date.diff(lastDate, "day") === 1) {
+        lastRun.push(date);
+        return acc;
+      } else {
+        return [...acc, [date]];
+      }
+    }, [] as dayjs.Dayjs[][]);
+    const runStrings = runs.map(run => {
+      if (run.length === 1) {
+        return run[0].format("MMM DD");
+      } else {
+        const start = run[0].format("MMM DD");
+        const endDate = run[run.length - 1];
+        const end = run[0].isSame(endDate, "month")
+          ? endDate.format("DD")
+          : endDate.format("MMM DD");
+        return `${start} - ${end}`;
+      }
+    });
+    return runStrings.join(", ");
+  }, [copyTargetDates]);
+
+  async function copyShift() {
+    if (copyTargetDates.length === 0) {
+      notifier.error("No dates selected to copy shift to");
+    }
+    await Promise.all(
+      copyTargetDates.map(async date => {
+        const startTimeOffsetMin = date.diff(date.startOf("day"), "minute");
+        const endTimeOffsetMin = newEndTime.diff(newStartTime, "minute");
+        const startTime = date.startOf("day").add(startTimeOffsetMin, "minute");
+        const endTime = startTime.add(endTimeOffsetMin, "minute");
+        await schedule.createShift({
+          name: newName,
+          description: newDesc,
+          startTime: startTime,
+          endTime: endTime,
+        });
+      }),
+    ).catch(notifier.error);
+    notifier.message(`Copied shift to ${copyTargetDates.length} dates`);
+
     props.onClose();
   }
 
@@ -407,6 +438,41 @@ function EditShift(props: EditShiftProps) {
         >
           Delete shift
         </Button>
+      </Box>
+      <Divider sx={{ paddingTop: 1, paddingBottom: 1 }} />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          justifyContent: "flex-start",
+          alignItems: "stretch",
+        }}
+      >
+        <MultiDateCalendar
+          selectedDates={copyTargetDates}
+          onSelectedDatesChange={setCopyTargetDates}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 1,
+          }}
+        >
+          <Typography>
+            {copyDatesDescription &&
+              `This shift will be copied to ${copyDatesDescription}.`}
+          </Typography>
+          {copyTargetDates.length !== 0 && (
+            <Button variant="contained" onClick={copyShift}>
+              Copy Shift
+            </Button>
+          )}
+          {copyTargetDates.length === 0 && (
+            <Typography>Select dates to copy this shift to</Typography>
+          )}
+        </Box>
       </Box>
     </>
   );
