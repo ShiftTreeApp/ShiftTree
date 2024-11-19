@@ -106,7 +106,6 @@ export const getICSFile = async (req: Request, res: Response) => {
       res.status(500).send("Error generating ICS file");
       return;
     }
-    res.setHeader("Content-Type", "text/calendar");
-    res.status(200).send(value);
+    res.status(200).send({ ics: value });
   });
 };
