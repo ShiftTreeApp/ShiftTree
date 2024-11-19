@@ -55,6 +55,15 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     { enabled: false },
   );
 
+  const { refetch: refetchICS } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/ics",
+    {
+      params: {
+        path: { scheduleId: scheduleId },
+      },
+    },
+  );
   const shifts = useMemo(
     () =>
       shiftsData?.map(
@@ -140,6 +149,11 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     const res = await refetchAssignmentsCsv({ throwOnError: true });
     return res.data?.csv ?? "";
   }
+  // Trying to follow the Csv model, confused as to how ID is getting passed...
+  async function getICS() {
+    const res = await refetchICS();
+    return res.data?.ics ?? "";
+  }
 
   function useShift({ shiftId }: { shiftId: string }) {
     const data = useMemo(() => shifts.find(s => s.id === shiftId), [shiftId]);
@@ -172,5 +186,6 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     updateShift,
     deleteSchedule,
     getAssignmentsCsv,
+    getICS,
   };
 }

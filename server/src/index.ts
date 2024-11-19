@@ -15,6 +15,7 @@ import * as registration from "@/registration";
 import * as schedules from "@/schedules";
 import * as invites from "@/invites";
 import * as autoschedule from "@/autoscheduling";
+import * as ICS from "@/ICSFile";
 
 //Setup
 const app = express();
@@ -129,6 +130,7 @@ app.get(
   auth.authorizationCheck,
   schedules.getCsv,
 );
+app.get("/schedules/:scheduleId/ics", auth.authorizationCheck, ICS.getICSFile);
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);
