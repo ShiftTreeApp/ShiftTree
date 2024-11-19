@@ -393,6 +393,67 @@ export async function getSignups(req: Request, res: Response) {
   res.status(200).json(results.rows[0].json);
 }
 
+export async function getAssignments(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  // Check that user can access the schedule
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select * from schedule_info as info
+        where info.user_id = $1 and info.schedule_id = $2
+      `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error: "You do not have permission to view assignments for this schedule",
+      });
+      return;
+    }
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      select coalesce(json_agg(json_build_object(
+        'id', shift.id,
+        'name', shift.shift_name,
+        'description', shift.shift_description,
+        'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
+        'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
+        'signups', (
+        select coalesce(json_agg(json_build_object(
+            'id', shift.id,
+            'name', shift.shift_name,
+            'description', shift.shift_description,
+            'startTime', (to_json(shift.start_time)#>>'{}') || 'Z',
+            'endTime', (to_json(shift.end_time)#>>'{}') || 'Z',
+            'assignedUserId', shift.assigned_user_id
+          )), json_build_array()) as json
+          from shift
+          join schedule on shift.schedule_id = schedule.id
+          where schedule.id = $1;
+        )
+      )), json_build_array()) as json
+      from shift
+      join schedule on shift.schedule_id = schedule.id
+      where schedule.id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  res.status(200).json(results.rows[0].json);
+}
+
+
 export async function deleteShift(req: Request, res: Response) {
   const userId = await getUserId(req);
   const shiftId = req.params.shiftId as string;

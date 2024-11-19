@@ -184,6 +184,7 @@ export default function Schedule() {
                     shiftId={selectedShift}
                   ></UserChips>
                 )}
+                
               </Box>
             </Box>
           </EditShiftDrawer>
