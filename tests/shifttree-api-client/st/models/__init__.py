@@ -2,7 +2,6 @@
 
 from .credentials import Credentials
 from .error import Error
-from .get_hello_response_200 import GetHelloResponse200
 from .get_schedules_role_item import GetSchedulesRoleItem
 from .get_shift_tree_code_existing_response_200 import GetShiftTreeCodeExistingResponse200
 from .get_shift_tree_code_generate_response_200 import GetShiftTreeCodeGenerateResponse200
@@ -25,7 +24,6 @@ from .user_info_preview import UserInfoPreview
 __all__ = (
     "Credentials",
     "Error",
-    "GetHelloResponse200",
     "GetSchedulesRoleItem",
     "GetShiftTreeCodeExistingResponse200",
     "GetShiftTreeCodeGenerateResponse200",
