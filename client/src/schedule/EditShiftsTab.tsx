@@ -36,6 +36,7 @@ import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 import MultiDateCalendar from "@/schedule/MultiDateCalendar";
 import { useNotifier } from "@/notifier";
 import useSchedule from "@/hooks/useSchedule";
+import { useManagerActions } from "@/hooks/useManagerActions";
 import { downloadFile } from "@/utils";
 
 interface EditShiftsTabProps {
@@ -104,12 +105,18 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleOpenModal = () => {
+    //Fetch backend.
     setModalOpen(true);
+    autogenerate();
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
   };
+  // TODO: Make work
+  async function autogenerate() {
+    await useManagerActions.triggerAutoSchedule(props.scheduleId);
+  }
 
   const handleConfirmModal = () => {
     // Add logic to generate the schedule here
