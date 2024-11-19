@@ -434,7 +434,8 @@ export async function getAssignments(req: Request, res: Response) {
     const role = results.rows[0].user_role;
     if (!(role === "owner" || role === "manager")) {
       res.status(403).json({
-        error: "You do not have permission to view assignments for this schedule",
+        error:
+          "You do not have permission to view assignments for this schedule",
       });
       return;
     }
@@ -443,35 +444,26 @@ export async function getAssignments(req: Request, res: Response) {
   const results = await pool.query({
     text: /* sql */ `
       select coalesce(json_agg(json_build_object(
-        'id', shift.id,
-        'name', shift.shift_name,
-        'description', shift.shift_description,
-        'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
-        'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
-        'signups', (
-        select coalesce(json_agg(json_build_object(
-            'id', shift.id,
-            'name', shift.shift_name,
-            'description', shift.shift_description,
-            'startTime', (to_json(shift.start_time)#>>'{}') || 'Z',
-            'endTime', (to_json(shift.end_time)#>>'{}') || 'Z',
-            'assignedUserId', shift.assigned_user_id
-          )), json_build_array()) as json
-          from shift
-          join schedule on shift.schedule_id = schedule.id
-          where schedule.id = $1;
+        'shiftId', shift.id,
+        'user', json_build_object(
+          'id', ua.id,
+          'displayName', ua.username,
+          'email', ua.email,
+          'profileImageUrl', ''
         )
-      )), json_build_array()) as json
+      )), json_array()) as json
       from shift
-      join schedule on shift.schedule_id = schedule.id
-      where schedule.id = $1
+      join user_shift_assignment as usa on shift.id = usa.shift_id
+      join user_account as ua on usa.user_id = ua.id
+      where shift.schedule_id = $1
     `,
     values: [scheduleId],
   });
 
+  console.log(results);
+
   res.status(200).json(results.rows[0].json);
 }
-
 
 export async function deleteShift(req: Request, res: Response) {
   const userId = await getUserId(req);
