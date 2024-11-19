@@ -117,6 +117,12 @@ export function useEmployeeActions(shiftTreeId?: string) {
         })
       : { data: [], refetch: () => {} };
 
+  const { data: allAssignments } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/assignments",
+    { params: { path: { scheduleId: shiftTreeId ?? "" } } },
+  );
+
   async function leaveSchedule({ scheduleId }: { scheduleId: string }) {
     await removeUser({ params: { path: { scheduleID: scheduleId } } });
   }
@@ -139,5 +145,6 @@ export function useEmployeeActions(shiftTreeId?: string) {
     signedUpShifts,
     assignedShifts,
     unregister,
+    allAssignments,
   };
 }
