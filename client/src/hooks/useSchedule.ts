@@ -103,6 +103,11 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     },
   );
 
+  const { mutateAsync: sendDeleteSchedule } = api.useMutation(
+    "delete",
+    "/schedules/{scheduleId}",
+  );
+
   async function createShift(shift: Omit<ShiftDetails, "id">) {
     const { id } = await postShift({
       params: { path: { scheduleId: scheduleId } },
@@ -150,6 +155,10 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     return { data, delete_, update };
   }
 
+  async function deleteSchedule() {
+    await sendDeleteSchedule({ params: { path: { scheduleId } } });
+  }
+
   return {
     name: scheduleData?.name,
     description: scheduleData?.description,
@@ -161,6 +170,7 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     useShift,
     deleteShift,
     updateShift,
+    deleteSchedule,
     getAssignmentsCsv,
   };
 }
