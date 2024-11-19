@@ -149,6 +149,7 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     const res = await refetchAssignmentsCsv({ throwOnError: true });
     return res.data?.csv ?? "";
   }
+  // Trying to follow the Csv model, confused as to how ID is getting passed...
   async function getICS() {
     const res = await refetchICS();
     return res.data?.ics ?? "";

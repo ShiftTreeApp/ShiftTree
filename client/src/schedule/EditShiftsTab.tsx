@@ -139,6 +139,13 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       filename: `${schedule.name ?? ""} - Assigned Shifts.csv`,
     });
   }
+  async function downloadIcs() {
+    const ics = await schedule.getICS();
+    downloadFile({
+      data: new Blob([ics], { type: "text/ics" }),
+      filename: `${schedule.name ?? ""} - Assigned Shifts.ics`,
+    });
+  }
 
   return (
     <Box
@@ -233,6 +240,16 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               onClick={downloadCsv}
             >
               Download CSV
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              sx={{
+                backgroundColor: theme => theme.palette.info.main,
+              }}
+              onClick={downloadIcs}
+            >
+              Download ICS
             </Button>
           </Box>
           <ShiftCalendar
