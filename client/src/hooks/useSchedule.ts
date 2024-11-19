@@ -1,5 +1,10 @@
 import { useMemo } from "react";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 import { useApi } from "@/client";
 
@@ -36,6 +41,18 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     {
       params: { path: { scheduleId: scheduleId } },
     },
+  );
+
+  const { refetch: refetchAssignmentsCsv } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/csv",
+    {
+      params: {
+        path: { scheduleId: scheduleId },
+        query: { type: "assignments", tz: dayjs.tz.guess() },
+      },
+    },
+    { enabled: false },
   );
 
   const shifts = useMemo(
@@ -119,6 +136,11 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     });
   }
 
+  async function getAssignmentsCsv() {
+    const res = await refetchAssignmentsCsv({ throwOnError: true });
+    return res.data?.csv ?? "";
+  }
+
   function useShift({ shiftId }: { shiftId: string }) {
     const data = useMemo(() => shifts.find(s => s.id === shiftId), [shiftId]);
 
@@ -149,5 +171,6 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     deleteShift,
     updateShift,
     deleteSchedule,
+    getAssignmentsCsv,
   };
 }

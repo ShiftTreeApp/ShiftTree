@@ -16,6 +16,7 @@ import {
   //EventRepeat as GenerateSchedule,
   AutoMode as GenerateSchedule,
   DeleteForever as DeleteShiftTreeIcon,
+  CloudDownload as DownloadIcon,
 } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import "dayjs/locale/en";
@@ -35,6 +36,7 @@ import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 import MultiDateCalendar from "@/schedule/MultiDateCalendar";
 import { useNotifier } from "@/notifier";
 import useSchedule from "@/hooks/useSchedule";
+import { downloadFile } from "@/utils";
 
 interface EditShiftsTabProps {
   scheduleId: string;
@@ -130,6 +132,14 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     navigate("/");
   };
 
+  async function downloadCsv() {
+    const csv = await schedule.getAssignmentsCsv();
+    downloadFile({
+      data: new Blob([csv], { type: "text/csv" }),
+      filename: `${schedule.name ?? ""} - Assigned Shifts.csv`,
+    });
+  }
+
   return (
     <Box
       sx={{
@@ -213,6 +223,17 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               onClose={() => setDeleteModalOpen(false)}
               onConfirm={handleDeleteConfirm}
             />
+
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              sx={{
+                backgroundColor: theme => theme.palette.info.main,
+              }}
+              onClick={downloadCsv}
+            >
+              Download CSV
+            </Button>
           </Box>
           <ShiftCalendar
             shifts={schedule.shifts}

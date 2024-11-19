@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useApi } from "@/client";
 
 export function useDatabaseQueries() {
@@ -14,18 +13,7 @@ export function useDatabaseQueries() {
     },
   );
 
-  const schedules = useMemo(
-    () =>
-      scheduleData?.map(schedule => ({
-        id: schedule.id,
-        name: schedule.name,
-        description: schedule.description,
-        state: schedule.state,
-        startTime: schedule.startTime,
-        endTime: schedule.endTime,
-      })),
-    [scheduleData],
-  );
+  const schedules = scheduleData;
 
   return { schedules, refetchAllSchedules };
 }

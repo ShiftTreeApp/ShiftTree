@@ -105,6 +105,7 @@ export default function Home() {
                   dates={formatTimes(schedule.startTime, schedule.endTime)}
                   description={schedule.description}
                   id={schedule.id}
+                  role={schedule.role}
                 />
               </Grid>
             ))}
