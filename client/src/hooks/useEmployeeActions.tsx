@@ -25,6 +25,16 @@ export function useEmployeeActions(shiftTreeId?: string) {
       onError: notifier.error,
     },
   );
+  const { mutateAsync: unregisterFromShift } = api.useMutation(
+    "delete",
+    "/signups/{shiftId}",
+    {
+      onSuccess: async () => {
+        await refetchUserSignups();
+      },
+      onError: notifier.error,
+    },
+  );
 
   /*
    * Changed structure to separately build functions and return them
@@ -111,6 +121,12 @@ export function useEmployeeActions(shiftTreeId?: string) {
     await removeUser({ params: { path: { scheduleID: scheduleId } } });
   }
 
+  async function unregister({ shiftId }: { shiftId: string }) {
+    await unregisterFromShift({
+      params: { path: { shiftId: shiftId } },
+    });
+  }
+
   const signedUpShifts = userSignups;
   const assignedShifts = userAssignedShifts;
 
@@ -122,5 +138,6 @@ export function useEmployeeActions(shiftTreeId?: string) {
     refetchUserAssignments,
     signedUpShifts,
     assignedShifts,
+    unregister,
   };
 }
