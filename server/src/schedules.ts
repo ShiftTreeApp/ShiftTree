@@ -412,6 +412,59 @@ export async function getSignups(req: Request, res: Response) {
   res.status(200).json(results.rows[0].json);
 }
 
+export async function getAssignments(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId as string;
+
+  // Check that user can access the schedule
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+        select * from schedule_info as info
+        where info.user_id = $1 and info.schedule_id = $2
+      `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({ error: "Schedule not found" });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role === "owner" || role === "manager")) {
+      res.status(403).json({
+        error:
+          "You do not have permission to view assignments for this schedule",
+      });
+      return;
+    }
+  }
+
+  const results = await pool.query({
+    text: /* sql */ `
+      select coalesce(json_agg(json_build_object(
+        'shiftId', shift.id,
+        'user', json_build_object(
+          'id', ua.id,
+          'displayName', ua.username,
+          'email', ua.email,
+          'profileImageUrl', ''
+        )
+      )), json_array()) as json
+      from shift
+      join user_shift_assignment as usa on shift.id = usa.shift_id
+      join user_account as ua on usa.user_id = ua.id
+      where shift.schedule_id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  console.log(results);
+
+  res.status(200).json(results.rows[0].json);
+}
+
 export async function deleteShift(req: Request, res: Response) {
   const userId = await getUserId(req);
   const shiftId = req.params.shiftId as string;

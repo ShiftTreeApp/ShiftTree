@@ -842,6 +842,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/schedules/{scheduleId}/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get schedule assignees */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    scheduleId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successful */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": string[];
+                    };
+                };
+                /** @description User does not have permission to view the assignments */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Schedule with specified ID does not exist, or user does not have access to it */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/autoschedule/{scheduleId}": {
         parameters: {
             query?: never;
@@ -1308,6 +1364,10 @@ export interface components {
         };
         ShiftWithSignups: {
             signups?: components["schemas"]["SignupInfo"][];
+        } & components["schemas"]["ShiftInfo"];
+        ShiftWithAssignment: {
+            /** Format: uuid */
+            assignedUserId?: string | null;
         } & components["schemas"]["ShiftInfo"];
     };
     responses: never;
