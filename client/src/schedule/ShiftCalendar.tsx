@@ -4,6 +4,7 @@ import {
   Box,
   Card,
   Chip,
+  Divider,
   Grid2 as Grid,
   Typography,
 } from "@mui/material";
@@ -307,14 +308,28 @@ function ShiftCard(props: ShiftCardProps) {
         {isDifferentDay && (
           <>
             {props.startTime.format("MMM DD, HH:mm")}
-            {" - "}
+            <Divider
+              variant="middle"
+              sx={{
+                margin: "4px 0",
+                borderColor: theme => theme.palette.info.dark,
+                borderWidth: 2,
+              }}
+            />
             {props.endTime.format("MMM DD, HH:mm")}
           </>
         )}
         {!isDifferentDay && (
           <>
             {props.startTime.format("HH:mm")}
-            {" - "}
+            <Divider
+              variant="middle"
+              sx={{
+                margin: "4px 0",
+                borderColor: theme => theme.palette.info.dark,
+                borderWidth: 2,
+              }}
+            />
             {props.endTime.format("HH:mm")}
           </>
         )}
