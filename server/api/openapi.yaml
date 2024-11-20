@@ -555,7 +555,7 @@ paths:
                       type: string
                       format: uuid
                     user:
-                      $ref: "#/components/schemas/ShiftWithAssignment"
+                      $ref: "#/components/schemas/UserInfoPreview"
         404:
           description: Schedule with specified ID does not exist, or user does not have access to it
           content:
