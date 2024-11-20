@@ -228,7 +228,6 @@ function MemberItem(props: MemberItemProps) {
           )}
 
           <Typography variant="body1">
-
             <br></br>
             <br></br>UserID: {props.userId}
           </Typography>
@@ -318,8 +317,8 @@ function ShiftDisplay(props: ShiftDisplayProps) {
       <Typography
         sx={{
           display: "flex",
-          justifyContent: "center", 
-          alignItems: "center", 
+          justifyContent: "center",
+          alignItems: "center",
           fontWeight: "bold",
         }}
       >
@@ -339,8 +338,8 @@ function ShiftDisplay(props: ShiftDisplayProps) {
         <Typography
           sx={{
             display: "flex",
-            justifyContent: "center", 
-            alignItems: "center", 
+            justifyContent: "center",
+            alignItems: "center",
             fontStyle: "italic",
           }}
         >
@@ -350,8 +349,8 @@ function ShiftDisplay(props: ShiftDisplayProps) {
       <Typography
         sx={{
           display: "flex",
-          justifyContent: "center", 
-          alignItems: "center", 
+          justifyContent: "center",
+          alignItems: "center",
           fontWeight: "bold",
         }}
       >
@@ -361,8 +360,8 @@ function ShiftDisplay(props: ShiftDisplayProps) {
         <Typography
           sx={{
             display: "flex",
-            justifyContent: "center", 
-            alignItems: "center", 
+            justifyContent: "center",
+            alignItems: "center",
             fontStyle: "italic",
           }}
         >
