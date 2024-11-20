@@ -56,8 +56,6 @@ export const getICSFile = async (req: Request, res: Response) => {
   }
   //TODO: Check shifts are assigned, and schedule is not still pending
 
-  console.log(userId);
-
   // Fetch relevant data for the ICS file from the schedule
   const query = /* sql */ `
       SELECT usa.id AS assignment_id,
@@ -79,35 +77,42 @@ export const getICSFile = async (req: Request, res: Response) => {
     text: query,
     values: [scheduleId],
   });
+  const map = new Map<string, any[]>();
 
-  result.rows.forEach(lookForDuplicates as any);
+  result.rows.forEach(value => {
+    const key = `${value.start_time}${value.end_time}`;
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+    map.get(key)?.push(value);
+  });
 
   //TODO: Check if it's null
-
-  const events = result.rows
-    .filter(row => row.start_time != 0)
-    .map((row: any) => {
-      //Get all the data and not merge it
-      return {
-        start: [
-          new Date(row.start_time).getFullYear(),
-          new Date(row.start_time).getMonth() + 1,
-          new Date(row.start_time).getDate(),
-          new Date(row.start_time).getHours(),
-          new Date(row.start_time).getMinutes(),
-        ],
-        end: [
-          new Date(row.end_time).getFullYear(),
-          new Date(row.end_time).getMonth() + 1,
-          new Date(row.end_time).getDate(),
-          new Date(row.end_time).getHours(),
-          new Date(row.end_time).getMinutes(),
-        ],
-        title: row.shift_name,
-        description: row.shift_description + ":" + row.email,
-        uid: row.assignment_id,
-      };
+  const events = [];
+  for (let [key, value] of map) {
+    let title = value.map(v => v.username).join(" and ");
+    let combinedEmails = value.map(v => v.email).join(", ");
+    //Get all the data and not merge it
+    events.push({
+      start: [
+        new Date(value[0].start_time).getFullYear(),
+        new Date(value[0].start_time).getMonth() + 1,
+        new Date(value[0].start_time).getDate(),
+        new Date(value[0].start_time).getHours(),
+        new Date(value[0].start_time).getMinutes(),
+      ],
+      end: [
+        new Date(value[0].end_time).getFullYear(),
+        new Date(value[0].end_time).getMonth() + 1,
+        new Date(value[0].end_time).getDate(),
+        new Date(value[0].end_time).getHours(),
+        new Date(value[0].end_time).getMinutes(),
+      ],
+      title: schedule.schedule_name + ":" + title,
+      description: combinedEmails,
+      uid: value[0].assignment_id,
     });
+  }
   ics.createEvents(events as any, (error, value) => {
     if (error) {
       console.log(error);
@@ -117,18 +122,3 @@ export const getICSFile = async (req: Request, res: Response) => {
     res.status(200).send({ ics: value });
   });
 };
-
-function lookForDuplicates(value: any, array: any[]) {
-  for (let i = 0; i < array.length; i++) {
-    if (
-      array[i].start_time! + 0 &&
-      array[i].start_time == value.start_time &&
-      array[i].end_time == value.end_time
-    ) {
-      value.username += "," + array[i].username;
-      value.email += "," + array[i].email;
-      array[i].start_time = 0;
-      array[i].end_time = 0;
-    }
-  }
-}
