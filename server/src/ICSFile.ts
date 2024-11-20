@@ -67,9 +67,12 @@ export const getICSFile = async (req: Request, res: Response) => {
              s.start_time,
              s.end_time,
              s.shift_name,
-             s.shift_description
+             s.shift_description,
+             ua.email,
+             ua.username
       FROM user_shift_assignment usa
-      JOIN shift s ON usa.shift_id = s.id
+      JOIN shift AS s ON usa.shift_id = s.id
+      JOIN user_account AS ua ON usa.user_id = ua.id
       WHERE s.schedule_id = $1
     `;
   const result = await pool.query({
@@ -77,30 +80,35 @@ export const getICSFile = async (req: Request, res: Response) => {
     values: [scheduleId],
   });
 
+  result.rows.forEach(lookForDuplicates as any);
+
   //TODO: Check if it's null
 
-  const events = result.rows.map((row: any) => {
-    return {
-      start: [
-        new Date(row.start_time).getFullYear(),
-        new Date(row.start_time).getMonth() + 1,
-        new Date(row.start_time).getDate(),
-        new Date(row.start_time).getHours(),
-        new Date(row.start_time).getMinutes(),
-      ],
-      end: [
-        new Date(row.end_time).getFullYear(),
-        new Date(row.end_time).getMonth() + 1,
-        new Date(row.end_time).getDate(),
-        new Date(row.end_time).getHours(),
-        new Date(row.end_time).getMinutes(),
-      ],
-      title: row.shift_name,
-      description: row.shift_description,
-      uid: row.assignment_id,
-    };
-  });
-  ics.createEvents(events, (error, value) => {
+  const events = result.rows
+    .filter(row => row.start_time != 0)
+    .map((row: any) => {
+      //Get all the data and not merge it
+      return {
+        start: [
+          new Date(row.start_time).getFullYear(),
+          new Date(row.start_time).getMonth() + 1,
+          new Date(row.start_time).getDate(),
+          new Date(row.start_time).getHours(),
+          new Date(row.start_time).getMinutes(),
+        ],
+        end: [
+          new Date(row.end_time).getFullYear(),
+          new Date(row.end_time).getMonth() + 1,
+          new Date(row.end_time).getDate(),
+          new Date(row.end_time).getHours(),
+          new Date(row.end_time).getMinutes(),
+        ],
+        title: row.shift_name,
+        description: row.shift_description + ":" + row.email,
+        uid: row.assignment_id,
+      };
+    });
+  ics.createEvents(events as any, (error, value) => {
     if (error) {
       console.log(error);
       res.status(500).send("Error generating ICS file");
@@ -109,3 +117,18 @@ export const getICSFile = async (req: Request, res: Response) => {
     res.status(200).send({ ics: value });
   });
 };
+
+function lookForDuplicates(value: any, array: any[]) {
+  for (let i = 0; i < array.length; i++) {
+    if (
+      array[i].start_time! + 0 &&
+      array[i].start_time == value.start_time &&
+      array[i].end_time == value.end_time
+    ) {
+      value.username += "," + array[i].username;
+      value.email += "," + array[i].email;
+      array[i].start_time = 0;
+      array[i].end_time = 0;
+    }
+  }
+}
