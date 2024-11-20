@@ -113,9 +113,10 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
   const handleCloseModal = () => {
     setModalOpen(false);
   };
-  // TODO: Make work
+  const managerActions = useManagerActions(props.scheduleId);
+
   async function autogenerate() {
-    await useManagerActions.triggerAutoSchedule(props.scheduleId);
+    await managerActions.triggerAutoSchedule({ scheduleId: props.scheduleId });
   }
 
   const handleConfirmModal = () => {

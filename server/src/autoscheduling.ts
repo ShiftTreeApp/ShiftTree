@@ -96,14 +96,14 @@ export async function sendShifts(req: Request, res: Response) {
     values: [scheduleId],
   });
   console.log(results.rows[0].json);
-  const result = await fetch(host + "/shifts", {
+  const result = await fetch(`http://${host}/shifts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ shifts: results.rows[0].json }),
   });
-  const responseData: ScheduleResponse = await result.json();
+  const responseData: ScheduleResponse = (await result.json()) as any;
   console.log(responseData);
   // Not tested, should work but realisitcally need response to make sure there won't be any bugs
   const insertQueryText = `
