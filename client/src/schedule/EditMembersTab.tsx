@@ -273,8 +273,20 @@ function ShiftDisplay(props: ShiftDisplayProps) {
     { params: { path: { scheduleId: props.scheduleId } } },
   );
 
-  // const signupData = useMemo();
-  console.log("Unpacking");
+  // Get the assignments for the current shift tree
+  const { data: scheduleAssignments } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/assignments",
+    { params: { path: { scheduleId: props.scheduleId } } },
+  );
+
+
+  const filteredAssignments = scheduleAssignments
+    ?.filter(
+      x => 
+        x.
+    )
+
 
   const filteredSignups = scheduleSignups
     ?.filter(
