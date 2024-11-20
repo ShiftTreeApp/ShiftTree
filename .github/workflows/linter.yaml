@@ -20,7 +20,7 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
-      # Install dependencies to avoid failing checks
+      # Install dependencies to avoid failing related checks
       - name: Install Server Dependencies
         run: pnpm i
         working-directory: ./server
