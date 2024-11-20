@@ -116,6 +116,13 @@ paths:
                 - member
                 - manager
             default: [owner, member, manager]
+        - name: date
+          in: query
+          description: Filter schedules if date is within schedule dates
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         200:
           description: Successful
@@ -297,6 +304,42 @@ paths:
                 $ref: "#/components/schemas/Error"
         403:
           description: User does not have permission to delete the schedule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /schedules/{scheduleId}/ics:
+    get:
+      security:
+        - Bearer: []
+      summary: Get schedule in ICS Format
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - ics
+                properties:
+                  ics:
+                    type: string
+        403:
+          description: User does not have permission to view the type of data requested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
           content:
             application/json:
               schema:
@@ -568,7 +611,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
 
   /autoschedule/{scheduleId}:
     post:

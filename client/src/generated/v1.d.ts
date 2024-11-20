@@ -120,6 +120,8 @@ export interface paths {
                 query?: {
                     /** @description Filter schedules by role */
                     role?: ("owner" | "member" | "manager")[];
+                    /** @description Filter schedules if date is within schedule dates */
+                    date?: string;
                 };
                 header?: never;
                 path?: never;
@@ -497,6 +499,64 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/schedules/{scheduleId}/ics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get schedule in ICS Format */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    scheduleId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successful */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ics: string;
+                        };
+                    };
+                };
+                /** @description User does not have permission to view the type of data requested */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Schedule with specified ID does not exist, or user does not have access to it */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
