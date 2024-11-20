@@ -302,14 +302,14 @@ function ShiftCard(props: ShiftCardProps) {
       onClick={props.onClick}
     >
       <Typography variant="h6">{props.name}</Typography>
-      <Typography>
+      <Typography variant="body2">
         {props.startTime.format("MMM DD, HH:mm")}
         <Divider
           variant="middle"
           sx={{
             margin: "4px 0",
             borderColor: theme => theme.palette.info.dark,
-            borderWidth: 2,
+            borderWidth: 1.25,
           }}
         />
         {props.endTime.format("MMM DD, HH:mm")}
