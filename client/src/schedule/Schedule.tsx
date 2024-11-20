@@ -70,6 +70,10 @@ export default function Schedule() {
     empActions.assignedShifts,
   );
 
+  const [assignedUser, setAssignedUser] = useState(
+    empActions.allAssignments,
+  );
+
   useEffect(() => {
     const getUpdatedShiftStatuses = async () => {
       empActions.refetchUserSignups();
@@ -97,9 +101,17 @@ export default function Schedule() {
     [assignedShifts],
   );
 
+  const userIndicators = useMemo(
+    () =>
+      Object.fromEntries(
+        assignedUser?.map((shiftId: string) => [shiftId, UserIndicators()]) ?? [],
+      ),
+    [assignedUser],
+  );
+
   const bothIndicators = useMemo(
-    () => ({ ...signedUpIndicators, ...assignedIndicators }),
-    [signedUpIndicators, assignedIndicators],
+    () => ({ ...signedUpIndicators, ...assignedIndicators, ...userIndicators}),
+    [signedUpIndicators, assignedIndicators, userIndicators],
   );
 
   const { data: scheduleData } = api.useQuery(
@@ -262,6 +274,7 @@ export default function Schedule() {
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
             customContentMap={bothIndicators}
+            scheduleId={scheduleId}
             shifts={formattedShifts}
           />
         </Paper>
@@ -292,6 +305,20 @@ function AssignedIndicator() {
         color: "white",
       }}
       label="Assigned"
+      color="primary"
+    />
+  );
+}
+
+function UserIndicators() {
+  return (
+    <Chip
+      icon={<RegisterIcon />}
+      sx={{
+        backgroundColor: theme.palette.primary.main,
+        color: "white",
+      }}
+      label="UserId"
       color="primary"
     />
   );
