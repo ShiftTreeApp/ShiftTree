@@ -20,6 +20,14 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
+      # Install dependencies to avoid failing checks
+      - name: Install Server Dependencies
+        run: pnpm i
+        working-directory: ./server
+      - name: Install Client Dependencies
+        run: pnpm i
+        working-directory: ./client
+
       # Check formatting of client and server files
       - name: Check Client Code Formatting
         run: pnpm run check
