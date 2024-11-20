@@ -109,7 +109,8 @@ export async function sendShifts(req: Request, res: Response) {
   const insertQueryText = `
   INSERT INTO user_shift_assignment (id, user_id, shift_id, requested_weight)
   VALUES (gen_random_uuid(), $1, $2, $3)
-  ON CONFLICT (user_id, shift_id) DO NOTHING
+  ON CONFLICT (user_id, shift_id) DO UPDATE
+  SET requested_weight = $3
   `;
 
   for (const assignment of responseData.assignments) {
