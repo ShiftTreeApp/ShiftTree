@@ -1,7 +1,9 @@
 name: Check Formatting of Files
 on:
   push:
-    branches: [linter-ci]
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   test:
