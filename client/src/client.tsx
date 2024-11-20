@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import createFetchClient from "openapi-fetch";
 import createClient from "openapi-react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
