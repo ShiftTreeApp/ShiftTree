@@ -108,7 +108,7 @@ export const getICSFile = async (req: Request, res: Response) => {
         new Date(value[0].end_time).getHours(),
         new Date(value[0].end_time).getMinutes(),
       ],
-      title: schedule.schedule_name + ":" + title,
+      title: schedule.schedule_name + ": " + title,
       description: combinedEmails,
       uid: value[0].assignment_id,
     });
