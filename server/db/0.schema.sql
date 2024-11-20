@@ -52,6 +52,7 @@ CREATE TABLE user_shift_assignment
 , user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
 , shift_id UUID NOT NULL REFERENCES shift (id) ON DELETE CASCADE
 , requested_weight INTEGER
+, UNIQUE (user_id, shift_id)
 );
 
 CREATE TABLE user_shift_signup
