@@ -867,7 +867,11 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": string[];
+                        "application/json": {
+                            /** Format: uuid */
+                            shiftId?: string;
+                            user?: components["schemas"]["ShiftWithAssignment"];
+                        }[];
                     };
                 };
                 /** @description User does not have permission to view the assignments */

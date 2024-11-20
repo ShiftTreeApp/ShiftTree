@@ -280,13 +280,24 @@ function ShiftDisplay(props: ShiftDisplayProps) {
     { params: { path: { scheduleId: props.scheduleId } } },
   );
 
+  // Get the assignments for the current shift tree
+  const { data: shifts } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/shifts",
+    { params: { path: { scheduleId: props.scheduleId } } },
+  );
 
-  const filteredAssignments = scheduleAssignments
-    ?.filter(
-      x => 
-        x.
-    )
+  const shiftIds = scheduleAssignments
+    ?.filter(assignment => assignment.user?.id === props.userId)
+    .map(assignment => assignment.shiftId);
 
+  function getShiftDetails(shiftId: string) {
+    return shifts?.find(x => x.id == shiftId);
+  }
+
+  const shiftDetailsArray = shiftIds
+    ?.filter(shiftId => shiftId !== undefined) // Filter out undefined shiftIds
+    .map(shiftId => getShiftDetails(shiftId)); // Only pass valid shiftId to getShiftDetails
 
   const filteredSignups = scheduleSignups
     ?.filter(
@@ -302,7 +313,9 @@ function ShiftDisplay(props: ShiftDisplayProps) {
 
   return (
     <Box>
-      {filteredSignups !== undefined && filteredSignups.length > 0 ? (
+      {shiftDetailsArray?.length === 0 &&
+      filteredSignups !== undefined &&
+      filteredSignups.length > 0 ? (
         filteredSignups.map((signup, index) => (
           <Typography key={index}>
             {signup.startTime.format("dddd")} {signup.name} -{" "}
@@ -311,7 +324,18 @@ function ShiftDisplay(props: ShiftDisplayProps) {
           </Typography>
         ))
       ) : (
-        <Typography>Loading signup data...</Typography>
+        <Typography>No signups.</Typography>
+      )}
+      {shiftDetailsArray?.length === 0 ? (
+        <Typography>No assignments.</Typography>
+      ) : (
+        shiftDetailsArray?.map((shift, index) => (
+          <Typography key={index}>
+            {dayjs(shift?.startTime).format("dddd")} {shift?.name} -{" "}
+            {dayjs(shift?.startTime).format("HH:mm")} to{" "}
+            {dayjs(shift?.endTime).format("HH:mm")}
+          </Typography>
+        ))
       )}
     </Box>
   );
