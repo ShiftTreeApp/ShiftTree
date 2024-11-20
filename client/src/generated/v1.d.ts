@@ -930,7 +930,7 @@ export interface paths {
                         "application/json": {
                             /** Format: uuid */
                             shiftId?: string;
-                            user?: components["schemas"]["ShiftWithAssignment"];
+                            user?: components["schemas"]["UserInfoPreview"];
                         }[];
                     };
                 };
