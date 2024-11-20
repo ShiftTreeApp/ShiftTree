@@ -333,6 +333,7 @@ function UserChips(props: UserChipsProps) {
         const member = membersData?.find((member: any) => member.id === userId);
         return member ? (
           <Chip
+            key={userId}
             avatar={
               <Avatar src={createRandomPfpUrl(member.displayName, member.id)} />
             }

@@ -372,7 +372,11 @@ function EditShift(props: EditShiftProps) {
     }
     await Promise.all(
       copyTargetDates.map(async date => {
-        const startTimeOffsetMin = date.diff(date.startOf("day"), "minute");
+        const startTimeOffsetMin = newStartTime.diff(
+          newStartTime.startOf("day"),
+          "minute",
+        );
+        console.log(startTimeOffsetMin);
         const endTimeOffsetMin = newEndTime.diff(newStartTime, "minute");
         const startTime = date.startOf("day").add(startTimeOffsetMin, "minute");
         const endTime = startTime.add(endTimeOffsetMin, "minute");

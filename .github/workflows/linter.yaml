@@ -1,0 +1,39 @@
+name: Check Formatting of Files
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    timeout-minutes: 30
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout a branch for runner to exec workflow
+      - uses: actions/checkout@v4
+      # Setup node env using version 18 (can change to lts)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      # Runner needs to install pnpm
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      # Install dependencies to avoid failing related checks
+      - name: Install Server Dependencies
+        run: pnpm i
+        working-directory: ./server
+      - name: Install Client Dependencies
+        run: pnpm i
+        working-directory: ./client
+
+      # Check formatting of client and server files
+      - name: Check Client Code Formatting
+        run: pnpm run check
+        working-directory: ./client
+      - name: Check Server Code Formatting
+        run: pnpm run check
+        working-directory: ./server

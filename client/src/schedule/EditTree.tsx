@@ -56,7 +56,7 @@ export default function EditTree() {
     if (scheduleData?.role === "member") {
       navigate(`/schedule/${scheduleId}`);
     }
-  }, [scheduleData, history, scheduleId]);
+  }, [scheduleData, scheduleId, navigate]);
 
   return (
     <Grid container direction="column" spacing={1}>
