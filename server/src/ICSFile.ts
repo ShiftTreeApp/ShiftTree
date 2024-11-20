@@ -67,12 +67,12 @@ export const getICSFile = async (req: Request, res: Response) => {
              s.start_time,
              s.end_time,
              s.shift_name,
-             s.shift_description
-             ua.email
+             s.shift_description,
+             ua.email,
              ua.username
       FROM user_shift_assignment usa
-      JOIN shift s ON usa.shift_id = s.id
-      JOIN user_account ON usa.user_id = ua.id
+      JOIN shift AS s ON usa.shift_id = s.id
+      JOIN user_account AS ua ON usa.user_id = ua.id
       WHERE s.schedule_id = $1
     `;
   const result = await pool.query({
@@ -80,7 +80,7 @@ export const getICSFile = async (req: Request, res: Response) => {
     values: [scheduleId],
   });
 
-  result.rows.forEach(lookForDuplicates);
+  result.rows.forEach(lookForDuplicates as any);
 
   //TODO: Check if it's null
 
@@ -108,7 +108,7 @@ export const getICSFile = async (req: Request, res: Response) => {
         uid: row.assignment_id,
       };
     });
-  ics.createEvents(events, (error, value) => {
+  ics.createEvents(events as any, (error, value) => {
     if (error) {
       console.log(error);
       res.status(500).send("Error generating ICS file");
@@ -118,7 +118,7 @@ export const getICSFile = async (req: Request, res: Response) => {
   });
 };
 
-function lookForDuplicates(value, array) {
+function lookForDuplicates(value: any, array: any[]) {
   for (let i = 0; i < array.length; i++) {
     if (
       array[i].start_time! + 0 &&
