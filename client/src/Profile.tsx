@@ -1,11 +1,4 @@
-import {
-  Button,
-  Grid2 as Grid,
-  Paper,
-  Divider,
-  Box,
-  Typography
-} from "@mui/material";
+import { Button, Grid2 as Grid, Box, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import profileImage from "./assets/profile.png";
 import Navbar from "@/Navbar";
@@ -92,7 +85,11 @@ export default function App() {
           justifyContent={"center"}
           sx={{ marginTop: 8, pt: 0.5, pb: 0.5, px: 2 }}
         >
-          <Button sx={{ backgroundColor: "red" }} component={Link} to="/edit_profile">
+          <Button
+            sx={{ backgroundColor: "red" }}
+            component={Link}
+            to="/edit_profile"
+          >
             <Typography color="black" sx={{ fontSize: "25px" }}>
               Edit
             </Typography>
