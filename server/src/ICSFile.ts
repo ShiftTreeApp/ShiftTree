@@ -4,6 +4,13 @@ import { z } from "zod";
 const tokenPayload = z.object({ email: z.string(), name: z.string() });
 import * as jwt from "jsonwebtoken";
 import * as ics from "ics";
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 //Scuffed copy paste
 async function getUserId(req: Request) {
   const token = req.headers.authorization?.split(" ")[1];
@@ -29,7 +36,7 @@ async function getUserId(req: Request) {
 export const getICSFile = async (req: Request, res: Response) => {
   const userId = await getUserId(req);
   const scheduleId = req.params.scheduleId;
-
+  // const tz = req.query.tz as string;
   //Checking that the user has correct permissions
   const schedulesQuery = /* sql */ `
     select * from schedule_info
@@ -90,6 +97,7 @@ export const getICSFile = async (req: Request, res: Response) => {
   //TODO: Check if it's null
   const events = [];
   for (let [key, value] of map) {
+    console.log(value);
     let title = value.map(v => v.username).join(" and ");
     let combinedEmails = value.map(v => v.email).join(", ");
     //Get all the data and not merge it
@@ -101,6 +109,7 @@ export const getICSFile = async (req: Request, res: Response) => {
         new Date(value[0].start_time).getHours(),
         new Date(value[0].start_time).getMinutes(),
       ],
+      startInputType: "utc",
       end: [
         new Date(value[0].end_time).getFullYear(),
         new Date(value[0].end_time).getMonth() + 1,
@@ -108,6 +117,9 @@ export const getICSFile = async (req: Request, res: Response) => {
         new Date(value[0].end_time).getHours(),
         new Date(value[0].end_time).getMinutes(),
       ],
+      startOutputType: "utc",
+      endInputType: "utc",
+      endOutputType: "utc",
       title: schedule.schedule_name + ": " + title,
       description: combinedEmails,
       uid: value[0].assignment_id,

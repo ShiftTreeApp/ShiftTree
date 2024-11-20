@@ -320,6 +320,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: tz
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: Successful
