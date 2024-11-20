@@ -279,8 +279,6 @@ type BackgroundColorType = Extract<
 >["backgroundColor"];
 
 function ShiftCard(props: ShiftCardProps) {
-  const isDifferentDay = !props.startTime.isSame(props.endTime, "day");
-
   return (
     <Card
       sx={{
@@ -305,34 +303,16 @@ function ShiftCard(props: ShiftCardProps) {
     >
       <Typography variant="h6">{props.name}</Typography>
       <Typography>
-        {isDifferentDay && (
-          <>
-            {props.startTime.format("MMM DD, HH:mm")}
-            <Divider
-              variant="middle"
-              sx={{
-                margin: "4px 0",
-                borderColor: theme => theme.palette.info.dark,
-                borderWidth: 2,
-              }}
-            />
-            {props.endTime.format("MMM DD, HH:mm")}
-          </>
-        )}
-        {!isDifferentDay && (
-          <>
-            {props.startTime.format("HH:mm")}
-            <Divider
-              variant="middle"
-              sx={{
-                margin: "4px 0",
-                borderColor: theme => theme.palette.info.dark,
-                borderWidth: 2,
-              }}
-            />
-            {props.endTime.format("HH:mm")}
-          </>
-        )}
+        {props.startTime.format("MMM DD, HH:mm")}
+        <Divider
+          variant="middle"
+          sx={{
+            margin: "4px 0",
+            borderColor: theme => theme.palette.info.dark,
+            borderWidth: 2,
+          }}
+        />
+        {props.endTime.format("MMM DD, HH:mm")}
       </Typography>
       <CustomContent map={props.customContentMap} id={props.id} />
     </Card>
