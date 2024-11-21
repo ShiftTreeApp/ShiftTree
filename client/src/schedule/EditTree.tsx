@@ -2,6 +2,7 @@ import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
 import { useSearchParam } from "@/useSearchParam";
 import EditShiftsTab from "./EditShiftsTab";
+import ShiftTreeSettings from "./ShiftTreeSettings";
 
 import {
   Container,
@@ -23,7 +24,7 @@ const tabNames = {
   shifts: "shifts",
   members: "members",
   signups: "signups",
-  assign: "assign",
+  settings: "settings",
 } as const;
 
 type TabName = (typeof tabNames)[keyof typeof tabNames];
@@ -92,10 +93,8 @@ export default function EditTree() {
           >
             <Tab label="Shifts" value={tabNames.shifts} />
             <Tab label="Members" value={tabNames.members} />
-            {/* TODO: Add back the signups and assign tabs once they do something
-            <Tab label="Signups" value={tabNames.signups} />
-            <Tab label="Assign" value={tabNames.assign} />
-            */}
+            {/* <Tab label="Signups" value={tabNames.signups} /> */}
+            <Tab label="Settings" value={tabNames.settings} />
           </Tabs>
           <Grid
             sx={{
@@ -122,24 +121,10 @@ export default function EditTree() {
             {selectedTab === "signups" && (
               <EditSignupsTab scheduleId={scheduleId as string} />
             )}
-            */}
-            {/* TODO: Add Assign Settings */}
-            {/*
-            {selectedTab === "assign" && (
-              <Paper
-                sx={{
-                  backgroundColor: "gray",
-                  minHeight: "75vh",
-                  minWidth: "75vw",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-start",
-                }}
-              >
-                Assign Settings
-              </Paper>
+            {/* ShiftTree Settings */}
+            {selectedTab === "settings" && (
+              <ShiftTreeSettings scheduleId={scheduleId as string} />
             )}
-            */}
           </Grid>
         </Paper>
       </Container>

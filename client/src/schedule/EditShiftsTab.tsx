@@ -6,7 +6,14 @@ import {
   Link,
   TextField,
   Typography,
+  Menu,
+  MenuItem,
+  Tooltip,
+  TooltipProps,
+  tooltipClasses,
+  styled,
 } from "@mui/material";
+import React from "react";
 import dayjs from "dayjs";
 import {
   Add as AddIcon,
@@ -15,7 +22,6 @@ import {
   Preview as PreviewIcon,
   //EventRepeat as GenerateSchedule,
   AutoMode as GenerateSchedule,
-  DeleteForever as DeleteShiftTreeIcon,
   CloudDownload as DownloadIcon,
 } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
@@ -32,7 +38,6 @@ import { ShiftCalendar } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import { useSearchParam } from "@/useSearchParam";
 import GenerateShiftModal from "./GenerateShiftModal";
-import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 import MultiDateCalendar from "@/schedule/MultiDateCalendar";
 import { useNotifier } from "@/notifier";
 import useSchedule from "@/hooks/useSchedule";
@@ -43,11 +48,22 @@ interface EditShiftsTabProps {
   scheduleId: string;
 }
 
+const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
+}));
+
 export default function EditShiftsTab(props: EditShiftsTabProps) {
   const [currentlyEditing, setCurrentlyEditing] = useSearchParam("shift");
 
-  const navigate = useNavigate();
-  const notifier = useNotifier();
+  //const navigate = useNavigate();
+  //const notifier = useNotifier();
   const schedule = useSchedule({ scheduleId: props.scheduleId });
 
   async function createNewShiftAndEdit() {
@@ -127,19 +143,6 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     }, 2000);
   };
 
-  // Delete ShiftTree modal
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const handleDeleteShiftTreeClick = () => {
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    await schedule.deleteSchedule().catch(notifier.error);
-    notifier.message("ShiftTree deleted");
-    setDeleteModalOpen(false);
-    navigate("/");
-  };
-
   async function downloadCsv() {
     const csv = await schedule.getAssignmentsCsv();
     downloadFile({
@@ -154,6 +157,16 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       filename: `${schedule.name ?? ""} - Assigned Shifts.ics`,
     });
   }
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <Box
@@ -174,7 +187,14 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       {schedule.shifts.length === 0 && <EmptyShifts />}
       {schedule.shifts.length !== 0 && (
         <>
-          <Box sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              flexDirection: "row-reverse",
+              gap: 1,
+            }}
+          >
             <Button
               variant="contained"
               component={RouterLink}
@@ -188,44 +208,34 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             </Button>
             {schedule.data?.role == "owner" ||
             schedule.data?.role == "manager" ? (
-              <Button
-                variant="contained"
-                onClick={createNewShiftAndEdit}
-                startIcon={<AddIcon />}
-                sx={{
-                  backgroundColor: theme => theme.palette.info.light,
-                }}
-              >
-                <Typography>Add Shift</Typography>
-              </Button>
+              <CustomTooltip title="Create New Shift" placement="top">
+                <Button
+                  variant="contained"
+                  onClick={createNewShiftAndEdit}
+                  startIcon={<AddIcon />}
+                  sx={{
+                    backgroundColor: theme => theme.palette.info.light,
+                  }}
+                >
+                  <Typography>Add Shift</Typography>
+                </Button>
+              </CustomTooltip>
             ) : null}
 
             {schedule.data?.role == "owner" ||
             schedule.data?.role == "manager" ? (
-              <Button
-                variant="contained"
-                onClick={handleOpenModal}
-                startIcon={<GenerateSchedule />}
-                sx={{
-                  backgroundColor: theme => theme.palette.info.dark,
-                }}
-              >
-                <Typography>Generate</Typography>
-              </Button>
-            ) : null}
-
-            {schedule.data?.role == "owner" ||
-            schedule.data?.role == "manager" ? (
-              <Button
-                variant="contained"
-                startIcon={<DeleteShiftTreeIcon />}
-                onClick={handleDeleteShiftTreeClick}
-                sx={{
-                  backgroundColor: theme => theme.palette.error.dark,
-                }}
-              >
-                <Typography>Delete ShiftTree</Typography>
-              </Button>
+              <CustomTooltip title="Auto-generate Schedule" placement="top">
+                <Button
+                  variant="contained"
+                  onClick={handleOpenModal}
+                  startIcon={<GenerateSchedule />}
+                  sx={{
+                    backgroundColor: theme => theme.palette.info.dark,
+                  }}
+                >
+                  <Typography>Generate</Typography>
+                </Button>
+              </CustomTooltip>
             ) : null}
 
             <GenerateShiftModal
@@ -233,32 +243,28 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               onClose={handleCloseModal}
               onConfirm={handleConfirmModal}
             />
-            <DeleteShiftTreeModal
-              open={deleteModalOpen}
-              onClose={() => setDeleteModalOpen(false)}
-              onConfirm={handleDeleteConfirm}
-            />
-
-            <Button
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.main,
-              }}
-              onClick={downloadCsv}
+            <CustomTooltip title="Download Generated Schedule" placement="top">
+              <Button
+                variant="contained"
+                startIcon={<DownloadIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.main,
+                }}
+                onClick={handleClick}
+              >
+                Download
+              </Button>
+            </CustomTooltip>
+            <Menu
+              id="download-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
             >
-              Download CSV
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.main,
-              }}
-              onClick={downloadIcs}
-            >
-              Download ICS
-            </Button>
+              <MenuItem onClick={downloadCsv}>Download CSV</MenuItem>
+              <MenuItem onClick={downloadIcs}>Download ICS</MenuItem>
+            </Menu>
           </Box>
           <ShiftCalendar
             shifts={schedule.shifts}
@@ -462,7 +468,7 @@ function EditShift(props: EditShiftProps) {
         <Button
           startIcon={<DeleteIcon />}
           variant="contained"
-          color="error"
+          sx={{ backgroundColor: theme => theme.palette.error.dark }}
           onClick={deleteShift}
         >
           Delete shift
