@@ -66,6 +66,11 @@ async function getUserId(req: Request) {
 export async function list(req: Request, res: Response) {
   const params = listParams.parse(req.query);
   const userId = await getUserId(req);
+  const date = req.query.date ? req.query.date : null;
+
+  console.log("Query Params: ", req.query);
+  console.log("Is there a req date? ", req.query.date);
+  console.log("Is there a date? ", date);
 
   const query = /* sql */ `
     with filtered as (
@@ -76,6 +81,11 @@ export async function list(req: Request, res: Response) {
       where true
         and info.user_id = $1
         and info.user_role in (select json_array_elements($2) #>> '{}' as r)
+        and (
+          ($3::date is null) or (
+            $3::date BETWEEN se.start_time::date AND se.end_time::date
+          )
+        )
       order by se.start_time asc, info.schedule_name asc
     )
     select coalesce(json_agg(json_build_object(
@@ -102,7 +112,7 @@ export async function list(req: Request, res: Response) {
 
   const result = await pool.query({
     text: query,
-    values: [userId, JSON.stringify(Array.from(new Set(params.role)))],
+    values: [userId, JSON.stringify(Array.from(new Set(params.role))), date],
   });
 
   res.json(result.rows[0].json);

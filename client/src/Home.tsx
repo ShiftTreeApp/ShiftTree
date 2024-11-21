@@ -1,5 +1,5 @@
 import { Grid2 as Grid, Typography, Paper, Divider, Box } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ResponsiveDrawer from "./LeftDrawer";
 import "dayjs/locale/en";
 import * as React from "react";
@@ -31,9 +31,19 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const queries = useDatabaseQueries(selectedDate ? selectedDate : undefined);
+  console.log(selectedDate);
 
-  const handleDateChange = (date: string | null) => {
+  useEffect(() => {
+    if (selectedDate) {
+      queries.refetchAllSchedules();
+    }
+  }, [selectedDate, queries.refetchAllSchedules]);
+
+  const handleDateChange = async (date: string | null) => {
+    console.log("Date Selected: ", date);
     setSelectedDate(date);
+    await queries.refetchAllSchedules();
+    console.log("Schedules: ", queries.schedules);
   };
 
   // Making the times into readable format
