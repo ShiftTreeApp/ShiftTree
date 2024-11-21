@@ -8,6 +8,10 @@ import {
   Typography,
   Menu,
   MenuItem,
+  Tooltip,
+  TooltipProps,
+  tooltipClasses,
+  styled,
 } from "@mui/material";
 import React from "react";
 import dayjs from "dayjs";
@@ -44,11 +48,22 @@ interface EditShiftsTabProps {
   scheduleId: string;
 }
 
+const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
+}));
+
 export default function EditShiftsTab(props: EditShiftsTabProps) {
   const [currentlyEditing, setCurrentlyEditing] = useSearchParam("shift");
 
-  const navigate = useNavigate();
-  const notifier = useNotifier();
+  //const navigate = useNavigate();
+  //const notifier = useNotifier();
   const schedule = useSchedule({ scheduleId: props.scheduleId });
 
   async function createNewShiftAndEdit() {
@@ -192,30 +207,34 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             </Button>
             {schedule.data?.role == "owner" ||
             schedule.data?.role == "manager" ? (
-              <Button
-                variant="contained"
-                onClick={createNewShiftAndEdit}
-                startIcon={<AddIcon />}
-                sx={{
-                  backgroundColor: theme => theme.palette.info.light,
-                }}
-              >
-                <Typography>Add Shift</Typography>
-              </Button>
+              <CustomTooltip title="Create New Shift" placement="top">
+                <Button
+                  variant="contained"
+                  onClick={createNewShiftAndEdit}
+                  startIcon={<AddIcon />}
+                  sx={{
+                    backgroundColor: theme => theme.palette.info.light,
+                  }}
+                >
+                  <Typography>Add Shift</Typography>
+                </Button>
+              </CustomTooltip>
             ) : null}
 
             {schedule.data?.role == "owner" ||
             schedule.data?.role == "manager" ? (
-              <Button
-                variant="contained"
-                onClick={handleOpenModal}
-                startIcon={<GenerateSchedule />}
-                sx={{
-                  backgroundColor: theme => theme.palette.info.dark,
-                }}
-              >
-                <Typography>Generate</Typography>
-              </Button>
+              <CustomTooltip title="Auto-generate Schedule" placement="top">
+                <Button
+                  variant="contained"
+                  onClick={handleOpenModal}
+                  startIcon={<GenerateSchedule />}
+                  sx={{
+                    backgroundColor: theme => theme.palette.info.dark,
+                  }}
+                >
+                  <Typography>Generate</Typography>
+                </Button>
+              </CustomTooltip>
             ) : null}
 
             <GenerateShiftModal
@@ -223,16 +242,18 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               onClose={handleCloseModal}
               onConfirm={handleConfirmModal}
             />
-            <Button
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.main,
-              }}
-              onClick={handleClick}
-            >
-              Download
-            </Button>
+            <CustomTooltip title="Download Generated Schedule" placement="top">
+              <Button
+                variant="contained"
+                startIcon={<DownloadIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.main,
+                }}
+                onClick={handleClick}
+              >
+                Download
+              </Button>
+            </CustomTooltip>
             <Menu
               id="download-menu"
               anchorEl={anchorEl}
