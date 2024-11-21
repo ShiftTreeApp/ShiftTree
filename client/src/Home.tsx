@@ -36,7 +36,7 @@ export default function Home() {
     if (selectedDate) {
       queries.refetchAllSchedules();
     }
-  }, [selectedDate, queries.refetchAllSchedules]);
+  }, [selectedDate, queries.refetchAllSchedules, queries]);
 
   const handleDateChange = async (date: string | null) => {
     setSelectedDate(date);

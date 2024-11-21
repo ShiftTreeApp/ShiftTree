@@ -23,8 +23,6 @@ import {
   ListItemButton,
   ListItemIcon,
   Dialog,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -36,7 +34,6 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "@/auth";
 import JoinTree from "./JoinTree";
 import { LeftDrawerContext } from "./Home";
-import { useNotifier } from "./notifier";
 
 interface ModalContextType {
   modalOpen: boolean;
@@ -100,9 +97,6 @@ export default function Navbar() {
   const handleModalClose = () => {
     setModalOpen(false);
   };
-
-  // notification snackbar for joining a ShiftTree
-  const notifier = useNotifier();
 
   return (
     <>

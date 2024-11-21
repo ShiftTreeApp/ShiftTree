@@ -32,7 +32,7 @@ import {
   renderTimeViewClock,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 
 import { ShiftCalendar } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
