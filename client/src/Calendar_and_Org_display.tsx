@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Button, Grid2 as Grid, Paper } from "@mui/material";
+import {
+  Button,
+  Grid2 as Grid,
+  Paper,
+  Typography,
+  Box,
+  Divider,
+} from "@mui/material";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -31,12 +38,18 @@ export default function Calendar_and_Org({
     <Grid sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
       <Paper
         sx={{
-          backgroundColor: theme => theme.palette.background.default,
+          backgroundColor: theme => theme.palette.background.paper,
           minHeight: 600,
           flexGrow: 1,
           borderRadius: 0,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
+        <Box sx={{ display: "flex", justifyContent: "center", pt: 2, pb: 1 }}>
+          <Typography variant="h6">Filter ShiftTrees</Typography>
+        </Box>
+        <Divider variant="middle" />
         {/* Weird Calendar Shit */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
@@ -45,15 +58,14 @@ export default function Calendar_and_Org({
             onChange={handleDateChange}
           />
         </LocalizationProvider>
+        <Button
+          variant="contained"
+          onClick={handleFilterResetClick}
+          sx={{ backgroundColor: theme => theme.palette.secondary.main }}
+        >
+          Reset Calendar Filter
+        </Button>
       </Paper>
-
-      <Button
-        variant="contained"
-        onClick={handleFilterResetClick}
-        sx={{ backgroundColor: theme => theme.palette.secondary.main }}
-      >
-        Reset Calendar Filter
-      </Button>
     </Grid>
   );
 }
