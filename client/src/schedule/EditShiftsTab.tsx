@@ -18,7 +18,6 @@ import {
   Preview as PreviewIcon,
   //EventRepeat as GenerateSchedule,
   AutoMode as GenerateSchedule,
-  DeleteForever as DeleteShiftTreeIcon,
   CloudDownload as DownloadIcon,
 } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
@@ -35,7 +34,6 @@ import { ShiftCalendar } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import { useSearchParam } from "@/useSearchParam";
 import GenerateShiftModal from "./GenerateShiftModal";
-import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 import MultiDateCalendar from "@/schedule/MultiDateCalendar";
 import { useNotifier } from "@/notifier";
 import useSchedule from "@/hooks/useSchedule";
@@ -129,19 +127,6 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     }, 2000);
   };
 
-  // Delete ShiftTree modal
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const handleDeleteShiftTreeClick = () => {
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    await schedule.deleteSchedule().catch(notifier.error);
-    notifier.message("ShiftTree deleted");
-    setDeleteModalOpen(false);
-    navigate("/");
-  };
-
   async function downloadCsv() {
     const csv = await schedule.getAssignmentsCsv();
     downloadFile({
@@ -233,29 +218,10 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               </Button>
             ) : null}
 
-            {/* {schedule.data?.role == "owner" ||
-            schedule.data?.role == "manager" ? (
-              <Button
-                variant="contained"
-                startIcon={<DeleteShiftTreeIcon />}
-                onClick={handleDeleteShiftTreeClick}
-                sx={{
-                  backgroundColor: theme => theme.palette.error.dark,
-                }}
-              >
-                <Typography>Delete ShiftTree</Typography>
-              </Button>
-            ) : null} */}
-
             <GenerateShiftModal
               open={modalOpen}
               onClose={handleCloseModal}
               onConfirm={handleConfirmModal}
-            />
-            <DeleteShiftTreeModal
-              open={deleteModalOpen}
-              onClose={() => setDeleteModalOpen(false)}
-              onConfirm={handleDeleteConfirm}
             />
             <Button
               variant="contained"
