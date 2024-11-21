@@ -31,7 +31,6 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const queries = useDatabaseQueries(selectedDate ? selectedDate : undefined);
-  console.log(selectedDate);
 
   useEffect(() => {
     if (selectedDate) {
@@ -40,10 +39,8 @@ export default function Home() {
   }, [selectedDate, queries.refetchAllSchedules]);
 
   const handleDateChange = async (date: string | null) => {
-    console.log("Date Selected: ", date);
     setSelectedDate(date);
     await queries.refetchAllSchedules();
-    console.log("Schedules: ", queries.schedules);
   };
 
   // Making the times into readable format

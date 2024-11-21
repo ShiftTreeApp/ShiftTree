@@ -3,8 +3,6 @@ import { useApi } from "@/client";
 export function useDatabaseQueries(date?: string) {
   const api = useApi();
 
-  console.log("Query sent:", date ? { date } : "No date");
-
   const { data: scheduleData, refetch: refetchAllSchedules } = api.useQuery(
     "get",
     "/schedules",

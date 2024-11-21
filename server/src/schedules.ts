@@ -68,10 +68,6 @@ export async function list(req: Request, res: Response) {
   const userId = await getUserId(req);
   const date = req.query.date ? req.query.date : null;
 
-  console.log("Query Params: ", req.query);
-  console.log("Is there a req date? ", req.query.date);
-  console.log("Is there a date? ", date);
-
   const query = /* sql */ `
     with filtered as (
       select info.*, se.start_time, se.end_time, ss.schedule_state
