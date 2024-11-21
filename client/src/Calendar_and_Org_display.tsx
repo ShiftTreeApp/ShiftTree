@@ -11,14 +11,17 @@ import "dayjs/locale/en";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Dayjs } from "dayjs";
 
-export default function Calendar_and_Org() {
+export default function Calendar_and_Org({
+  onDateChange,
+}: {
+  onDateChange: (date: string | null) => void;
+}) {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
 
   const handleDateChange = (date: Dayjs | null) => {
     setSelectedDate(date);
-    if (date) {
-      console.log(date.format("YYYY-MM-DD"));
-    }
+    onDateChange(date ? date.format("YYYY-MM-DD") : null); // Notify parent of date change
+    console.log(date);
   };
 
   return (

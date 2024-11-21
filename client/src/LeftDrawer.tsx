@@ -6,7 +6,11 @@ import { LeftDrawerContext } from "./Home";
 import Calendar_and_Org from "./Calendar_and_Org_display";
 const drawerWidth = 360;
 
-export default function ResponsiveDrawer() {
+export default function ResponsiveDrawer({
+  onDateChange,
+}: {
+  onDateChange: (date: string | null) => void;
+}) {
   const LDC = React.useContext(LeftDrawerContext);
   const handleDrawerClose = () => {
     LDC.setIsClosing(true);
@@ -42,7 +46,7 @@ export default function ResponsiveDrawer() {
             },
           }}
         >
-          <Calendar_and_Org />
+          <Calendar_and_Org onDateChange={onDateChange} />
         </Drawer>
         <Drawer
           variant="permanent"
@@ -57,7 +61,7 @@ export default function ResponsiveDrawer() {
           }}
           open
         >
-          <Calendar_and_Org />
+          <Calendar_and_Org onDateChange={onDateChange} />
         </Drawer>
       </Box>
     </Box>

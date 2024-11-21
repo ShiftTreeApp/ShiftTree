@@ -28,8 +28,13 @@ export const LeftDrawerContext = React.createContext<LeftDrawerContextType>({
 export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const queries = useDatabaseQueries();
+
+  const handleDateChange = (date: string | null) => {
+    console.log("Selected: " + date);
+  };
 
   // Making the times into readable format
   const formatTimes = (startTime: string | null, endTime: string | null) => {
@@ -62,7 +67,7 @@ export default function Home() {
         }}
       >
         <Navbar />
-        <ResponsiveDrawer />
+        <ResponsiveDrawer onDateChange={handleDateChange} />
       </LeftDrawerContext.Provider>
       <Box
         component="main"
