@@ -30,6 +30,8 @@ import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import theme from "@/theme";
 import { useNotifier } from "@/notifier";
 
+
+
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedShift = searchParams.get("shift");
@@ -70,9 +72,6 @@ export default function Schedule() {
     empActions.assignedShifts,
   );
 
-  const [assignedUser, setAssignedUser] = useState(
-    empActions.allAssignments,
-  );
 
   useEffect(() => {
     const getUpdatedShiftStatuses = async () => {
@@ -104,9 +103,9 @@ export default function Schedule() {
   const userIndicators = useMemo(
     () =>
       Object.fromEntries(
-        assignedUser?.map((shiftId: string) => [shiftId, UserIndicators()]) ?? [],
+        empActions.allAssignments?.map(({shiftId, user}) => [shiftId, () => <UserIndicators name={user?.displayName ?? ""} id={user?.id ?? ""}/>]) ?? [],
       ),
-    [assignedUser],
+    [empActions.allAssignments],
   );
 
   const bothIndicators = useMemo(
@@ -274,7 +273,6 @@ export default function Schedule() {
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
             customContentMap={bothIndicators}
-            scheduleId={scheduleId}
             shifts={formattedShifts}
           />
         </Paper>
@@ -310,15 +308,20 @@ function AssignedIndicator() {
   );
 }
 
-function UserIndicators() {
+interface UserIndicatorsProps {
+  name: string;
+  id: string;
+}
+
+function UserIndicators(props: UserIndicatorsProps) {
   return (
     <Chip
-      icon={<RegisterIcon />}
+      avatar={<Avatar src={createRandomPfpUrl(props.name,props.id)}></Avatar>}
       sx={{
         backgroundColor: theme.palette.primary.main,
         color: "white",
       }}
-      label="UserId"
+      label={props.name}
       color="primary"
     />
   );
