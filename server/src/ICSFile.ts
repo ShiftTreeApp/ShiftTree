@@ -4,6 +4,13 @@ import { z } from "zod";
 const tokenPayload = z.object({ email: z.string(), name: z.string() });
 import * as jwt from "jsonwebtoken";
 import * as ics from "ics";
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 //Scuffed copy paste
 async function getUserId(req: Request) {
   const token = req.headers.authorization?.split(" ")[1];
@@ -29,7 +36,7 @@ async function getUserId(req: Request) {
 export const getICSFile = async (req: Request, res: Response) => {
   const userId = await getUserId(req);
   const scheduleId = req.params.scheduleId;
-
+  // const tz = req.query.tz as string;
   //Checking that the user has correct permissions
   const schedulesQuery = /* sql */ `
     select * from schedule_info
@@ -56,8 +63,6 @@ export const getICSFile = async (req: Request, res: Response) => {
   }
   //TODO: Check shifts are assigned, and schedule is not still pending
 
-  console.log(userId);
-
   // Fetch relevant data for the ICS file from the schedule
   const query = /* sql */ `
       SELECT usa.id AS assignment_id,
@@ -67,40 +72,60 @@ export const getICSFile = async (req: Request, res: Response) => {
              s.start_time,
              s.end_time,
              s.shift_name,
-             s.shift_description
+             s.shift_description,
+             ua.email,
+             ua.username
       FROM user_shift_assignment usa
-      JOIN shift s ON usa.shift_id = s.id
+      JOIN shift AS s ON usa.shift_id = s.id
+      JOIN user_account AS ua ON usa.user_id = ua.id
       WHERE s.schedule_id = $1
     `;
   const result = await pool.query({
     text: query,
     values: [scheduleId],
   });
+  const map = new Map<string, any[]>();
+
+  result.rows.forEach(value => {
+    const key = `${value.start_time}${value.end_time}`;
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+    map.get(key)?.push(value);
+  });
 
   //TODO: Check if it's null
-
-  const events = result.rows.map((row: any) => {
-    return {
+  const events = [];
+  for (const [_, value] of map) {
+    console.log(value);
+    const title = value.map(v => v.username).join(" and ");
+    const combinedEmails = value.map(v => v.email).join(", ");
+    //Get all the data and not merge it
+    events.push({
       start: [
-        new Date(row.start_time).getFullYear(),
-        new Date(row.start_time).getMonth() + 1,
-        new Date(row.start_time).getDate(),
-        new Date(row.start_time).getHours(),
-        new Date(row.start_time).getMinutes(),
+        new Date(value[0].start_time).getFullYear(),
+        new Date(value[0].start_time).getMonth() + 1,
+        new Date(value[0].start_time).getDate(),
+        new Date(value[0].start_time).getHours(),
+        new Date(value[0].start_time).getMinutes(),
       ],
+      startInputType: "utc",
       end: [
-        new Date(row.end_time).getFullYear(),
-        new Date(row.end_time).getMonth() + 1,
-        new Date(row.end_time).getDate(),
-        new Date(row.end_time).getHours(),
-        new Date(row.end_time).getMinutes(),
+        new Date(value[0].end_time).getFullYear(),
+        new Date(value[0].end_time).getMonth() + 1,
+        new Date(value[0].end_time).getDate(),
+        new Date(value[0].end_time).getHours(),
+        new Date(value[0].end_time).getMinutes(),
       ],
-      title: row.shift_name,
-      description: row.shift_description,
-      uid: row.assignment_id,
-    };
-  });
-  ics.createEvents(events, (error, value) => {
+      startOutputType: "utc",
+      endInputType: "utc",
+      endOutputType: "utc",
+      title: schedule.schedule_name + ": " + title,
+      description: combinedEmails,
+      uid: value[0].assignment_id,
+    });
+  }
+  ics.createEvents(events as any, (error, value) => {
     if (error) {
       console.log(error);
       res.status(500).send("Error generating ICS file");

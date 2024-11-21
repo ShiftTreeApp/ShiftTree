@@ -16,7 +16,7 @@ import {
 import { useParams } from "react-router";
 import { useNavigate } from "react-router";
 import EditMembersTab from "./EditMembersTab";
-import EditSignupsTab from "./EditSignupsTab";
+//import EditSignupsTab from "./EditSignupsTab"; // Will be added back later
 import { useApi } from "../client";
 import { useEffect } from "react";
 
@@ -57,7 +57,7 @@ export default function EditTree() {
     if (scheduleData?.role === "member") {
       navigate(`/schedule/${scheduleId}`);
     }
-  }, [scheduleData, history, scheduleId]);
+  }, [scheduleData, scheduleId, navigate]);
 
   return (
     <Grid container direction="column" spacing={1}>
@@ -93,7 +93,7 @@ export default function EditTree() {
           >
             <Tab label="Shifts" value={tabNames.shifts} />
             <Tab label="Members" value={tabNames.members} />
-            <Tab label="Signups" value={tabNames.signups} />
+            {/* <Tab label="Signups" value={tabNames.signups} /> */}
             <Tab label="Settings" value={tabNames.settings} />
           </Tabs>
           <Grid
@@ -116,7 +116,8 @@ export default function EditTree() {
                 <EditMembersTab scheduleId={scheduleId as string} />
               </>
             )}
-            {/* Signups Settings */}
+            {/* TODO: Add Signups Settings */}
+            {/*
             {selectedTab === "signups" && (
               <EditSignupsTab scheduleId={scheduleId as string} />
             )}

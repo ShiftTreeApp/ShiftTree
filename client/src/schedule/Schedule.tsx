@@ -97,9 +97,25 @@ export default function Schedule() {
     [assignedShifts],
   );
 
+  const userIndicators = useMemo(
+    () =>
+      Object.fromEntries(
+        empActions.allAssignments?.map(({ shiftId, user }) => [
+          shiftId,
+          () => (
+            <UserIndicators
+              name={user?.displayName ?? ""}
+              id={user?.id ?? ""}
+            />
+          ),
+        ]) ?? [],
+      ),
+    [empActions.allAssignments],
+  );
+
   const bothIndicators = useMemo(
-    () => ({ ...signedUpIndicators, ...assignedIndicators }),
-    [signedUpIndicators, assignedIndicators],
+    () => ({ ...signedUpIndicators, ...assignedIndicators, ...userIndicators }),
+    [signedUpIndicators, assignedIndicators, userIndicators],
   );
 
   const { data: scheduleData } = api.useQuery(
@@ -297,6 +313,25 @@ function AssignedIndicator() {
   );
 }
 
+interface UserIndicatorsProps {
+  name: string;
+  id: string;
+}
+
+function UserIndicators(props: UserIndicatorsProps) {
+  return (
+    <Chip
+      avatar={<Avatar src={createRandomPfpUrl(props.name, props.id)}></Avatar>}
+      sx={{
+        backgroundColor: theme.palette.primary.main,
+        color: "white",
+      }}
+      label={props.name}
+      color="primary"
+    />
+  );
+}
+
 interface UserChipsProps {
   scheduleId?: string;
   shiftId?: string;
@@ -333,6 +368,7 @@ function UserChips(props: UserChipsProps) {
         const member = membersData?.find((member: any) => member.id === userId);
         return member ? (
           <Chip
+            key={userId}
             avatar={
               <Avatar src={createRandomPfpUrl(member.displayName, member.id)} />
             }

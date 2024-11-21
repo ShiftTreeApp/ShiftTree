@@ -1,5 +1,5 @@
 import { Grid2 as Grid, Typography, Paper, Divider, Box } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ResponsiveDrawer from "./LeftDrawer";
 import "dayjs/locale/en";
 import * as React from "react";
@@ -28,8 +28,19 @@ export const LeftDrawerContext = React.createContext<LeftDrawerContextType>({
 export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  const queries = useDatabaseQueries();
+  const queries = useDatabaseQueries(selectedDate ? selectedDate : undefined);
+
+  useEffect(() => {
+    if (selectedDate) {
+      queries.refetchAllSchedules();
+    }
+  }, [selectedDate, queries.refetchAllSchedules]);
+
+  const handleDateChange = async (date: string | null) => {
+    setSelectedDate(date);
+  };
 
   // Making the times into readable format
   const formatTimes = (startTime: string | null, endTime: string | null) => {
@@ -62,7 +73,7 @@ export default function Home() {
         }}
       >
         <Navbar />
-        <ResponsiveDrawer />
+        <ResponsiveDrawer onDateChange={handleDateChange} />
       </LeftDrawerContext.Provider>
       <Box
         component="main"

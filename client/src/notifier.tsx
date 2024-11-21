@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { ErrorOutline as ErrorOutlineIcon } from "@mui/icons-material";
 import { Alert, Snackbar } from "@mui/material";
 import { createContext, PropsWithChildren, useContext, useState } from "react";

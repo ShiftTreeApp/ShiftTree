@@ -221,21 +221,13 @@ function MemberItem(props: MemberItemProps) {
           <Typography variant="body1">
             {props.email}
             <br></br>
-            <br></br>
-            <br></br>
           </Typography>
-
-          <Divider component="div" role="presentation" />
-
-          <Typography variant="h5" sx={{ textDecoration: "underline" }}>
-            Shift Details
-          </Typography>
+          <Divider sx={{ borderColor: "blue" }} />
           {drawerOpen && (
             <ShiftDisplay userId={props.userId} scheduleId={props.scheduleId} />
           )}
 
           <Typography variant="body1">
-            <br></br>
             <br></br>
             <br></br>UserID: {props.userId}
           </Typography>
@@ -273,9 +265,38 @@ function ShiftDisplay(props: ShiftDisplayProps) {
     { params: { path: { scheduleId: props.scheduleId } } },
   );
 
-  // const signupData = useMemo();
-  console.log("Unpacking");
+  // Get the assignments for the current shift tree
+  const { data: scheduleAssignments } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/assignments",
+    { params: { path: { scheduleId: props.scheduleId } } },
+  );
 
+  // Get the assignments for the current shift tree
+  const { data: shifts } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/shifts",
+    { params: { path: { scheduleId: props.scheduleId } } },
+  );
+
+  // Cursed solution
+
+  // Gets an array of all shiftIds that they're
+  const shiftIds = scheduleAssignments
+    ?.filter(assignment => assignment.user?.id === props.userId)
+    .map(assignment => assignment.shiftId);
+
+  // Gets the details for an individual shift
+  function getShiftDetails(shiftId: string) {
+    return shifts?.find(x => x.id == shiftId);
+  }
+
+  // The array of all the users shift details
+  const shiftDetailsArray = shiftIds
+    ?.filter(shiftId => shiftId !== undefined)
+    .map(shiftId => getShiftDetails(shiftId));
+
+  // Filtered signups
   const filteredSignups = scheduleSignups
     ?.filter(
       x =>
@@ -288,18 +309,72 @@ function ShiftDisplay(props: ShiftDisplayProps) {
       endTime: dayjs(shift.endTime),
     }));
 
+  console.log(shiftDetailsArray);
+
+  // THIS IS INCREDIBLY CURSED ;-; //
   return (
     <Box>
-      {filteredSignups !== undefined && filteredSignups.length > 0 ? (
+      <Typography
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontWeight: "bold",
+        }}
+      >
+        Signups:
+      </Typography>
+      {shiftDetailsArray?.length === 0 &&
+      filteredSignups !== undefined &&
+      filteredSignups.length > 0 ? (
         filteredSignups.map((signup, index) => (
           <Typography key={index}>
-            {signup.startTime.format("dddd")} {signup.name} -{" "}
+            {signup.startTime.format("dddd")}, {signup.name} -{" "}
             {signup.startTime.format("HH:mm")} to{" "}
             {signup.endTime.format("HH:mm")}
           </Typography>
         ))
       ) : (
-        <Typography>Loading signup data...</Typography>
+        <Typography
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontStyle: "italic",
+          }}
+        >
+          No signups.
+        </Typography>
+      )}
+      <Typography
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontWeight: "bold",
+        }}
+      >
+        Assignments:
+      </Typography>
+      {shiftDetailsArray?.length === 0 ? (
+        <Typography
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontStyle: "italic",
+          }}
+        >
+          No assignments.
+        </Typography>
+      ) : (
+        shiftDetailsArray?.map((shift, index) => (
+          <Typography key={index}>
+            {dayjs(shift?.startTime).format("dddd")}, {shift?.name} -{" "}
+            {dayjs(shift?.startTime).format("HH:mm")} to{" "}
+            {dayjs(shift?.endTime).format("HH:mm")}
+          </Typography>
+        ))
       )}
     </Box>
   );

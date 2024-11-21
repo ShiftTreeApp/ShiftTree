@@ -129,9 +129,10 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
   const handleCloseModal = () => {
     setModalOpen(false);
   };
-  // TODO: Make work
+  const managerActions = useManagerActions(props.scheduleId);
+
   async function autogenerate() {
-    await useManagerActions.triggerAutoSchedule(props.scheduleId);
+    await managerActions.triggerAutoSchedule({ scheduleId: props.scheduleId });
   }
 
   const handleConfirmModal = () => {
@@ -378,7 +379,11 @@ function EditShift(props: EditShiftProps) {
     }
     await Promise.all(
       copyTargetDates.map(async date => {
-        const startTimeOffsetMin = date.diff(date.startOf("day"), "minute");
+        const startTimeOffsetMin = newStartTime.diff(
+          newStartTime.startOf("day"),
+          "minute",
+        );
+        console.log(startTimeOffsetMin);
         const endTimeOffsetMin = newEndTime.diff(newStartTime, "minute");
         const startTime = date.startOf("day").add(startTimeOffsetMin, "minute");
         const endTime = startTime.add(endTimeOffsetMin, "minute");

@@ -4,6 +4,7 @@ import {
   Box,
   Card,
   Chip,
+  Divider,
   Grid2 as Grid,
   Typography,
 } from "@mui/material";
@@ -278,8 +279,6 @@ type BackgroundColorType = Extract<
 >["backgroundColor"];
 
 function ShiftCard(props: ShiftCardProps) {
-  const isDifferentDay = !props.startTime.isSame(props.endTime, "day");
-
   return (
     <Card
       sx={{
@@ -303,21 +302,17 @@ function ShiftCard(props: ShiftCardProps) {
       onClick={props.onClick}
     >
       <Typography variant="h6">{props.name}</Typography>
-      <Typography>
-        {isDifferentDay && (
-          <>
-            {props.startTime.format("MMM DD, HH:mm")}
-            {" - "}
-            {props.endTime.format("MMM DD, HH:mm")}
-          </>
-        )}
-        {!isDifferentDay && (
-          <>
-            {props.startTime.format("HH:mm")}
-            {" - "}
-            {props.endTime.format("HH:mm")}
-          </>
-        )}
+      <Typography variant="body2">
+        {props.startTime.format("MMM DD, HH:mm")}
+        <Divider
+          variant="middle"
+          sx={{
+            margin: "4px 0",
+            borderColor: theme => theme.palette.info.dark,
+            borderWidth: 1.25,
+          }}
+        />
+        {props.endTime.format("MMM DD, HH:mm")}
       </Typography>
       <CustomContent map={props.customContentMap} id={props.id} />
     </Card>

@@ -116,6 +116,13 @@ paths:
                 - member
                 - manager
             default: [owner, member, manager]
+        - name: date
+          in: query
+          description: Filter schedules if date is within schedule dates
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         200:
           description: Successful
@@ -313,6 +320,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: tz
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: Successful
@@ -604,7 +616,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
 
   /autoschedule/{scheduleId}:
     post:

@@ -1,4 +1,12 @@
-.PHONY: docker-build-all docker-build-client docker-build-server docker-build-scheduler
+.PHONY: check format docker-build-all docker-build-client docker-build-server docker-build-scheduler
+
+check:
+	cd client && pnpm check
+	cd server && pnpm check
+
+format:
+	cd client && pnpm prettier --check src --write
+	cd server && pnpm prettier --check src --write
 
 docker-build-all: docker-build-client docker-build-server docker-build-scheduler
 
