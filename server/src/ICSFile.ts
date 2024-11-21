@@ -96,10 +96,10 @@ export const getICSFile = async (req: Request, res: Response) => {
 
   //TODO: Check if it's null
   const events = [];
-  for (let [key, value] of map) {
+  for (const [_, value] of map) {
     console.log(value);
-    let title = value.map(v => v.username).join(" and ");
-    let combinedEmails = value.map(v => v.email).join(", ");
+    const title = value.map(v => v.username).join(" and ");
+    const combinedEmails = value.map(v => v.email).join(", ");
     //Get all the data and not merge it
     events.push({
       start: [
