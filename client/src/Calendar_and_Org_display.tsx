@@ -20,8 +20,7 @@ export default function Calendar_and_Org({
 
   const handleDateChange = (date: Dayjs | null) => {
     setSelectedDate(date);
-    onDateChange(date ? date.format("YYYY-MM-DD") : null); // Notify parent of date change
-    console.log(date);
+    onDateChange(date ? date.format("YYYY-MM-DD") : null);
   };
 
   return (

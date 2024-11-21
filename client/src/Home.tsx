@@ -30,10 +30,10 @@ export default function Home() {
   const [isClosing, setIsClosing] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  const queries = useDatabaseQueries();
+  const queries = useDatabaseQueries(selectedDate ? selectedDate : undefined);
 
   const handleDateChange = (date: string | null) => {
-    console.log("Selected: " + date);
+    setSelectedDate(date);
   };
 
   // Making the times into readable format
