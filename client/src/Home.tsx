@@ -40,7 +40,6 @@ export default function Home() {
 
   const handleDateChange = async (date: string | null) => {
     setSelectedDate(date);
-    await queries.refetchAllSchedules();
   };
 
   // Making the times into readable format
