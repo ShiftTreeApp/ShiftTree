@@ -1,28 +1,34 @@
 import { useState } from "react";
-import {
-  //Button,
-  Grid2 as Grid,
-  Paper,
-} from "@mui/material";
+import { Button, Grid2 as Grid, Paper } from "@mui/material";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import "dayjs/locale/en";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
-export default function Calendar_and_Org() {
+export default function Calendar_and_Org({
+  onDateChange,
+}: {
+  onDateChange: (date: string | null) => void;
+}) {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
 
   const handleDateChange = (date: Dayjs | null) => {
     setSelectedDate(date);
-    if (date) {
-      console.log(date.format("YYYY-MM-DD"));
-    }
+    onDateChange(date ? date.format("YYYY-MM-DD") : null);
+  };
+
+  // Set the calendar to today's date, then clear the selection
+  const handleFilterResetClick = () => {
+    const today = dayjs();
+    setSelectedDate(today);
+    onDateChange(null);
+    setTimeout(() => setSelectedDate(null), 0);
   };
 
   return (
-    <Grid sx={{ flexGrow: 1, display: "flex" }}>
+    <Grid sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
       <Paper
         sx={{
           backgroundColor: theme => theme.palette.background.default,
@@ -40,6 +46,14 @@ export default function Calendar_and_Org() {
           />
         </LocalizationProvider>
       </Paper>
+
+      <Button
+        variant="contained"
+        onClick={handleFilterResetClick}
+        sx={{ backgroundColor: theme => theme.palette.secondary.main }}
+      >
+        Reset Calendar Filter
+      </Button>
     </Grid>
   );
 }
