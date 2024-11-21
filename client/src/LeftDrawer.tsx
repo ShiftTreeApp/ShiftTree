@@ -1,7 +1,5 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import CssBaseline from "@mui/material/CssBaseline";
-import Drawer from "@mui/material/Drawer";
+import { Box, CssBaseline, Drawer } from "@mui/material";
 import { LeftDrawerContext } from "./Home";
 import Calendar_and_Org from "./Calendar_and_Org_display";
 const drawerWidth = 360;
