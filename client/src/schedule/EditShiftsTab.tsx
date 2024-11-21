@@ -6,7 +6,10 @@ import {
   Link,
   TextField,
   Typography,
+  Menu,
+  MenuItem,
 } from "@mui/material";
+import React from "react";
 import dayjs from "dayjs";
 import {
   Add as AddIcon,
@@ -154,6 +157,16 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     });
   }
 
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Box
       sx={{
@@ -173,7 +186,14 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       {schedule.shifts.length === 0 && <EmptyShifts />}
       {schedule.shifts.length !== 0 && (
         <>
-          <Box sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              flexDirection: "row-reverse",
+              gap: 1,
+            }}
+          >
             <Button
               variant="contained"
               component={RouterLink}
@@ -213,7 +233,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               </Button>
             ) : null}
 
-            {schedule.data?.role == "owner" ||
+            {/* {schedule.data?.role == "owner" ||
             schedule.data?.role == "manager" ? (
               <Button
                 variant="contained"
@@ -225,7 +245,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               >
                 <Typography>Delete ShiftTree</Typography>
               </Button>
-            ) : null}
+            ) : null} */}
 
             <GenerateShiftModal
               open={modalOpen}
@@ -237,27 +257,26 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               onClose={() => setDeleteModalOpen(false)}
               onConfirm={handleDeleteConfirm}
             />
-
             <Button
               variant="contained"
               startIcon={<DownloadIcon />}
               sx={{
                 backgroundColor: theme => theme.palette.info.main,
               }}
-              onClick={downloadCsv}
+              onClick={handleClick}
             >
-              Download CSV
+              Download
             </Button>
-            <Button
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.main,
-              }}
-              onClick={downloadIcs}
+            <Menu
+              id="download-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
             >
-              Download ICS
-            </Button>
+              <MenuItem onClick={downloadCsv}>Download CSV</MenuItem>
+              <MenuItem onClick={downloadIcs}>Download ICS</MenuItem>
+            </Menu>
           </Box>
           <ShiftCalendar
             shifts={schedule.shifts}
@@ -457,7 +476,7 @@ function EditShift(props: EditShiftProps) {
         <Button
           startIcon={<DeleteIcon />}
           variant="contained"
-          color="error"
+          sx={{ backgroundColor: theme => theme.palette.error.dark }}
           onClick={deleteShift}
         >
           Delete shift
