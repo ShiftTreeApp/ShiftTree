@@ -61,6 +61,7 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     {
       params: {
         path: { scheduleId: scheduleId },
+        query: { tz: dayjs.tz.guess() },
       },
     },
   );
