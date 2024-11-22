@@ -74,6 +74,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
         description: "",
         startTime: now,
         endTime: now.add(1, "hour"),
+        count: 1,
       });
       setCurrentlyEditing(id);
     } else {
@@ -85,6 +86,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
         description: "",
         startTime: lastEnd,
         endTime: lastEnd.add(1, "hour"),
+        count: 1,
       });
       setCurrentlyEditing(id);
     }
@@ -315,6 +317,7 @@ function EditShift(props: EditShiftProps) {
   const [newDesc, setNewDesc] = useState("");
   const [newStartTime, setNewStartTime] = useState(dayjs());
   const [newEndTime, setNewEndTime] = useState(dayjs());
+  const [newCount, setNewCount] = useState(1);
   useEffect(() => {
     if (shift.data) {
       setNewName(shift.data.name);
@@ -392,6 +395,7 @@ function EditShift(props: EditShiftProps) {
           description: newDesc,
           startTime: startTime,
           endTime: endTime,
+          count: newCount,
         });
       }),
     ).catch(notifier.error);
