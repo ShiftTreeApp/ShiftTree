@@ -44,7 +44,8 @@ export default function SignUp() {
       .then(() => {
         setErrorMessage(null);
         notifier.message("Successfully registered!");
-        navigate("/signup-confirmation");
+        navigate("/");
+        //navigate("/signup-confirmation");
       })
       .catch(e => {
         console.error(e);
