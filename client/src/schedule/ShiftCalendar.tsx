@@ -183,17 +183,57 @@ function WeekRow(props: WeekRowProps) {
     [props.startDate],
   );
 
+  const stackedShifts = useMemo(() => {
+    const shifts = new Map<string, ShiftDetails[]>();
+    for (const shift of props.shifts) {
+      const key = `${shift.startTime.format("YYYYMMDDHHmm")}${shift.endTime.format("YYYYMMDDHHmm")}`;
+      if (!shifts.has(key)) {
+        shifts.set(key, []);
+      }
+      shifts.get(key)?.push(shift);
+    }
+    return Array.from(shifts.values()).map(shifts => {
+      const [first, ...rest] = shifts;
+      return {
+        ...first,
+        count: shifts.length,
+        rest,
+      };
+    });
+  }, [props.shifts]);
+
+  const groupedContentMap = useMemo(() => {
+    const map = new Map<string, React.FC>();
+    for (const stack of stackedShifts) {
+      const allShiftIds = [stack.id, ...stack.rest.map(shift => shift.id)];
+      const customContent = allShiftIds
+        .map(id => props.customContentMap[id])
+        .filter(Boolean);
+      const component = () => (
+        <>
+          {customContent.map((Custom, i) => (
+            <Custom key={i} />
+          ))}
+        </>
+      );
+      for (const id of allShiftIds) {
+        map.set(id, component);
+      }
+    }
+    return map;
+  }, [props.customContentMap, stackedShifts]);
+
   const shiftsByDayOfWeek = useMemo(() => {
-    const shifts: { date: dayjs.Dayjs; shifts: ShiftDetails[] }[] = [];
+    const shifts: { date: dayjs.Dayjs; shifts: StackedShiftDetails[] }[] = [];
     for (const day of days) {
-      const selectedShifts = props.shifts.filter(shift =>
+      const selectedShifts = stackedShifts.filter(shift =>
         shift.startTime.isSame(day, "day"),
       );
       selectedShifts.sort((a, b) => a.startTime.unix() - b.startTime.unix());
       shifts.push({ date: day, shifts: selectedShifts });
     }
     return shifts;
-  }, [days, props.shifts]);
+  }, [days, stackedShifts]);
 
   return (
     <Grid container columns={{ xs: 1, md: 7 }} sx={{ flexGrow: 1 }}>
@@ -202,7 +242,7 @@ function WeekRow(props: WeekRowProps) {
           key={date.toISOString()}
           size={1}
           sx={theme => ({
-            padding: 1.5,
+            padding: 0.5,
             paddingTop: 0.5,
             [theme.breakpoints.up("md")]: {
               borderLeft: "1px solid",
@@ -249,7 +289,7 @@ function WeekRow(props: WeekRowProps) {
                 onClick={() => props.onClickShift(shift.id)}
                 selected={props.selectedShifts.includes(shift.id)}
                 colorMap={props.colorMap}
-                customContentMap={props.customContentMap}
+                Custom={groupedContentMap.get(shift.id) ?? (() => null)}
               />
             ))}
           </Box>
@@ -266,11 +306,17 @@ export interface ShiftDetails {
   endTime: dayjs.Dayjs;
 }
 
+interface StackedShiftDetails extends ShiftDetails {
+  count: number;
+  rest: ShiftDetails[];
+}
+
 interface ShiftCardProps extends ShiftDetails {
   onClick: () => void;
   selected: boolean;
   colorMap: Record<string, BackgroundColorType>;
-  customContentMap: Record<string, React.FC>;
+  Custom: React.FC;
+  count: number;
 }
 
 type BackgroundColorType = Extract<
@@ -278,14 +324,15 @@ type BackgroundColorType = Extract<
   { backgroundColor?: any }
 >["backgroundColor"];
 
-function ShiftCard(props: ShiftCardProps) {
+function ShiftCard({ Custom, ...props }: ShiftCardProps) {
   return (
     <Card
       sx={{
+        position: "relative",
         display: "flex",
         flexDirection: "column",
-        padding: theme => theme.spacing(1),
-        gap: theme => theme.spacing(1),
+        padding: 0.75,
+        gap: 1,
         ":hover": {
           cursor: "pointer",
         },
@@ -301,9 +348,19 @@ function ShiftCard(props: ShiftCardProps) {
       elevation={props.selected ? 4 : 1}
       onClick={props.onClick}
     >
-      <Typography variant="h6">{props.name}</Typography>
-      <Typography variant="body2">
-        {props.startTime.format("MMM DD, HH:mm")}
+      <Typography sx={{ fontSize: "0.9rem", fontWeight: "bold" }}>
+        {props.name}
+      </Typography>
+      {props.count > 1 && (
+        <Chip
+          sx={{ position: "absolute", right: "2px", top: "2px" }}
+          label={props.count}
+          size="small"
+          color="info"
+        />
+      )}
+      <Typography sx={{ fontSize: "0.75rem" }}>
+        {props.startTime.format("HH:mm")}
         <Divider
           variant="middle"
           sx={{
@@ -312,23 +369,16 @@ function ShiftCard(props: ShiftCardProps) {
             borderWidth: 1.25,
           }}
         />
-        {props.endTime.format("MMM DD, HH:mm")}
+        {props.endTime.isSame(props.startTime, "day") ? (
+          props.endTime.format("HH:mm")
+        ) : (
+          <>
+            {props.endTime.format("HH:mm")}{" "}
+            <strong>{`(${props.endTime.format("ddd MMM DD")})`}</strong>
+          </>
+        )}
       </Typography>
-      <CustomContent map={props.customContentMap} id={props.id} />
+      <Custom />
     </Card>
   );
-}
-
-interface CustomContentProps {
-  map: Record<string, React.FC>;
-  id: string;
-}
-
-function CustomContent(props: CustomContentProps) {
-  if (props.map[props.id]) {
-    const Component = props.map[props.id];
-    return <Component />;
-  } else {
-    return <></>;
-  }
 }
