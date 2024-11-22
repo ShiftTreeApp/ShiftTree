@@ -15,6 +15,7 @@ import NotFoundPage from "@/NotFound.tsx";
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
 import { NotifierProvider } from "@/notifier.tsx";
+import SignUpConfirmation from "./SignUpConfirmation.tsx";
 
 export default function App() {
   return (
@@ -27,6 +28,11 @@ export default function App() {
                 <Route path="/login" element={<SignIn />} />
                 <Route path="/register" element={<SignUp />} />
                 {/* Put authenticated routes below */}
+                <Route
+                  path="/signup-confirmation"
+                  // must be authenticated to view this page. just testing rn
+                  element={<SignUpConfirmation />}
+                />
                 <Route
                   path="/"
                   element={

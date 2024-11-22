@@ -11,6 +11,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { useNavigate } from "react-router";
+import { useNotifier } from "./notifier";
 
 import { useAuth } from "@/auth";
 
@@ -20,6 +21,7 @@ export type SignUpParams = {
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const notifier = useNotifier();
   const auth = useAuth();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -41,7 +43,8 @@ export default function SignUp() {
       .register({ username, email, password })
       .then(() => {
         setErrorMessage(null);
-        navigate("/login");
+        notifier.message("Successfully registered!");
+        navigate("/signup-confirmation");
       })
       .catch(e => {
         console.error(e);
