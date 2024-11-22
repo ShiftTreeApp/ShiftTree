@@ -70,6 +70,8 @@ export default function Schedule() {
     empActions.assignedShifts,
   );
 
+  const [weight, setWeight] = useState(5); // Add state variable for weight
+
   useEffect(() => {
     const getUpdatedShiftStatuses = async () => {
       empActions.refetchUserSignups();
@@ -142,6 +144,7 @@ export default function Schedule() {
     await empActions.signup({
       shiftId: selectedShift ? selectedShift : "",
       userId: "none",
+      weight: weight,
     });
 
     empActions.refetchUserSignups();
@@ -227,15 +230,17 @@ export default function Schedule() {
                 >
                   <Typography gutterBottom>Request Weight</Typography>
                   <Slider
-                    defaultValue={50}
+                    defaultValue={5}
                     aria-label="Request weight"
                     valueLabelDisplay="auto"
                     sx={{ width: { md: 300 } }}
-                    shiftStep={30}
-                    step={10}
+                    shiftStep={3}
+                    step={1}
                     marks
-                    max={100}
-                    min={10}
+                    max={10}
+                    min={1}
+                    value={weight}
+                    onChange={(e, newValue) => setWeight(newValue as number)}
                   />
 
                   <Button
