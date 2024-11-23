@@ -7,6 +7,7 @@ import {
   Divider,
   Grid2 as Grid,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import React, { useMemo } from "react";
 import dayjs from "dayjs";
@@ -336,12 +337,20 @@ function ShiftCard({ Custom, ...props }: ShiftCardProps) {
         {props.name}
       </Typography>
       {props.count > 1 && (
-        <Chip
-          sx={{ position: "absolute", right: "2px", top: "2px" }}
-          label={props.count}
-          size="small"
-          color="info"
-        />
+        <Tooltip title={`This shift has ${props.count} spots.`}>
+          <Chip
+            sx={{
+              position: "absolute",
+              right: "4px",
+              top: "4px",
+              color: "white",
+              fontWeight: "bold",
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+            }}
+            label={props.count}
+            size="small"
+          />
+        </Tooltip>
       )}
       <Typography sx={{ fontSize: "0.75rem" }}>
         {props.startTime.format("HH:mm")}
