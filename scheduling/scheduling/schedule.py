@@ -50,7 +50,7 @@ class Config(BaseModel):
 
 
 def constraint_name(rule: str, **kwargs: Any) -> str:
-    return json.dumps({"rule_name": rule, "subjects": kwargs})
+    return json.dumps({"name": rule, "subjects": kwargs})
 
 
 class Rule(Protocol):
@@ -165,7 +165,7 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
     if not config.employees or not config.shifts:
         return models.ScheduleResponse(
             assignments=[],
-            conflicts=[],
+            events=[],
             status="optimal",
         )
 
@@ -202,31 +202,46 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
 
     assert status != cp_model.MODEL_INVALID, "Invalid model"
 
-    if status == cp_model.OPTIMAL:
-        print("Solution:")
-        for e in config.employees:
-            for s in config.shifts:
-                if solver.value(shift_asgn[(e, s)]) == 1:
-                    weight = requested_weight(employee=e, shift=s)
-                    shift = config.shifts[s]
-                    start_time_str = shift.start_time.strftime("%m-%d-%y %H:%M")
-                    end_time_str = shift.end_time.strftime("%m-%d-%y %H:%M")
-                    if weight > 0:
-                        print(
-                            f"'{e}' works shift '{s}' (requested weight={weight}) from {start_time_str} to {end_time_str}"
-                        )
-                    else:
-                        print(
-                            f"'{e}' works shift '{s}' (not requested) from {start_time_str} to {end_time_str}"
-                        )
-            print()
-    else:
-        print(f"No optimal solution found! ({status=})")
+    assignments = (
+        [
+            (e, s)
+            for e, s in itertools.product(config.employees, config.shifts)
+            if solver.value(shift_asgn[(e, s)]) == 1
+        ]
+        if status == cp_model.OPTIMAL
+        else []
+    )
 
-    print("Statistics:")
-    print(f" - conflicts: {solver.num_conflicts}")
-    print(f" - branches : {solver.num_branches}")
-    print(f" - wall time: {solver.wall_time}s")
+    bad_assignment_events = (
+        models.Event(
+            name="assignment to unrequested shift",
+            subjects={
+                "user": f"user:{e}",
+                "shift": f"shift:{s}",
+            },
+        )
+        for e, s in assignments
+        if requested_weight_or_none(employee=e, shift=s) is None
+    )
+
+    constraint_events = (
+        models.Event(name=f"constraint violated: {e.name}", subjects=e.subjects)
+        for e in (
+            models.Event(**json.loads(model.var_index_to_var_proto(var_index).name))
+            for var_index in solver.sufficient_assumptions_for_infeasibility()
+        )
+    )
+
+    statistic_events = (
+        models.Event(
+            name="statistics",
+            subjects={
+                "num_conflicts": solver.num_conflicts,
+                "num_branches": solver.num_branches,
+                "wall_time_s": solver.wall_time,
+            },
+        ),
+    )
 
     return models.ScheduleResponse(
         assignments=[
@@ -235,12 +250,8 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
                 user_id=e,
                 requested_weight=requested_weight_or_none(employee=e, shift=s),
             )
-            for (e, s) in itertools.product(config.employees, config.shifts)
-            if solver.value(shift_asgn[(e, s)]) == 1
+            for (e, s) in assignments
         ],
-        conflicts=[
-            models.Conflict(**json.loads(model.var_index_to_var_proto(var_index).name))
-            for var_index in solver.sufficient_assumptions_for_infeasibility()
-        ],
+        events=[*constraint_events, *bad_assignment_events, *statistic_events],
         status="optimal" if status == cp_model.OPTIMAL else "infeasible",
     )
