@@ -29,6 +29,7 @@ import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import theme from "@/theme";
 import { useNotifier } from "@/notifier";
+import { useShifts } from "@/hooks/useShifts";
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -140,8 +141,7 @@ export default function Schedule() {
   const handleRegister = async () => {
     console.log(selectedShift);
     await empActions.signup({
-      shiftId: selectedShift ? selectedShift : "",
-      userId: "none",
+      shiftId: selectedShift ?? "",
     });
 
     empActions.refetchUserSignups();
@@ -340,13 +340,6 @@ interface UserChipsProps {
 function UserChips(props: UserChipsProps) {
   const api = useApi();
 
-  // This request is required to get the users avatars/names for the chips
-  const { data: membersData } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/members",
-    { params: { path: { scheduleId: props.scheduleId as string } } },
-  );
-
   // This request is required to get the users that are signed up in each schedule
   const { data: scheduleSignups } = api.useQuery(
     "get",
@@ -354,28 +347,31 @@ function UserChips(props: UserChipsProps) {
     { params: { path: { scheduleId: props.scheduleId as string } } },
   );
 
-  const userIds =
-    scheduleSignups
-      ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
-      .flatMap((shift: any) =>
-        shift.signups.map((signup: any) => signup.user.id),
-      ) || [];
+  const shifts = useShifts(props.scheduleId ?? "");
+
+  const stackShiftIds = useMemo(
+    () => new Set(shifts.matchingShifts(props.shiftId ?? "").map(s => s.id)),
+    [props.shiftId, shifts],
+  );
+
+  const users = scheduleSignups
+    ?.filter(shift => stackShiftIds.has(shift.id)) // Match the shiftId
+    .flatMap(shift => shift.signups?.map(signup => signup.user))
+    .filter(u => u !== undefined);
 
   return (
     <Box>
-      {userIds.map(userId => {
-        // Find the corresponding member data by userId
-        const member = membersData?.find((member: any) => member.id === userId);
-        return member ? (
+      {users?.map(user => {
+        return (
           <Chip
-            key={userId}
+            key={user.id}
             avatar={
-              <Avatar src={createRandomPfpUrl(member.displayName, member.id)} />
+              <Avatar src={createRandomPfpUrl(user.displayName, user.id)} />
             }
-            label={member.displayName}
+            label={user.displayName}
             variant="outlined"
           />
-        ) : null;
+        );
       })}
     </Box>
   );
