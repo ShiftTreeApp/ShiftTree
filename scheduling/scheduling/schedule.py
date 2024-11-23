@@ -153,6 +153,14 @@ def prevent_consecutive_shifts(
                 model.add_assumption(enforcement_var)
 
 
+default_rules = (
+    exactly_one_shift_per_employee,
+    evenly_distribute_shifts,
+    prevent_overlapping_shifts,
+    prevent_consecutive_shifts,
+)
+
+
 def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
     if not config.employees or not config.shifts:
         return models.ScheduleResponse(
