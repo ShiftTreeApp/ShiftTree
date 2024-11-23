@@ -57,8 +57,10 @@ INSERT INTO user_shift_assignment (id, user_id, shift_id) VALUES
 
 -- Insert test data for user_shift_signup
 INSERT INTO user_shift_signup (id, user_id, shift_id, user_weighting) VALUES
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 1'), 1),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 1'), 1),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 1 (2)'), 1),
   (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 2'), 1),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 2 (2)'), 1),
   (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 3'), 1),
   (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 4'), 1);
 
