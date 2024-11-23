@@ -31,6 +31,8 @@ class Employee(BaseModel):
 class Config(BaseModel):
     shifts: Mapping[ShiftId, Shift]
     employees: Mapping[EmployeeId, Employee]
+    seed: int | None = Field(default=None)
+    """Random seed for the solver. If not provided, the solver does not produce deterministic results."""
 
     @classmethod
     def from_request(cls, request: models.ScheduleRequest) -> Self:
@@ -46,6 +48,7 @@ class Config(BaseModel):
                 for shift in request.shifts
                 for signup in shift.signups
             },
+            seed=request.seed,
         )
 
 
@@ -198,6 +201,8 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
         return req.weight if req is not None else None
 
     solver = cp_model.CpSolver()
+    if config.seed is not None:
+        solver.parameters.random_seed = config.seed
     status = solver.solve(model)
 
     assert status != cp_model.MODEL_INVALID, "Invalid model"

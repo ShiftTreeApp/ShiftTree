@@ -24,6 +24,7 @@ class Shift(BaseModel):
 
 class ScheduleRequest(BaseModel):
     shifts: Sequence[Shift]
+    seed: int | None = None
 
 
 class Assignment(BaseModel):
