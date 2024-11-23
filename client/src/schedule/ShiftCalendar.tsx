@@ -19,9 +19,14 @@ export interface ShiftCalendarProps {
   selectedShifts: string[];
   /** Mapping from shiftId to the color */
   colorMap?: Record<string, BackgroundColorType> | undefined;
-  /** Mapping from shiftId to custom content to be rendered in the shift card */
+  /** Mapping from shiftId to custom content to be rendered in the shift card
+   * @deprecated
+   */
   customContentMap?: Record<string, React.FC> | undefined;
+  CustomContent?: CustomContentComponent | undefined;
 }
+
+export type CustomContentComponent = React.FC<{ shiftIds: string[] }>;
 
 export type ShiftColorMap = NonNullable<ShiftCalendarProps["colorMap"]>;
 
@@ -129,6 +134,7 @@ export function ShiftCalendar(props: ShiftCalendarProps) {
                 onClickShift={props.onClickShift}
                 colorMap={props.colorMap ?? {}}
                 customContentMap={props.customContentMap ?? {}}
+                CustomContent={props.CustomContent ?? (() => null)}
               />
             </Box>
           </Box>
@@ -173,7 +179,9 @@ interface WeekRowProps {
   onClickShift: (shiftId: string) => void;
   selectedShifts: string[];
   colorMap: Record<string, BackgroundColorType>;
+  /** @deprecated */
   customContentMap: Record<string, React.FC>;
+  CustomContent: CustomContentComponent;
 }
 
 function WeekRow(props: WeekRowProps) {
@@ -201,27 +209,6 @@ function WeekRow(props: WeekRowProps) {
       };
     });
   }, [props.shifts]);
-
-  const groupedContentMap = useMemo(() => {
-    const map = new Map<string, React.FC>();
-    for (const stack of stackedShifts) {
-      const allShiftIds = [stack.id, ...stack.rest.map(shift => shift.id)];
-      const customContent = allShiftIds
-        .map(id => props.customContentMap[id])
-        .filter(Boolean);
-      const component = () => (
-        <>
-          {customContent.map((Custom, i) => (
-            <Custom key={i} />
-          ))}
-        </>
-      );
-      for (const id of allShiftIds) {
-        map.set(id, component);
-      }
-    }
-    return map;
-  }, [props.customContentMap, stackedShifts]);
 
   const shiftsByDayOfWeek = useMemo(() => {
     const shifts: { date: dayjs.Dayjs; shifts: StackedShiftDetails[] }[] = [];
@@ -289,7 +276,11 @@ function WeekRow(props: WeekRowProps) {
                 onClick={() => props.onClickShift(shift.id)}
                 selected={props.selectedShifts.includes(shift.id)}
                 colorMap={props.colorMap}
-                Custom={groupedContentMap.get(shift.id) ?? (() => null)}
+                Custom={() => (
+                  <props.CustomContent
+                    shiftIds={[shift.id, ...shift.rest.map(s => s.id)]}
+                  />
+                )}
               />
             ))}
           </Box>

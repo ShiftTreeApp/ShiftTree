@@ -163,6 +163,53 @@ export default function Schedule() {
     [selectedShift, signedUpShifts],
   );
 
+  function ManagerPerShiftStackContent(props: { shiftIds: string[] }) {
+    const shiftIds = useMemo(() => new Set(props.shiftIds), [props.shiftIds]);
+    const assignedUsers = useMemo(
+      () =>
+        empActions.allAssignments
+          ?.filter(asgn => asgn.shiftId && shiftIds.has(asgn.shiftId))
+          .map(asgn => asgn.user)
+          .filter(u => u !== undefined) ?? [],
+      [shiftIds],
+    );
+
+    return (
+      <>
+        {assignedUsers.map(user => (
+          <Chip
+            key={user.id}
+            avatar={
+              <Avatar src={createRandomPfpUrl(user.displayName, user.id)} />
+            }
+            label={user.displayName}
+            color="primary"
+          />
+        ))}
+      </>
+    );
+  }
+
+  function MemberPerShiftStackContent(props: { shiftIds: string[] }) {
+    const isRegistered = useMemo(
+      () => props.shiftIds.some(id => signedUpShifts.includes(id)),
+      [props.shiftIds],
+    );
+
+    const isAssigned = useMemo(
+      () => props.shiftIds.some(id => assignedShifts.includes(id)),
+      [props.shiftIds],
+    );
+
+    if (isAssigned) {
+      return <AssignedIndicator />;
+    } else if (isRegistered) {
+      return <SignedUpIndicator />;
+    } else {
+      return <></>;
+    }
+  }
+
   return (
     <Grid container direction="column" spacing={1}>
       <Navbar />
@@ -279,6 +326,11 @@ export default function Schedule() {
             selectedShifts={selectedShift ? [selectedShift] : []}
             customContentMap={bothIndicators}
             shifts={formattedShifts}
+            CustomContent={
+              isManager
+                ? ManagerPerShiftStackContent
+                : MemberPerShiftStackContent
+            }
           />
         </Paper>
       </Container>
