@@ -7,6 +7,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 import { useApi } from "@/client";
+import { useShifts } from "@/hooks/useShifts";
 
 export interface ShiftDetails {
   id: string;
@@ -36,14 +37,6 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     [scheduleData?.endTime],
   );
 
-  const { data: shiftsData, refetch: refetchShifts } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/shifts",
-    {
-      params: { path: { scheduleId: scheduleId } },
-    },
-  );
-
   const { refetch: refetchAssignmentsCsv } = api.useQuery(
     "get",
     "/schedules/{scheduleId}/csv",
@@ -66,45 +59,13 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
       },
     },
   );
-  const shifts = useMemo(
-    () =>
-      shiftsData?.map(shift => ({
-        id: shift.id,
-        name: shift.name,
-        description: shift.description,
-        startTime: dayjs(shift.startTime),
-        endTime: dayjs(shift.endTime),
-      })) ?? [],
-    [shiftsData],
-  );
 
-  const groupedShifts = useMemo(() => {
-    const groupedShifts: Record<string, Omit<ShiftDetails, "count">[]> = {};
-    shifts.forEach(shift => {
-      const key = `${shift.startTime.format("YYYYMMDDHHss")}${shift.endTime.format("YYYYMMDDHHss")}`;
-      if (!groupedShifts[key]) {
-        groupedShifts[key] = [];
-      }
-      groupedShifts[key].push(shift);
-    });
-    return groupedShifts;
-  }, [shifts]);
-
-  const stackedShifts = useMemo(() => {
-    return Object.values(groupedShifts).map(shifts => {
-      const shift = shifts[0];
-      return { ...shift, count: shifts.length } satisfies ShiftDetails;
-    });
-  }, [groupedShifts]);
-
-  function matchingShifts(id: string) {
-    const shift = shifts.find(shift => shift.id === id);
-    if (!shift) {
-      return [];
-    }
-    const key = `${shift.startTime.format("YYYYMMDDHHss")}${shift.endTime.format("YYYYMMDDHHss")}`;
-    return groupedShifts[key] ?? [];
-  }
+  const {
+    shifts,
+    stackedShifts,
+    matchingShifts,
+    refetch: refetchShifts,
+  } = useShifts(scheduleId);
 
   const { mutateAsync: postShift } = api.useMutation(
     "post",
