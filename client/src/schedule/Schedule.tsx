@@ -82,43 +82,6 @@ export default function Schedule() {
     getUpdatedShiftStatuses();
   }, [empActions.signedUpShifts, empActions.assignedShifts, empActions]);
 
-  const signedUpIndicators = useMemo(
-    () =>
-      Object.fromEntries(
-        signedUpShifts.map((shiftId: string) => [shiftId, SignedUpIndicator]),
-      ),
-    [signedUpShifts],
-  );
-
-  const assignedIndicators = useMemo(
-    () =>
-      Object.fromEntries(
-        assignedShifts.map((shiftId: string) => [shiftId, AssignedIndicator]),
-      ),
-    [assignedShifts],
-  );
-
-  const userIndicators = useMemo(
-    () =>
-      Object.fromEntries(
-        empActions.allAssignments?.map(({ shiftId, user }) => [
-          shiftId,
-          () => (
-            <UserIndicators
-              name={user?.displayName ?? ""}
-              id={user?.id ?? ""}
-            />
-          ),
-        ]) ?? [],
-      ),
-    [empActions.allAssignments],
-  );
-
-  const bothIndicators = useMemo(
-    () => ({ ...signedUpIndicators, ...assignedIndicators, ...userIndicators }),
-    [signedUpIndicators, assignedIndicators, userIndicators],
-  );
-
   const { data: scheduleData } = api.useQuery(
     "get",
     "/schedules/{scheduleId}",
@@ -177,14 +140,7 @@ export default function Schedule() {
     return (
       <>
         {assignedUsers.map(user => (
-          <Chip
-            key={user.id}
-            avatar={
-              <Avatar src={createRandomPfpUrl(user.displayName, user.id)} />
-            }
-            label={user.displayName}
-            color="primary"
-          />
+          <UserIndicators key={user.id} name={user.displayName} id={user.id} />
         ))}
       </>
     );
@@ -324,7 +280,6 @@ export default function Schedule() {
             startDate={dayjs(scheduleData?.startTime ?? dayjs().toISOString())}
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
-            customContentMap={bothIndicators}
             shifts={formattedShifts}
             CustomContent={
               isManager

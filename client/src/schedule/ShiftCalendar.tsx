@@ -19,10 +19,6 @@ export interface ShiftCalendarProps {
   selectedShifts: string[];
   /** Mapping from shiftId to the color */
   colorMap?: Record<string, BackgroundColorType> | undefined;
-  /** Mapping from shiftId to custom content to be rendered in the shift card
-   * @deprecated
-   */
-  customContentMap?: Record<string, React.FC> | undefined;
   CustomContent?: CustomContentComponent | undefined;
 }
 
@@ -133,7 +129,6 @@ export function ShiftCalendar(props: ShiftCalendarProps) {
                 selectedShifts={props.selectedShifts}
                 onClickShift={props.onClickShift}
                 colorMap={props.colorMap ?? {}}
-                customContentMap={props.customContentMap ?? {}}
                 CustomContent={props.CustomContent ?? (() => null)}
               />
             </Box>
@@ -179,8 +174,6 @@ interface WeekRowProps {
   onClickShift: (shiftId: string) => void;
   selectedShifts: string[];
   colorMap: Record<string, BackgroundColorType>;
-  /** @deprecated */
-  customContentMap: Record<string, React.FC>;
   CustomContent: CustomContentComponent;
 }
 
