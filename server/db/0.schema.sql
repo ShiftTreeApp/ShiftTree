@@ -20,6 +20,7 @@ CREATE TABLE user_account
 , username VARCHAR(64) NOT NULL
 , email VARCHAR(64) NOT NULL UNIQUE
 , password_hash VARCHAR(255) NOT NULL
+, reset_code UUID DEFAULT gen_random_uuid()
 );
 
 CREATE TABLE schedule

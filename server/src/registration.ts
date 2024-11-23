@@ -32,8 +32,20 @@ export const registerUser = async (req: Request, res: Response) => {
 
     await pool.query(insertUserStatement, [username, email, password]);
 
+    const selectKeyQuery = `
+      SELECT reset_code FROM user_account WHERE email = $1
+    `;
+    const key = await pool.query(selectKeyQuery, [email]);
+
+    console.log(key.rows[0]["reset_code"]);
+
     // Can choose to send an access token later on if we want the user to automatically login after registration
-    res.status(201).json({ message: "Registration Successful" });
+    res
+      .status(201)
+      .json({
+        message: "Registration Successful",
+        secretKey: key.rows[0]["reset_code"],
+      });
     return;
   } catch (err) {
     console.log("Registration Error:", err);
