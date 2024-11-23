@@ -324,8 +324,9 @@ function EditShift(props: EditShiftProps) {
       setNewDesc(shift.data.description);
       setNewStartTime(dayjs(shift.data.startTime));
       setNewEndTime(dayjs(shift.data.endTime));
+      setNewCount(shift.stack.length);
     }
-  }, [shift.data]);
+  }, [shift.data, shift.stack]);
 
   useEffect(() => {
     if (newStartTime.isAfter(newEndTime)) {
@@ -339,6 +340,7 @@ function EditShift(props: EditShiftProps) {
       description: newDesc,
       startTime: newStartTime,
       endTime: newEndTime,
+      count: newCount,
     });
     props.onClose();
   }
@@ -386,7 +388,6 @@ function EditShift(props: EditShiftProps) {
           newStartTime.startOf("day"),
           "minute",
         );
-        console.log(startTimeOffsetMin);
         const endTimeOffsetMin = newEndTime.diff(newStartTime, "minute");
         const startTime = date.startOf("day").add(startTimeOffsetMin, "minute");
         const endTime = startTime.add(endTimeOffsetMin, "minute");
@@ -406,12 +407,22 @@ function EditShift(props: EditShiftProps) {
 
   return (
     <>
-      <TextField
-        id="name"
-        label="Name"
-        value={newName}
-        onChange={event => setNewName(event.target.value)}
-      />
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <TextField
+          id="name"
+          label="Name"
+          value={newName}
+          onChange={event => setNewName(event.target.value)}
+          sx={{ flexGrow: "1" }}
+        />
+        <TextField
+          id="count"
+          label="Count"
+          type="number"
+          value={newCount}
+          onChange={event => setNewCount(parseInt(event.target.value))}
+        />
+      </Box>
       <TextField
         id="desc"
         label="Description"

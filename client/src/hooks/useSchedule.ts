@@ -153,6 +153,22 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
         endTime: shift.endTime.toISOString(),
       },
     });
+
+    if (shift.count > 1) {
+      await Promise.all(
+        new Array(shift.count - 1).fill(0).map(async () => {
+          await postShift({
+            params: { path: { scheduleId: scheduleId } },
+            body: {
+              name: shift.name,
+              startTime: shift.startTime.toISOString(),
+              endTime: shift.endTime.toISOString(),
+            },
+          });
+        }),
+      );
+    }
+
     return { id };
   }
 
@@ -164,22 +180,38 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     );
   }
 
-  async function updateShift(
-    shiftUpdate: Partial<ShiftDetails> & { id: string },
-  ) {
-    await Promise.all(
-      matchingShifts(shiftUpdate.id).map(async shift => {
-        console.log("update", shift);
-        await sendUpdateShift({
-          params: { path: { shiftId: shift.id } },
-          body: {
-            name: shiftUpdate.name,
-            description: shiftUpdate.description,
-            startTime: shiftUpdate.startTime?.toISOString(),
-            endTime: shiftUpdate.endTime?.toISOString(),
-          },
+  async function updateShift(shift: Partial<ShiftDetails> & { id: string }) {
+    const stack = matchingShifts(shift.id);
+    if (shift.count !== undefined) {
+      if (shift.count < stack.length) {
+        const count = Math.max(shift.count, 1);
+        await Promise.all(
+          stack.slice(count).map(async shift => {
+            await sendDelete({ params: { path: { shiftId: shift.id } } });
+          }),
+        );
+      } else if (shift.count > stack.length) {
+        const numToAdd = shift.count - stack.length;
+        await createShift({
+          count: numToAdd,
+          ...stack[0],
         });
-      }),
+      }
+    }
+    await Promise.all(
+      matchingShifts(shift.id)
+        .slice(0, shift.count)
+        .map(async s => {
+          await sendUpdateShift({
+            params: { path: { shiftId: s.id } },
+            body: {
+              name: shift.name,
+              description: shift.description,
+              startTime: shift.startTime?.toISOString(),
+              endTime: shift.endTime?.toISOString(),
+            },
+          });
+        }),
     );
   }
 
@@ -196,6 +228,8 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
   function useShift({ shiftId }: { shiftId: string }) {
     const data = useMemo(() => shifts.find(s => s.id === shiftId), [shiftId]);
 
+    const stack = useMemo(() => matchingShifts(shiftId), [shiftId]);
+
     async function delete_() {
       await deleteShift({ shiftId });
     }
@@ -204,7 +238,7 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
       await updateShift({ ...shift, id: shiftId });
     }
 
-    return { data, delete_, update };
+    return { data, stack, delete_, update };
   }
 
   async function deleteSchedule() {
