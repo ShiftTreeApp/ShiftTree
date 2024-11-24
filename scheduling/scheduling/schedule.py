@@ -25,7 +25,7 @@ class Request(BaseModel):
 
 class Employee(BaseModel):
     min_shifts: int | None = Field(default=None)
-    requests: Mapping[ShiftId, Request] = Field(default=None)
+    requests: Mapping[ShiftId, Request] = Field(default_factory=dict)
 
 
 class Config(BaseModel):
