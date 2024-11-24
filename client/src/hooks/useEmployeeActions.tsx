@@ -1,4 +1,5 @@
 import { useApi } from "@/client";
+import { useShifts } from "@/hooks/useShifts";
 import { useNotifier } from "@/notifier";
 
 export function useEmployeeActions(shiftTreeId?: string) {
@@ -54,7 +55,7 @@ export function useEmployeeActions(shiftTreeId?: string) {
     console.log("Joined");
   }
 
-  async function signup({
+  async function signupForSingle({
     shiftId,
     userId,
     weight,
@@ -78,6 +79,25 @@ export function useEmployeeActions(shiftTreeId?: string) {
       },
     });
     console.log("Signed up for shift");
+  }
+
+  const shifts = useShifts(shiftTreeId ?? "");
+
+  async function signup({
+    shiftId,
+    weight,
+  }: {
+    shiftId: string;
+    weight?: number;
+  }) {
+    await Promise.all(
+      shifts.matchingShifts(shiftId).map(async shift => {
+        await signupForSingle({
+          shiftId: shift.id,
+          weight,
+        });
+      }),
+    );
   }
 
   /*
