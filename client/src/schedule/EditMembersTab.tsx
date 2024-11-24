@@ -19,6 +19,8 @@ import EditMembersDrawer from "./EditMembersDrawer";
 import { useApi } from "@/client";
 import dayjs from "dayjs";
 import { useManagerActions } from "@/hooks/useManagerActions";
+import CompactNumInput from "@/customComponents/CompactNumInput";
+import CompactNumberInput from "@/customComponents/CompactNumberInput";
 
 interface EditMembersTabProps {
   scheduleId: string;
@@ -42,6 +44,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
 
   // TODO: Add the base url as an environment variable so it can be set during build
   const [inviteCode, setInviteCode] = useState<string>("");
+
   useEffect(() => {
     if (managerActions.existingCode) {
       setInviteCode(managerActions.existingCode);
@@ -143,6 +146,15 @@ export default function EditMembersTab(props: EditMembersTabProps) {
             )}
             onKick={() => setUserToKick(member)}
           />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+            }}
+          >
+            <CompactNumberInput />
+          </Box>
         </Fragment>
       ))}
     </Box>
@@ -223,6 +235,7 @@ function MemberItem(props: MemberItemProps) {
             <br></br>
           </Typography>
           <Divider sx={{ borderColor: "blue" }} />
+
           {drawerOpen && (
             <ShiftDisplay userId={props.userId} scheduleId={props.scheduleId} />
           )}
