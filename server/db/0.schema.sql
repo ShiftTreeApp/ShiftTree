@@ -154,3 +154,31 @@ SELECT
     END AS schedule_state,
     asgn_count.schedule_id
 FROM asgn_count;
+
+CREATE VIEW schedule_counts AS
+WITH
+    member_count AS (
+        SELECT
+            s.id AS schedule_id,
+            COUNT(usm.id) AS total_members
+        FROM schedule AS s
+        LEFT JOIN user_schedule_membership AS usm ON s.id = usm.schedule_id
+        WHERE s.removed IS NULL
+        GROUP BY s.id
+    ),
+    shift_count AS (
+        SELECT
+            s.id AS schedule_id,
+            COUNT(shift.id) AS total_shifts
+        FROM schedule AS s
+        LEFT JOIN shift ON s.id = shift.schedule_id
+        WHERE s.removed IS NULL
+        GROUP BY s.id
+    )
+SELECT
+    s.id AS schedule_id,
+    COALESCE(member_count.total_members, 0) AS total_members,
+    COALESCE(shift_count.total_shifts, 0) AS total_shifts
+FROM schedule AS s
+LEFT JOIN member_count ON s.id = member_count.schedule_id
+LEFT JOIN shift_count ON s.id = shift_count.schedule_id;
