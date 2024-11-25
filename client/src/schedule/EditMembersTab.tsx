@@ -15,11 +15,11 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { Fragment, useState, useEffect } from "react";
-import EditMembersDrawer from "./EditMembersDrawer";
-import { useApi } from "@/client";
 import dayjs from "dayjs";
+
+import { useApi } from "@/client";
 import { useManagerActions } from "@/hooks/useManagerActions";
-import CompactNumInput from "@/customComponents/CompactNumInput";
+import EditMembersDrawer from "./EditMembersDrawer";
 import CompactNumberInput from "@/customComponents/CompactNumberInput";
 
 interface EditMembersTabProps {
@@ -85,6 +85,18 @@ export default function EditMembersTab(props: EditMembersTabProps) {
       },
     });
   }
+
+  const [suggestedShifts, setSuggestedShifts] = useState<{
+    [key: string]: number;
+  }>({});
+
+  const handleSuggestedChange = (userId: string, value: number | null) => {
+    const checkValue = value ?? 0;
+    setSuggestedShifts(prevState => ({
+      ...prevState,
+      [userId]: checkValue,
+    }));
+  };
 
   return (
     <Box
@@ -153,7 +165,11 @@ export default function EditMembersTab(props: EditMembersTabProps) {
               alignItems: "flex-start",
             }}
           >
-            <CompactNumberInput />
+            <Typography variant="body2">User Options:</Typography>
+            <CompactNumberInput
+              suggestedShifts={suggestedShifts[member.id] ?? 0}
+              onChange={newValue => handleSuggestedChange(member.id, newValue)}
+            />
           </Box>
         </Fragment>
       ))}

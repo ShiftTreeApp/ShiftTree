@@ -1,59 +1,75 @@
 import * as React from "react";
-import {
-  unstable_useNumberInput as useNumberInput,
-  UseNumberInputParameters,
-} from "@mui/base/unstable_useNumberInput";
 import { styled } from "@mui/system";
-import { unstable_useForkRef as useForkRef } from "@mui/utils";
 import ArrowDropUpRoundedIcon from "@mui/icons-material/ArrowDropUpRounded";
 import ArrowDropDownRoundedIcon from "@mui/icons-material/ArrowDropDownRounded";
 
+interface CompactNumberInputProps {
+  suggestedShifts: number | null;
+  onChange: (newValue: number | null) => void;
+}
+
 const CompactNumberInput = React.forwardRef(function CompactNumberInput(
-  props: Omit<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    "onChange" | "value"
-  > &
-    UseNumberInputParameters,
+  { suggestedShifts, onChange, ...props }: CompactNumberInputProps,
   ref: React.ForwardedRef<HTMLInputElement>,
 ) {
-  const {
-    getRootProps,
-    getInputProps,
-    getIncrementButtonProps,
-    getDecrementButtonProps,
-  } = useNumberInput(props);
+  const handleIncrement = () => {
+    if (suggestedShifts !== null) {
+      onChange(suggestedShifts + 1);
+    }
+  };
 
-  const inputProps = getInputProps();
+  const handleDecrement = () => {
+    if (suggestedShifts !== null) {
+      if (suggestedShifts > 0) {
+        onChange(suggestedShifts - 1);
+      } else {
+        onChange(suggestedShifts);
+      }
+    }
+  };
 
-  inputProps.ref = useForkRef(inputProps.ref, ref);
+  const handleHiddenInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const newValue = Number(event.target.value);
+    if (!isNaN(newValue)) {
+      onChange(newValue);
+    } else {
+      onChange(null);
+    }
+  };
 
   return (
-    <StyledInputRoot {...getRootProps()}>
-      <StyledStepperButton className="increment" {...getIncrementButtonProps()}>
+    <StyledInputRoot>
+      <StyledStepperButton className="increment" onClick={handleIncrement}>
         <ArrowDropUpRoundedIcon />
       </StyledStepperButton>
-      <StyledStepperButton className="decrement" {...getDecrementButtonProps()}>
+      <StyledStepperButton className="decrement" onClick={handleDecrement}>
         <ArrowDropDownRoundedIcon />
       </StyledStepperButton>
-      <HiddenInput {...inputProps} />
+      <HiddenInput
+        {...props}
+        ref={ref}
+        value={suggestedShifts ?? ""}
+        onChange={handleHiddenInputChange}
+      />
     </StyledInputRoot>
   );
 });
 
-export default function UseNumberInputCompact() {
-  const [value, setValue] = React.useState<number | null>(null);
-
+export default function UseNumberInputCompact({
+  suggestedShifts,
+  onChange,
+}: CompactNumberInputProps) {
   return (
     <Layout>
+      <Pre>Suggested Shifts: {suggestedShifts ?? " "}</Pre>
+
       <CompactNumberInput
         aria-label="Compact Suggested Shifts"
-        placeholder="Input Suggested Shifts"
-        readOnly
-        value={value}
-        onChange={(_, val) => setValue(val)}
+        suggestedShifts={suggestedShifts}
+        onChange={onChange}
       />
-
-      <Pre>Suggested Shifts: {value ?? " "}</Pre>
     </Layout>
   );
 }
@@ -83,13 +99,13 @@ const grey = {
 const StyledInputRoot = styled("div")(
   ({ theme }) => `
     display: grid;
-    grid-template-columns: 2rem;
-    grid-template-rows: 2rem 2rem;
+    grid-template-columns: 1.2rem;
+    grid-template-rows: 1.2rem 1.2rem;
     grid-template-areas:
       "increment"
       "decrement";
-    row-gap: 1px;
-    overflow: auto;
+    row-gap: 0.5px;
+    overflow: hidden;
     border-radius: 8px;
     border-style: solid;
     border-width: 1px;
@@ -116,6 +132,8 @@ const StyledStepperButton = styled("button")(
   box-sizing: border-box;
   border: 0;
   padding: 0;
+  width: 1.2rem;
+  height: 1.2rem;
   color: inherit;
   background: ${theme.palette.mode === "dark" ? grey[900] : grey[50]};
 
@@ -144,7 +162,7 @@ const Layout = styled("div")`
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
-  column-gap: 1rem;
+  column-gap: 0.65rem;
 `;
 
 const Pre = styled("pre")`
