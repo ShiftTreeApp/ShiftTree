@@ -68,15 +68,16 @@ def compute_shifts_per_user[K](
     offsets = ensure_valid_distribtion(offsets, n_shifts)
 
     for k, offset in offsets.items():
-        counts[k] += offset
+        counts[k] = max(0, counts[k] + offset)
 
     s = sum(counts.values())
     if s > n_shifts:
         for k in itertools.cycle(offsets.keys()):
             if s == n_shifts:
                 break
-            counts[k] -= 1
-            s -= 1
+            if counts[k] > 0:
+                counts[k] -= 1
+                s -= 1
     elif s < n_shifts:
         for k in itertools.cycle(offsets.keys()):
             if s == n_shifts:

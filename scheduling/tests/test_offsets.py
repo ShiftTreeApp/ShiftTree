@@ -64,3 +64,20 @@ def test_requesting_same_value_for_all_users_does_nothing(
     result = compute_shifts_per_user(offsets, n_shifts)
     avg_shifts = n_shifts // len(offsets)
     assert all(v == avg_shifts or v == (avg_shifts + 1) for v in result.values())
+
+
+@given(
+    offsets=st.dictionaries(
+        keys=st.uuids().map(str),
+        values=st.integers(min_value=-50, max_value=50),
+        min_size=10,
+        max_size=50,
+    ),
+    n_shifts=st.integers(min_value=20, max_value=600),
+)
+def test_produces_sensible_counts_when_crazy_offsets(
+    offsets: dict[str, int], n_shifts: int
+):
+    result = compute_shifts_per_user(offsets, n_shifts)
+    print(f"{result=}")
+    assert all(v >= 0 for v in result.values())
