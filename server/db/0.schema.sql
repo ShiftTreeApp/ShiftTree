@@ -35,6 +35,7 @@ CREATE TABLE user_schedule_membership
 ( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
 , schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
+, shift_count_offset INTEGER NOT NULL DEFAULT 0
 , UNIQUE (user_id, schedule_id)
 );
 
