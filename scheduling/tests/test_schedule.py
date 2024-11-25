@@ -156,3 +156,36 @@ def test_all_shifts_are_assigned(config: schedule.Config):
 def test_schedules_with_insufficient_employees_fail(config: schedule.Config):
     res = schedule.solve(config, rules=schedule.default_rules)
     assert res.status == "infeasible"
+
+
+def test_users_get_suggested_number_of_shifts():
+    config = schedule.Config(
+        shifts={
+            f"{i + 1}": schedule.Shift(
+                start_time=datetime(2024, 1, 1 + i, 8, 0),
+                end_time=datetime(2024, 1, 1 + i, 10, 0),
+            )
+            for i in range(12)
+        },
+        employees={
+            "A": schedule.Employee(
+                requests={},
+                min_shifts=-2,
+            ),
+            "B": schedule.Employee(
+                requests={},
+                min_shifts=+2,
+            ),
+            "C": schedule.Employee(
+                requests={},
+                min_shifts=0,
+            ),
+        },
+        seed=1337,
+    )
+    res = schedule.solve(config, rules=schedule.default_rules)
+    assert res.status == "optimal"
+
+    assert len([a for a in res.assignments if a.user_id == "A"]) == 2
+    assert len([a for a in res.assignments if a.user_id == "B"]) == 6
+    assert len([a for a in res.assignments if a.user_id == "C"]) == 4

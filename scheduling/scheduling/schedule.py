@@ -7,7 +7,7 @@ from typing import Any, Protocol, Self
 from ortools.sat.python import cp_model
 from pydantic import BaseModel, Field
 
-from scheduling import models
+from scheduling import models, offsets
 
 type ShiftId = str
 
@@ -83,21 +83,18 @@ def evenly_distribute_shifts(
     assignments: Mapping[tuple[EmployeeId, ShiftId], cp_model.IntVar],
     config: Config,
 ):
-    """Attempts to evenly distribute shifts across employees, disregarding specified min shifts.
-
-    If the number of employees divides the total number of shifts, then the min and max number of shifts are the same.
-    Otherwise some employees have to work one more shift than others.
+    """Attempts to evenly distribute shifts across employees, taking into account the "min_shifts", which is
+    repurposed to be the offset of the number of shifts each employee should work from the average.
     """
-    min_shifts_per_employee = len(config.shifts) // len(config.employees)
-    if len(config.shifts) % len(config.employees) == 0:
-        max_shifts_per_employee = min_shifts_per_employee
-    else:
-        max_shifts_per_employee = min_shifts_per_employee + 1
+    shift_offsets = {e: config.employees[e].min_shifts or 0 for e in config.employees}
+    target_shifts = offsets.compute_shifts_per_user(
+        offsets=shift_offsets,
+        n_shifts=len(config.shifts),
+    )
 
     for e in config.employees:
         num_shifts_worked = sum(assignments[(e, s)] for s in config.shifts)
-        model.add(min_shifts_per_employee <= num_shifts_worked)
-        model.add(num_shifts_worked <= max_shifts_per_employee)
+        model.add(num_shifts_worked == target_shifts[e])
 
 
 def prevent_overlapping_shifts(
