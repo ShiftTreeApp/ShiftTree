@@ -1388,6 +1388,7 @@ export interface components {
             displayName: string;
             email: string;
             profileImageUrl?: string;
+            suggestedShifts?: number;
         };
         UUID: string;
         ScheduleInfo: components["schemas"]["ScheduleInfoPreview"];

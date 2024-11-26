@@ -182,14 +182,14 @@ SELECT
     CASE
         WHEN COALESCE(member_count.total_members, 0) = 0 THEN 0
         ELSE FLOOR(COALESCE(shift_count.total_shifts, 0) * 1.0 / COALESCE(member_count.total_members, 1))
-    END AS min_shifts_per_employee,
+    END AS base_min_per_employee,
     CASE
         WHEN COALESCE(member_count.total_members, 0) = 0 THEN 0
         WHEN COALESCE(shift_count.total_shifts, 0) % COALESCE(member_count.total_members, 1) = 0 THEN
             FLOOR(COALESCE(shift_count.total_shifts, 0) * 1.0 / COALESCE(member_count.total_members, 1))
         ELSE
             FLOOR(COALESCE(shift_count.total_shifts, 0) * 1.0 / COALESCE(member_count.total_members, 1)) + 1
-    END AS max_shifts_per_employee
+    END AS base_max_per_employee
 FROM schedule AS s
 LEFT JOIN member_count ON s.id = member_count.schedule_id
 LEFT JOIN shift_count ON s.id = shift_count.schedule_id;

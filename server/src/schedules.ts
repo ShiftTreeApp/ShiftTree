@@ -344,10 +344,16 @@ export async function getMembers(req: Request, res: Response) {
         'id', ua.id,
         'displayName', ua.username,
         'email', ua.email,
-        'profileImageUrl', ''
+        'profileImageUrl', '',
+        'suggestedShifts',
+          CASE
+            WHEN sc.base_min_per_employee + usm.shift_count_offset < 0 THEN 0
+            ELSE sc.base_min_per_employee + usm.shift_count_offset
+          END
       )), json_build_array()) as json
       from user_schedule_membership as usm
       join user_account as ua on usm.user_id = ua.id
+      join schedule_counts as sc on usm.schedule_id = sc.schedule_id
       where usm.schedule_id = $1
     `,
     values: [scheduleId],

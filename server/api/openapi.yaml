@@ -942,6 +942,8 @@ components:
           type: string
         profileImageUrl:
           type: string
+        suggestedShifts:
+          type: integer
 
     UUID:
       type: string
