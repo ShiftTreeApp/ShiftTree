@@ -9,6 +9,10 @@ import {
   Box,
   Slider,
   Avatar,
+  Tooltip,
+  TooltipProps,
+  tooltipClasses,
+  styled,
 } from "@mui/material";
 import { useParams } from "react-router";
 import {
@@ -30,6 +34,17 @@ import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import theme from "@/theme";
 import { useNotifier } from "@/notifier";
 import { useShifts } from "@/hooks/useShifts";
+
+const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
+}));
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -180,7 +195,7 @@ export default function Schedule() {
       >
         <Paper elevation={3} sx={{ padding: 2 }}>
           <Grid container justifyContent="space-between" alignItems="center">
-            <Grid sx={{ paddingLeft: 2 }}>
+            <Grid sx={{ paddingLeft: 2, paddingBottom: 1, paddingTop: 1 }}>
               <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
             <Grid
@@ -228,7 +243,17 @@ export default function Schedule() {
                     gap: 1,
                   }}
                 >
-                  <Typography gutterBottom>Request Weight</Typography>
+                  <CustomTooltip
+                    title="(Note:
+                      All your weights will be averaged. i.e. A weight of 100
+                      for all registered shifts is equivalent to putting down 50
+                      for all of them)"
+                    placement="top"
+                  >
+                    <Typography gutterBottom>
+                      Request Weight: How badly do you want this shift?{" "}
+                    </Typography>
+                  </CustomTooltip>
                   <Slider
                     defaultValue={50}
                     aria-label="Request weight"
