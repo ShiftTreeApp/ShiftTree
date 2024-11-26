@@ -24,6 +24,7 @@ class Shift(BaseModel):
 
 class ScheduleRequest(BaseModel):
     shifts: Sequence[Shift]
+    seed: int | None = None
 
 
 class Assignment(BaseModel):
@@ -32,13 +33,13 @@ class Assignment(BaseModel):
     requested_weight: float | None
 
 
-class Conflict(BaseModel):
-    rule_name: str
+class Event(BaseModel):
+    name: str
     subjects: Mapping[str, Any]
 
 
 class ScheduleResponse(BaseModel):
-    conflicts: Sequence[Conflict]
+    events: Sequence[Event]
     assignments: Sequence[Assignment]
     status: Literal["optimal", "infeasible"]
 
