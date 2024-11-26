@@ -2,6 +2,8 @@ import itertools
 import json
 from collections.abc import Iterable, Mapping
 from datetime import datetime
+from math import sqrt
+from random import Random
 from typing import Any, Protocol, Self
 
 from ortools.sat.python import cp_model
@@ -161,6 +163,43 @@ default_rules = (
 )
 
 
+def _shuffle_config(config: Config, seed: int) -> Config:
+    rand = Random(seed)
+
+    employee_keys = list(config.employees.keys())
+    rand.shuffle(employee_keys)
+
+    shift_keys = list(config.shifts.keys())
+    rand.shuffle(shift_keys)
+
+    employees = {k: config.employees[k] for k in employee_keys}
+    shifts = {k: config.shifts[k] for k in shift_keys}
+
+    return Config(shifts=shifts, employees=employees, seed=seed)
+
+
+def _normalize_weights(config: Config) -> Config:
+    config = config.model_copy()
+    for e in config.employees.values():
+        if not e.requests:
+            continue
+
+        total_weight = sum(s.weight for s in e.requests.values())
+        avg_weight = total_weight / len(e.requests)
+        std_dev = sqrt(
+            sum((req.weight - avg_weight) ** 2 for req in e.requests.values())
+            / len(e.requests)
+        )
+
+        if std_dev < 1e-6:
+            for req in e.requests.values():
+                req.weight = 1
+        else:
+            for req in e.requests.values():
+                req.weight = 1 + ((req.weight - avg_weight) / std_dev)
+    return config
+
+
 def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
     if not config.employees or not config.shifts:
         return models.ScheduleResponse(
@@ -168,6 +207,11 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
             events=[],
             status="optimal",
         )
+
+    if config.seed is not None:
+        config = _shuffle_config(config, seed=config.seed)
+
+    config = _normalize_weights(config)
 
     model = cp_model.CpModel()
     # Creates shift variables.
@@ -190,8 +234,6 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
             for e, s in itertools.product(config.employees, config.shifts)
         )
     )
-
-    print(model.validate())
 
     def requested_weight_or_none(employee: EmployeeId, shift: ShiftId) -> float | None:
         req = config.employees[employee].requests.get(shift, None)
