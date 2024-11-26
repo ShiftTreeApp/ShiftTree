@@ -29,7 +29,6 @@ import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import theme from "@/theme";
 import { useNotifier } from "@/notifier";
-import { useShifts } from "@/hooks/useShifts";
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -59,9 +58,17 @@ export default function Schedule() {
   const { selectedShift, setSelectedShift, clearSelectedShift } =
     useSelectedShiftParam();
 
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectedShifts, setSelectedShifts] = useState<string[]>([]);
+    
   const drawerOpen = selectedShift !== null;
 
   const api = useApi();
+
+  const toggleSelectionMode = () => {
+    setIsSelecting(prev => !prev);
+    setSelectedShifts([]); // Clear selections when toggling
+  };
 
   const [signedUpShifts, setSignedUpShifts] = useState(
     empActions.signedUpShifts,
@@ -81,6 +88,43 @@ export default function Schedule() {
 
     getUpdatedShiftStatuses();
   }, [empActions.signedUpShifts, empActions.assignedShifts, empActions]);
+
+  const signedUpIndicators = useMemo(
+    () =>
+      Object.fromEntries(
+        signedUpShifts.map((shiftId: string) => [shiftId, SignedUpIndicator]),
+      ),
+    [signedUpShifts],
+  );
+
+  const assignedIndicators = useMemo(
+    () =>
+      Object.fromEntries(
+        assignedShifts.map((shiftId: string) => [shiftId, AssignedIndicator]),
+      ),
+    [assignedShifts],
+  );
+
+  const userIndicators = useMemo(
+    () =>
+      Object.fromEntries(
+        empActions.allAssignments?.map(({ shiftId, user }) => [
+          shiftId,
+          () => (
+            <UserIndicators
+              name={user?.displayName ?? ""}
+              id={user?.id ?? ""}
+            />
+          ),
+        ]) ?? [],
+      ),
+    [empActions.allAssignments],
+  );
+
+  const bothIndicators = useMemo(
+    () => ({ ...signedUpIndicators, ...assignedIndicators, ...userIndicators }),
+    [signedUpIndicators, assignedIndicators, userIndicators],
+  );
 
   const { data: scheduleData } = api.useQuery(
     "get",
@@ -104,7 +148,8 @@ export default function Schedule() {
   const handleRegister = async () => {
     console.log(selectedShift);
     await empActions.signup({
-      shiftId: selectedShift ?? "",
+      shiftId: selectedShift ? selectedShift : "",
+      userId: "none",
     });
 
     empActions.refetchUserSignups();
@@ -125,46 +170,6 @@ export default function Schedule() {
     () => selectedShift && signedUpShifts.includes(selectedShift),
     [selectedShift, signedUpShifts],
   );
-
-  function ManagerPerShiftStackContent(props: { shiftIds: string[] }) {
-    const shiftIds = useMemo(() => new Set(props.shiftIds), [props.shiftIds]);
-    const assignedUsers = useMemo(
-      () =>
-        empActions.allAssignments
-          ?.filter(asgn => asgn.shiftId && shiftIds.has(asgn.shiftId))
-          .map(asgn => asgn.user)
-          .filter(u => u !== undefined) ?? [],
-      [shiftIds],
-    );
-
-    return (
-      <>
-        {assignedUsers.map(user => (
-          <UserIndicators key={user.id} name={user.displayName} id={user.id} />
-        ))}
-      </>
-    );
-  }
-
-  function MemberPerShiftStackContent(props: { shiftIds: string[] }) {
-    const isRegistered = useMemo(
-      () => props.shiftIds.some(id => signedUpShifts.includes(id)),
-      [props.shiftIds],
-    );
-
-    const isAssigned = useMemo(
-      () => props.shiftIds.some(id => assignedShifts.includes(id)),
-      [props.shiftIds],
-    );
-
-    if (isAssigned) {
-      return <AssignedIndicator />;
-    } else if (isRegistered) {
-      return <SignedUpIndicator />;
-    } else {
-      return <></>;
-    }
-  }
 
   return (
     <Grid container direction="column" spacing={1}>
@@ -210,6 +215,51 @@ export default function Schedule() {
                   <Typography>Leave Shift Tree</Typography>
                 </Button>
               ) : null}
+              <Button
+                variant="contained"
+                onClick={() => {
+                  if (isSelecting) {
+                    setSelectedShifts([]);
+                  }
+                  setIsSelecting(prev => !prev);
+                }}
+              >
+                {isSelecting ? "Cancel" : "Select"}
+              </Button>
+              {isSelecting && (
+              <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={async () => {
+                    for (const shiftId of selectedShifts) {
+                      await empActions.signup({ shiftId });
+                    }
+                    notifier.message("Registered for selected shifts");
+                    empActions.refetchUserSignups();
+                    setSelectedShifts([]);
+                  }}
+                >
+                  Register All
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: theme => theme.palette.error.dark,
+                  }}
+                  onClick={async () => {
+                    for (const shiftId of selectedShifts) {
+                      await empActions.unregister({ shiftId });
+                    }
+                    notifier.message("Unregistered from selected shifts");
+                    empActions.refetchUserSignups();
+                    setSelectedShifts([]);
+                  }}
+                >
+                  Unregister All
+                </Button>
+              </Box>
+            )}
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
@@ -276,16 +326,22 @@ export default function Schedule() {
             )}
           </EditShiftDrawer>
           <ShiftCalendar
-            onClickShift={shiftId => setSelectedShift(shiftId)}
+            onClickShift={shiftId => {
+              if (isSelecting) {
+                setSelectedShifts(prev =>
+                  prev.includes(shiftId)
+                    ? prev.filter(id => id !== shiftId)
+                    : [...prev, shiftId]
+                );
+              } else {
+                setSelectedShift(shiftId); // Single selection behavior
+              }
+            }}
             startDate={dayjs(scheduleData?.startTime ?? dayjs().toISOString())}
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
-            selectedShifts={selectedShift ? [selectedShift] : []}
+            selectedShifts={isSelecting ? selectedShifts : selectedShift ? [selectedShift] : []}
+            customContentMap={bothIndicators}
             shifts={formattedShifts}
-            CustomContent={
-              isManager
-                ? ManagerPerShiftStackContent
-                : MemberPerShiftStackContent
-            }
           />
         </Paper>
       </Container>
@@ -347,6 +403,13 @@ interface UserChipsProps {
 function UserChips(props: UserChipsProps) {
   const api = useApi();
 
+  // This request is required to get the users avatars/names for the chips
+  const { data: membersData } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/members",
+    { params: { path: { scheduleId: props.scheduleId as string } } },
+  );
+
   // This request is required to get the users that are signed up in each schedule
   const { data: scheduleSignups } = api.useQuery(
     "get",
@@ -354,31 +417,28 @@ function UserChips(props: UserChipsProps) {
     { params: { path: { scheduleId: props.scheduleId as string } } },
   );
 
-  const shifts = useShifts(props.scheduleId ?? "");
-
-  const stackShiftIds = useMemo(
-    () => new Set(shifts.matchingShifts(props.shiftId ?? "").map(s => s.id)),
-    [props.shiftId, shifts],
-  );
-
-  const users = scheduleSignups
-    ?.filter(shift => stackShiftIds.has(shift.id)) // Match the shiftId
-    .flatMap(shift => shift.signups?.map(signup => signup.user))
-    .filter(u => u !== undefined);
+  const userIds =
+    scheduleSignups
+      ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
+      .flatMap((shift: any) =>
+        shift.signups.map((signup: any) => signup.user.id),
+      ) || [];
 
   return (
     <Box>
-      {users?.map(user => {
-        return (
+      {userIds.map(userId => {
+        // Find the corresponding member data by userId
+        const member = membersData?.find((member: any) => member.id === userId);
+        return member ? (
           <Chip
-            key={user.id}
+            key={userId}
             avatar={
-              <Avatar src={createRandomPfpUrl(user.displayName, user.id)} />
+              <Avatar src={createRandomPfpUrl(member.displayName, member.id)} />
             }
-            label={user.displayName}
+            label={member.displayName}
             variant="outlined"
           />
-        );
+        ) : null;
       })}
     </Box>
   );
