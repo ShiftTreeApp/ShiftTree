@@ -14,6 +14,7 @@ import { useNavigate } from "react-router";
 import { useNotifier } from "./notifier";
 
 import { useAuth } from "@/auth";
+import { useNotifier } from "@/notifier";
 
 export type SignUpParams = {
   from: string;
@@ -23,6 +24,7 @@ export default function SignUp() {
   const navigate = useNavigate();
   const notifier = useNotifier();
   const auth = useAuth();
+  const notifier = useNotifier();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -32,12 +34,24 @@ export default function SignUp() {
     }
   }, [auth, navigate]);
 
+  const [email, setEmail] = useState("");
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const username = data.get("username") as string;
-    const email = data.get("email") as string;
+    //const email = data.get("email") as string;
     const password = data.get("password") as string;
+
+    if (!validateEmail(email)) {
+      notifier.error("Invalid email address");
+      return;
+    }
 
     auth
       .register({ username, email, password })
@@ -91,6 +105,8 @@ export default function SignUp() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
               />
             </Grid>
             <Grid size={12}>
