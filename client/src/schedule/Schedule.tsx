@@ -215,7 +215,7 @@ export default function Schedule() {
                   <Typography>Leave Shift Tree</Typography>
                 </Button>
               ) : null}
-              <Button
+              {!isManager ? (<Button
                 variant="contained"
                 onClick={() => {
                   if (isSelecting) {
@@ -225,7 +225,7 @@ export default function Schedule() {
                 }}
               >
                 {isSelecting ? "Cancel" : "Select"}
-              </Button>
+              </Button>) : null}
               {isSelecting && (
               <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
                 <Button
@@ -237,7 +237,6 @@ export default function Schedule() {
                     }
                     notifier.message("Registered for selected shifts");
                     empActions.refetchUserSignups();
-                    setSelectedShifts([]);
                   }}
                 >
                   Register All
@@ -253,7 +252,6 @@ export default function Schedule() {
                     }
                     notifier.message("Unregistered from selected shifts");
                     empActions.refetchUserSignups();
-                    setSelectedShifts([]);
                   }}
                 >
                   Unregister All
