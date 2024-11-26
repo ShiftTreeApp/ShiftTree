@@ -21,6 +21,7 @@ import { useApi } from "@/client";
 import { useManagerActions } from "@/hooks/useManagerActions";
 import EditMembersDrawer from "./EditMembersDrawer";
 import CompactNumberInput from "@/customComponents/CompactNumberInput";
+import { palette } from "@mui/system";
 
 interface EditMembersTabProps {
   scheduleId: string;
@@ -90,12 +91,30 @@ export default function EditMembersTab(props: EditMembersTabProps) {
     [key: string]: number;
   }>({});
 
+  useEffect(() => {
+    if (membersData) {
+      const suggestedShiftsFromDB: { [key: string]: number } = {};
+      for (const member of membersData) {
+        suggestedShiftsFromDB[member.id] = member.suggestedShifts ?? -100;
+      }
+      setSuggestedShifts(suggestedShiftsFromDB);
+    }
+  }, [membersData]);
+
   const handleSuggestedChange = (userId: string, value: number | null) => {
     const checkValue = value ?? 0;
     setSuggestedShifts(prevState => ({
       ...prevState,
       [userId]: checkValue,
     }));
+  };
+
+  const handleSuggestionsSubmit = async () => {
+    for (const [userId, numShifts] of Object.entries(suggestedShifts)) {
+      // Will replace with the hook to the PUT/POST endpoint
+      console.log(userId, ": ", numShifts);
+    }
+    // Add snackbar here
   };
 
   return (
@@ -173,6 +192,23 @@ export default function EditMembersTab(props: EditMembersTabProps) {
           </Box>
         </Fragment>
       ))}
+      <Divider />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+        }}
+      >
+        <Typography variant="h5">Confirm Options:</Typography>
+        <Button
+          variant="contained"
+          onClick={handleSuggestionsSubmit}
+          sx={{ backgroundColor: theme => theme.palette.info.light }}
+        >
+          Submit Suggested Shifts
+        </Button>
+      </Box>
     </Box>
   );
 }
