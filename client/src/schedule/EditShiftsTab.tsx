@@ -406,6 +406,20 @@ function EditShift(props: EditShiftProps) {
     props.onClose();
   }
 
+  const currentDate = dayjs();
+  const startDateFloor = currentDate.subtract(2, "year").startOf("day");
+  const startDateCeil = currentDate.add(10, "year").endOf("day");
+  const handleStartTimeChange = (value: any) => {
+    // wont be any, gets sent from mui dateTimePicker
+    if (value) {
+      setNewStartTime(value);
+      const maxEndTime = value.add(2, "month");
+      if (newEndTime.isAfter(maxEndTime) || newEndTime.isBefore(value)) {
+        setNewEndTime(value.add(1, "hour"));
+      }
+    }
+  };
+
   return (
     <>
       <Box sx={{ display: "flex", gap: 1 }}>
@@ -444,7 +458,9 @@ function EditShift(props: EditShiftProps) {
             label="Start time"
             ampm={false}
             value={newStartTime}
-            onChange={value => value && setNewStartTime(value)}
+            minDateTime={startDateFloor}
+            maxDateTime={startDateCeil}
+            onChange={handleStartTimeChange}
             viewRenderers={{
               hours: renderTimeViewClock,
               minutes: renderTimeViewClock,
@@ -456,6 +472,7 @@ function EditShift(props: EditShiftProps) {
             ampm={false}
             value={newEndTime}
             minDateTime={newStartTime}
+            maxDateTime={newStartTime.add(2, "month").endOf("day")}
             onChange={value => value && setNewEndTime(value)}
             viewRenderers={{
               hours: renderTimeViewClock,

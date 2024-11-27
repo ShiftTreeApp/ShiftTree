@@ -14,7 +14,6 @@ import { useNavigate } from "react-router";
 import { useNotifier } from "./notifier";
 
 import { useAuth } from "@/auth";
-import { useNotifier } from "@/notifier";
 
 export type SignUpParams = {
   from: string;
@@ -24,7 +23,6 @@ export default function SignUp() {
   const navigate = useNavigate();
   const notifier = useNotifier();
   const auth = useAuth();
-  const notifier = useNotifier();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
