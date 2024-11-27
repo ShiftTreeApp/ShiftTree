@@ -407,8 +407,8 @@ function EditShift(props: EditShiftProps) {
   }
 
   const currentDate = dayjs();
-  const startDateFloor = currentDate.subtract(2, "year").startOf("day");
-  const startDateCeil = currentDate.add(10, "year").endOf("day");
+  const startDateFloor = currentDate.subtract(5, "year").startOf("day");
+  const startDateCeil = currentDate.add(14, "year").endOf("day");
   const handleStartTimeChange = (value: any) => {
     // wont be any, gets sent from mui dateTimePicker
     if (value) {
