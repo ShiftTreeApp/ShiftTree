@@ -499,15 +499,8 @@ paths:
                   description: New recommended number of shifts for specified user
                   type: number
       responses:
-        200:
-          description: Successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  newRecommendedShifts:
-                    type: string
+        204:
+          description: Update of user's recommended shifts successful
         403:
           description: User does not have permission to modify recommended shifts
           content:

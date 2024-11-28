@@ -778,16 +778,12 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Successful */
-                200: {
+                /** @description Update of user's recommended shifts successful */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content: {
-                        "application/json": {
-                            newRecommendedShifts?: string;
-                        };
-                    };
+                    content?: never;
                 };
                 /** @description User does not have permission to modify recommended shifts */
                 403: {
