@@ -63,7 +63,7 @@ export default function UseNumberInputCompact({
 }: CompactNumberInputProps) {
   return (
     <Layout>
-      <Pre>Suggested Shifts: {suggestedShifts ?? " "}</Pre>
+      <Pre>Recommended Shifts: {suggestedShifts ?? " "}</Pre>
 
       <CompactNumberInput
         aria-label="Compact Suggested Shifts"

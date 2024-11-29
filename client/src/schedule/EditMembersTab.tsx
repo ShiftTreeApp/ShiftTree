@@ -19,9 +19,9 @@ import dayjs from "dayjs";
 
 import { useApi } from "@/client";
 import { useManagerActions } from "@/hooks/useManagerActions";
+import { useNotifier } from "@/notifier";
 import EditMembersDrawer from "./EditMembersDrawer";
 import CompactNumberInput from "@/customComponents/CompactNumberInput";
-import { palette } from "@mui/system";
 
 interface EditMembersTabProps {
   scheduleId: string;
@@ -30,6 +30,7 @@ interface EditMembersTabProps {
 export default function EditMembersTab(props: EditMembersTabProps) {
   const api = useApi();
   const managerActions = useManagerActions(props.scheduleId);
+  const notifier = useNotifier();
 
   const { data: scheduleData } = api.useQuery(
     "get",
@@ -111,10 +112,13 @@ export default function EditMembersTab(props: EditMembersTabProps) {
 
   const handleSuggestionsSubmit = async () => {
     for (const [userId, numShifts] of Object.entries(suggestedShifts)) {
-      // Will replace with the hook to the PUT/POST endpoint
-      console.log(userId, ": ", numShifts);
+      await managerActions.updateRecommendedNumShifts({
+        scheduleId: props.scheduleId,
+        targetUserId: userId,
+        numShifts: numShifts,
+      });
     }
-    // Add snackbar here
+    notifier.message("Updated Recommended Shifts for Employees");
   };
 
   return (
