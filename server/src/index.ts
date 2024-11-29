@@ -16,6 +16,7 @@ import * as schedules from "@/schedules";
 import * as invites from "@/invites";
 import * as autoschedule from "@/autoscheduling";
 import * as ICS from "@/ICSFile";
+import * as reset from "@/passwordResets";
 
 //Setup
 const app = express();
@@ -46,6 +47,8 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 // app.REQUESTTYPE('endpoint',{put middleware(authentication) here}, file.FunctionName)
 app.post("/login", auth.login);
 app.post("/register", registration.registerUser);
+app.get("/confirmResetCodeValid", reset.confirmResetCodeValid);
+app.post("/resetPassword", reset.resetPassword);
 app.post("/schedules", auth.authorizationCheck, schedules.create);
 app.get("/schedules", auth.authorizationCheck, schedules.list);
 app.get(

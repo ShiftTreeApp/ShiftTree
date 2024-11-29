@@ -30,7 +30,8 @@ export const registerUser = async (req: Request, res: Response) => {
 
     const uuidResult = await pool.query(genUUIDQuery);
     const secretKey = uuidResult.rows[0].reset_token;
-
+    // Uncomment to get secretKey to test endpoints
+    // console.log(secretKey);
     const insertUserStatement = `
       INSERT INTO user_account (username, email, password_hash, reset_code)
       VALUES ($1, $2, encode(digest($3, 'sha256'), 'hex'), encode(digest($4, 'sha256'), 'hex'))

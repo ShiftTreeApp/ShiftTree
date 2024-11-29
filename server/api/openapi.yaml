@@ -57,6 +57,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnexpectedError"
+
+  /confirmResetCodeValid:
+    get:
+      description: Confirms that a given users reset_code is valid
+      parameters:
+        - name: resetCode
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Valid Reset Code
+        401:
+          description: Invalid Reset Code or Gmail
+  /resetPassword:
+    post:
+      description: Resets users password given their gmail and secret key
+      parameters:
+        - name: resetCode
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+        - name: newPassword
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: Succesfully Reset Password
+        500:
+          description: Unexpected Error
   /schedules:
     post:
       description: Create a new schedule
