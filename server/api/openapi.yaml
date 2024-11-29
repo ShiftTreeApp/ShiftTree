@@ -671,7 +671,13 @@ paths:
       responses:
         204:
           description: Successful
-
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responseData:
+                    type: string
   /schedules/{scheduleId}/user-signups:
     get:
       security:
@@ -706,7 +712,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
+  /schedules/{scheduleId}/logData:
+    get:
+      summary: Get log data for a specific schedule
+      description: Retrieve the JSONB log data for the specified schedule.
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful response with log data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logData:
+                    type: object
+                    additionalProperties: true
+        400:
+          description: Invalid scheduleId supplied
+        404:
+          description: Schedule not found
   /schedules/{scheduleId}/user-assigned:
     get:
       security:

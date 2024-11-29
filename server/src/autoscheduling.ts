@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import { z } from "zod";
 import * as jwt from "jsonwebtoken";
 
@@ -95,7 +95,7 @@ export async function sendShifts(req: Request, res: Response) {
       `,
     values: [scheduleId],
   });
-  console.log(results.rows[0].json);
+  // console.log(results.rows[0].json);
   const result = await fetch(`http://${host}/shifts`, {
     method: "POST",
     headers: {
@@ -123,6 +123,11 @@ export async function sendShifts(req: Request, res: Response) {
       ],
     });
   }
-
-  res.status(204).send();
+  const storeLogData = `
+  UPDATE schedule SET data = $1 WHERE id = $2`;
+  await pool.query({
+    text: storeLogData,
+    values: [responseData, scheduleId],
+  });
+  res.status(204).json({ responseData: JSON.stringify(responseData) });
 }

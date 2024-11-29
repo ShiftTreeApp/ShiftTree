@@ -65,6 +65,17 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
       },
     },
   );
+
+  const { refetch: refetchLogData } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/logData",
+    {
+      params: {
+        path: { scheduleId: scheduleId },
+      },
+    },
+  );
+
   const shifts = useMemo(
     () =>
       shiftsData?.map(
@@ -155,6 +166,10 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     const res = await refetchICS();
     return res.data?.ics ?? "";
   }
+  async function getLogData() {
+    const res = await refetchLogData();
+    return res.data?.logData ?? "";
+  }
 
   function useShift({ shiftId }: { shiftId: string }) {
     const data = useMemo(() => shifts.find(s => s.id === shiftId), [shiftId]);
@@ -188,5 +203,6 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     deleteSchedule,
     getAssignmentsCsv,
     getICS,
+    getLogData,
   };
 }

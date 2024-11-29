@@ -30,6 +30,7 @@ CREATE TABLE schedule
 , schedule_name VARCHAR(64) NOT NULL DEFAULT ''
 , schedule_description VARCHAR(255) NOT NULL DEFAULT ''
 , code UUID DEFAULT gen_random_uuid()
+, data jsonb DEFAULT NULL
 );
 
 CREATE TABLE user_schedule_membership
