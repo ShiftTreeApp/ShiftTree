@@ -92,6 +92,10 @@ export default function EditMembersTab(props: EditMembersTabProps) {
     [key: string]: number;
   }>({});
 
+  const [lastSubmittedSuggestions, setLastSubmittedSuggestions] = useState<{
+    [key: string]: number;
+  }>({});
+
   useEffect(() => {
     if (membersData) {
       const suggestedShiftsFromDB: { [key: string]: number } = {};
@@ -99,6 +103,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
         suggestedShiftsFromDB[member.id] = member.suggestedShifts ?? -100;
       }
       setSuggestedShifts(suggestedShiftsFromDB);
+      setLastSubmittedSuggestions(suggestedShiftsFromDB);
     }
   }, [membersData]);
 
@@ -119,6 +124,14 @@ export default function EditMembersTab(props: EditMembersTabProps) {
       });
     }
     notifier.message("Updated Recommended Shifts for Employees");
+    setLastSubmittedSuggestions(suggestedShifts);
+  };
+
+  const unsubmittedRecommendationChanges = () => {
+    return (
+      JSON.stringify(suggestedShifts) !==
+      JSON.stringify(lastSubmittedSuggestions)
+    );
   };
 
   return (
@@ -208,7 +221,16 @@ export default function EditMembersTab(props: EditMembersTabProps) {
         <Button
           variant="contained"
           onClick={handleSuggestionsSubmit}
-          sx={{ backgroundColor: theme => theme.palette.info.light }}
+          disabled={!unsubmittedRecommendationChanges()}
+          sx={{
+            backgroundColor: theme => theme.palette.info.light,
+            "&.Mui-disabled": {
+              opacity: 0.4,
+              backgroundColor: theme =>
+                theme.palette.info.light + " !important",
+              color: "#FFFFFF",
+            },
+          }}
         >
           Submit Suggested Shifts
         </Button>
