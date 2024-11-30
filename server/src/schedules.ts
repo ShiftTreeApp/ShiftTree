@@ -344,10 +344,16 @@ export async function getMembers(req: Request, res: Response) {
         'id', ua.id,
         'displayName', ua.username,
         'email', ua.email,
-        'profileImageUrl', ''
+        'profileImageUrl', '',
+        'suggestedShifts',
+          CASE
+            WHEN sc.base_min_per_employee + usm.shift_count_offset < 0 THEN 0
+            ELSE sc.base_min_per_employee + usm.shift_count_offset
+          END
       )), json_build_array()) as json
       from user_schedule_membership as usm
       join user_account as ua on usm.user_id = ua.id
+      join schedule_counts as sc on usm.schedule_id = sc.schedule_id
       where usm.schedule_id = $1
     `,
     values: [scheduleId],
@@ -935,4 +941,60 @@ export async function getCsv(req: Request, res: Response) {
   );
 
   res.status(200).send({ csv: csvString });
+}
+
+export async function modifyRecommendedShifts(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId;
+  const targetUserId = req.body.userId as string | null;
+  const newRecommendedShifts = req.body.recommendedNumShifts as number | null;
+
+  // Ensure that user exists and has perms to manage the schedule
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+          select *
+          from schedule_info as info
+          where info.user_id = $1 and info.schedule_id = $2
+        `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({
+        error: "Schedule not found or user does not exist",
+      });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role == "owner" || role == "manager")) {
+      res.status(403).json({
+        error:
+          "You do not have permission to modify the recommended shifts for a user",
+      });
+      return;
+    }
+  }
+
+  const query = /* sql */ `
+    update user_schedule_membership as usm
+    set shift_count_offset = $1 - sc.base_min_per_employee
+    from schedule_counts as sc
+    where usm.schedule_id = sc.schedule_id
+      and usm.user_id = $2 
+      and usm.schedule_id = $3
+  `;
+
+  const results = await pool.query({
+    text: query,
+    values: [newRecommendedShifts, targetUserId, scheduleId],
+  });
+
+  if (!results.rowCount || results.rowCount < 1) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+
+  res.status(204).send();
 }

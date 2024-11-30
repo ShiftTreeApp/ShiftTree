@@ -24,6 +24,7 @@ class Shift(BaseModel):
 
 class ScheduleRequest(BaseModel):
     shifts: Sequence[Shift]
+    shift_offsets: Mapping[UserId, int]
     seed: int | None = None
 
 

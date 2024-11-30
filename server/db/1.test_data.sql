@@ -31,11 +31,11 @@ INSERT INTO schedule (id, removed, owner_id, schedule_name, schedule_description
   (gen_random_uuid(), NULL, (SELECT id FROM user_account WHERE username = 'user3'), 'Schedule 3', 'Description for Schedule 3', gen_random_uuid());
 
 -- Insert test data for user_schedule_membership
-INSERT INTO user_schedule_membership (id, user_id, schedule_id) VALUES
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1')),
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1')),
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2')),
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2'));
+INSERT INTO user_schedule_membership (id, user_id, schedule_id, shift_count_offset) VALUES
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1'), 0),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1'), 0),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2'), 0),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2'), 0);
 
 -- Insert test data for shift
 INSERT INTO shift (id, schedule_id, start_time, end_time, shift_name, shift_description) VALUES

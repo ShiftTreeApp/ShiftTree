@@ -474,6 +474,46 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /schedules/{scheduleId}/recommended-shifts:
+    post:
+      security:
+        - Bearer: []
+      summary: Update the given user's recommended shifts as set by manager
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  description: User to update recommended shifts for
+                  type: string
+                recommendedNumShifts:
+                  description: New recommended number of shifts for specified user
+                  type: number
+      responses:
+        204:
+          description: Update of user's recommended shifts successful
+        403:
+          description: User does not have permission to modify recommended shifts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: User with given userId does not exist or cannot be modified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /schedules/{scheduleId}/shifts:
     get:
       security:
@@ -942,6 +982,8 @@ components:
           type: string
         profileImageUrl:
           type: string
+        suggestedShifts:
+          type: integer
 
     UUID:
       type: string

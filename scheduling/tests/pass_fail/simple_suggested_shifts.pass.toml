@@ -1,0 +1,23 @@
+[shifts.a1]
+start_time = "2024-12-01 08:00"
+end_time = "2024-12-01 16:00"
+
+
+[shifts.a2]
+start_time = "2024-12-02 08:00"
+end_time = "2024-12-02 16:00"
+
+[shifts.b1]
+start_time = "2024-12-04 08:00"
+end_time = "2024-12-04 16:00"
+
+
+[shifts.b2]
+start_time = "2024-12-05 08:00"
+end_time = "2024-12-05 16:00"
+
+[employees.Foo]
+min_shifts = 1
+
+[employees.Bar]
+min_shifts = 3

@@ -748,6 +748,69 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/schedules/{scheduleId}/recommended-shifts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update the given user's recommended shifts as set by manager */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    scheduleId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** @description User to update recommended shifts for */
+                        userId?: string;
+                        /** @description New recommended number of shifts for specified user */
+                        recommendedNumShifts?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Update of user's recommended shifts successful */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description User does not have permission to modify recommended shifts */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description User with given userId does not exist or cannot be modified */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/schedules/{scheduleId}/shifts": {
         parameters: {
             query?: never;
@@ -1388,6 +1451,7 @@ export interface components {
             displayName: string;
             email: string;
             profileImageUrl?: string;
+            suggestedShifts?: number;
         };
         UUID: string;
         ScheduleInfo: components["schemas"]["ScheduleInfoPreview"];
