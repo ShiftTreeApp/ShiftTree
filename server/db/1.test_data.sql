@@ -31,30 +31,36 @@ INSERT INTO schedule (id, removed, owner_id, schedule_name, schedule_description
   (gen_random_uuid(), NULL, (SELECT id FROM user_account WHERE username = 'user3'), 'Schedule 3', 'Description for Schedule 3', gen_random_uuid());
 
 -- Insert test data for user_schedule_membership
-INSERT INTO user_schedule_membership (id, user_id, schedule_id) VALUES
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1')),
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1')),
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2')),
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2'));
+INSERT INTO user_schedule_membership (id, user_id, schedule_id, shift_count_offset) VALUES
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1'), 0),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1'), 0),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2'), 0),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2'), 0);
 
 -- Insert test data for shift
 INSERT INTO shift (id, schedule_id, start_time, end_time, shift_name, shift_description) VALUES
   (gen_random_uuid(), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1'), '2024-11-13 08:00:00', '2024-11-13 12:00:00', 'Shift 1', 'Description for Shift 1'),
+  (gen_random_uuid(), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1'), '2024-11-13 08:00:00', '2024-11-13 12:00:00', 'Shift 1 (2)', 'Description for Shift 1'),
   (gen_random_uuid(), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1'), '2024-11-14 13:00:00', '2024-11-14 17:00:00', 'Shift 2', 'Description for Shift 2'),
+  (gen_random_uuid(), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 1'), '2024-11-14 13:00:00', '2024-11-14 17:00:00', 'Shift 2 (2)', 'Description for Shift 2'),
   (gen_random_uuid(), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2'), '2024-11-14 08:00:00', '2024-11-14 12:00:00', 'Shift 3', 'Description for Shift 3'),
   (gen_random_uuid(), (SELECT id FROM schedule WHERE schedule_name = 'Schedule 2'), '2024-11-13 13:00:00', '2024-11-13 17:00:00', 'Shift 4', 'Description for Shift 4');
 
 -- Insert test data for user_shift_assignment
 INSERT INTO user_shift_assignment (id, user_id, shift_id) VALUES
   (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 1')),
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 2')),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 2')),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 1 (2)')),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 2 (2)')),
   (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 3')),
   (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 4'));
 
 -- Insert test data for user_shift_signup
 INSERT INTO user_shift_signup (id, user_id, shift_id, user_weighting) VALUES
-  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 1'), 1),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 1'), 1),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 1 (2)'), 1),
   (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 2'), 1),
+  (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 2 (2)'), 1),
   (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user4'), (SELECT id FROM shift WHERE shift_name = 'Shift 3'), 1),
   (gen_random_uuid(), (SELECT id FROM user_account WHERE username = 'user5'), (SELECT id FROM shift WHERE shift_name = 'Shift 4'), 1);
 

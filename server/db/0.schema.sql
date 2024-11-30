@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Drop tables if they exist
 DROP TABLE IF EXISTS user_account;
 DROP TABLE IF EXISTS schedule;
@@ -20,7 +22,7 @@ CREATE TABLE user_account
 , username VARCHAR(64) NOT NULL
 , email VARCHAR(64) NOT NULL UNIQUE
 , password_hash VARCHAR(255) NOT NULL
-, reset_code VARCHAR(255) NOT NULL
+, reset_code VARCHAR(255) NOT NULL DEFAULT encode(digest(gen_random_uuid()::text, 'sha256'), 'hex')
 );
 
 CREATE TABLE schedule
@@ -37,6 +39,7 @@ CREATE TABLE user_schedule_membership
 ( id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 , user_id UUID NOT NULL REFERENCES user_account (id) ON DELETE CASCADE
 , schedule_id UUID NOT NULL REFERENCES schedule (id) ON DELETE CASCADE
+, shift_count_offset INTEGER NOT NULL DEFAULT 0
 , UNIQUE (user_id, schedule_id)
 );
 
@@ -155,3 +158,42 @@ SELECT
     END AS schedule_state,
     asgn_count.schedule_id
 FROM asgn_count;
+
+CREATE VIEW schedule_counts AS
+WITH
+    member_count AS (
+        SELECT
+            s.id AS schedule_id,
+            COUNT(usm.id) AS total_members
+        FROM schedule AS s
+        LEFT JOIN user_schedule_membership AS usm ON s.id = usm.schedule_id
+        WHERE s.removed IS NULL
+        GROUP BY s.id
+    ),
+    shift_count AS (
+        SELECT
+            s.id AS schedule_id,
+            COUNT(shift.id) AS total_shifts
+        FROM schedule AS s
+        LEFT JOIN shift ON s.id = shift.schedule_id
+        WHERE s.removed IS NULL
+        GROUP BY s.id
+    )
+SELECT
+    s.id AS schedule_id,
+    COALESCE(member_count.total_members, 0) AS total_members,
+    COALESCE(shift_count.total_shifts, 0) AS total_shifts,
+    CASE
+        WHEN COALESCE(member_count.total_members, 0) = 0 THEN 0
+        ELSE FLOOR(COALESCE(shift_count.total_shifts, 0) * 1.0 / COALESCE(member_count.total_members, 1))
+    END AS base_min_per_employee,
+    CASE
+        WHEN COALESCE(member_count.total_members, 0) = 0 THEN 0
+        WHEN COALESCE(shift_count.total_shifts, 0) % COALESCE(member_count.total_members, 1) = 0 THEN
+            FLOOR(COALESCE(shift_count.total_shifts, 0) * 1.0 / COALESCE(member_count.total_members, 1))
+        ELSE
+            FLOOR(COALESCE(shift_count.total_shifts, 0) * 1.0 / COALESCE(member_count.total_members, 1)) + 1
+    END AS base_max_per_employee
+FROM schedule AS s
+LEFT JOIN member_count ON s.id = member_count.schedule_id
+LEFT JOIN shift_count ON s.id = shift_count.schedule_id;

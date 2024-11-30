@@ -2,12 +2,14 @@ import itertools
 import json
 from collections.abc import Iterable, Mapping
 from datetime import datetime
+from math import sqrt
+from random import Random
 from typing import Any, Protocol, Self
 
 from ortools.sat.python import cp_model
 from pydantic import BaseModel, Field
 
-from scheduling import models
+from scheduling import models, offsets
 
 type ShiftId = str
 
@@ -25,12 +27,14 @@ class Request(BaseModel):
 
 class Employee(BaseModel):
     min_shifts: int | None = Field(default=None)
-    requests: Mapping[ShiftId, Request] = Field(default=None)
+    requests: Mapping[ShiftId, Request] = Field(default_factory=dict)
 
 
 class Config(BaseModel):
     shifts: Mapping[ShiftId, Shift]
     employees: Mapping[EmployeeId, Employee]
+    seed: int | None = Field(default=None)
+    """Random seed for the solver. If not provided, the solver does not produce deterministic results."""
 
     @classmethod
     def from_request(cls, request: models.ScheduleRequest) -> Self:
@@ -41,16 +45,18 @@ class Config(BaseModel):
             },
             employees={
                 signup.user_id: Employee(
-                    requests={shift.id: Request(weight=signup.weight)}
+                    requests={shift.id: Request(weight=signup.weight)},
+                    min_shifts=request.shift_offsets.get(signup.user_id),
                 )
                 for shift in request.shifts
                 for signup in shift.signups
             },
+            seed=request.seed,
         )
 
 
 def constraint_name(rule: str, **kwargs: Any) -> str:
-    return json.dumps({"rule_name": rule, "subjects": kwargs})
+    return json.dumps({"name": rule, "subjects": kwargs})
 
 
 class Rule(Protocol):
@@ -80,21 +86,18 @@ def evenly_distribute_shifts(
     assignments: Mapping[tuple[EmployeeId, ShiftId], cp_model.IntVar],
     config: Config,
 ):
-    """Attempts to evenly distribute shifts across employees, disregarding specified min shifts.
-
-    If the number of employees divides the total number of shifts, then the min and max number of shifts are the same.
-    Otherwise some employees have to work one more shift than others.
+    """Attempts to evenly distribute shifts across employees, taking into account the "min_shifts", which is
+    repurposed to be the offset of the number of shifts each employee should work from the average.
     """
-    min_shifts_per_employee = len(config.shifts) // len(config.employees)
-    if len(config.shifts) % len(config.employees) == 0:
-        max_shifts_per_employee = min_shifts_per_employee
-    else:
-        max_shifts_per_employee = min_shifts_per_employee + 1
+    shift_offsets = {e: config.employees[e].min_shifts or 0 for e in config.employees}
+    target_shifts = offsets.compute_shifts_per_user(
+        offsets=shift_offsets,
+        n_shifts=len(config.shifts),
+    )
 
     for e in config.employees:
         num_shifts_worked = sum(assignments[(e, s)] for s in config.shifts)
-        model.add(min_shifts_per_employee <= num_shifts_worked)
-        model.add(num_shifts_worked <= max_shifts_per_employee)
+        model.add(num_shifts_worked == target_shifts[e])
 
 
 def prevent_overlapping_shifts(
@@ -153,13 +156,63 @@ def prevent_consecutive_shifts(
                 model.add_assumption(enforcement_var)
 
 
+default_rules = (
+    exactly_one_shift_per_employee,
+    evenly_distribute_shifts,
+    prevent_overlapping_shifts,
+    prevent_consecutive_shifts,
+)
+
+
+def _shuffle_config(config: Config, seed: int) -> Config:
+    rand = Random(seed)
+
+    employee_keys = list(config.employees.keys())
+    rand.shuffle(employee_keys)
+
+    shift_keys = list(config.shifts.keys())
+    rand.shuffle(shift_keys)
+
+    employees = {k: config.employees[k] for k in employee_keys}
+    shifts = {k: config.shifts[k] for k in shift_keys}
+
+    return Config(shifts=shifts, employees=employees, seed=seed)
+
+
+def _normalize_weights(config: Config) -> Config:
+    config = config.model_copy()
+    for e in config.employees.values():
+        if not e.requests:
+            continue
+
+        total_weight = sum(s.weight for s in e.requests.values())
+        avg_weight = total_weight / len(e.requests)
+        std_dev = sqrt(
+            sum((req.weight - avg_weight) ** 2 for req in e.requests.values())
+            / len(e.requests)
+        )
+
+        if std_dev < 1e-6:
+            for req in e.requests.values():
+                req.weight = 1
+        else:
+            for req in e.requests.values():
+                req.weight = 1 + ((req.weight - avg_weight) / std_dev)
+    return config
+
+
 def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
     if not config.employees or not config.shifts:
         return models.ScheduleResponse(
             assignments=[],
-            conflicts=[],
+            events=[],
             status="optimal",
         )
+
+    if config.seed is not None:
+        config = _shuffle_config(config, seed=config.seed)
+
+    config = _normalize_weights(config)
 
     model = cp_model.CpModel()
     # Creates shift variables.
@@ -183,42 +236,57 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
         )
     )
 
-    print(model.validate())
-
     def requested_weight_or_none(employee: EmployeeId, shift: ShiftId) -> float | None:
         req = config.employees[employee].requests.get(shift, None)
         return req.weight if req is not None else None
 
     solver = cp_model.CpSolver()
+    if config.seed is not None:
+        solver.parameters.random_seed = config.seed
     status = solver.solve(model)
 
     assert status != cp_model.MODEL_INVALID, "Invalid model"
 
-    if status == cp_model.OPTIMAL:
-        print("Solution:")
-        for e in config.employees:
-            for s in config.shifts:
-                if solver.value(shift_asgn[(e, s)]) == 1:
-                    weight = requested_weight(employee=e, shift=s)
-                    shift = config.shifts[s]
-                    start_time_str = shift.start_time.strftime("%m-%d-%y %H:%M")
-                    end_time_str = shift.end_time.strftime("%m-%d-%y %H:%M")
-                    if weight > 0:
-                        print(
-                            f"'{e}' works shift '{s}' (requested weight={weight}) from {start_time_str} to {end_time_str}"
-                        )
-                    else:
-                        print(
-                            f"'{e}' works shift '{s}' (not requested) from {start_time_str} to {end_time_str}"
-                        )
-            print()
-    else:
-        print(f"No optimal solution found! ({status=})")
+    assignments = (
+        [
+            (e, s)
+            for e, s in itertools.product(config.employees, config.shifts)
+            if solver.value(shift_asgn[(e, s)]) == 1
+        ]
+        if status == cp_model.OPTIMAL
+        else []
+    )
 
-    print("Statistics:")
-    print(f" - conflicts: {solver.num_conflicts}")
-    print(f" - branches : {solver.num_branches}")
-    print(f" - wall time: {solver.wall_time}s")
+    bad_assignment_events = (
+        models.Event(
+            name="assignment to unrequested shift",
+            subjects={
+                "user": f"user:{e}",
+                "shift": f"shift:{s}",
+            },
+        )
+        for e, s in assignments
+        if requested_weight_or_none(employee=e, shift=s) is None
+    )
+
+    constraint_events = (
+        models.Event(name=f"constraint violated: {e.name}", subjects=e.subjects)
+        for e in (
+            models.Event(**json.loads(model.var_index_to_var_proto(var_index).name))
+            for var_index in solver.sufficient_assumptions_for_infeasibility()
+        )
+    )
+
+    statistic_events = (
+        models.Event(
+            name="statistics",
+            subjects={
+                "num_conflicts": solver.num_conflicts,
+                "num_branches": solver.num_branches,
+                "wall_time_s": solver.wall_time,
+            },
+        ),
+    )
 
     return models.ScheduleResponse(
         assignments=[
@@ -227,12 +295,8 @@ def solve(config: Config, rules: Iterable[Rule]) -> models.ScheduleResponse:
                 user_id=e,
                 requested_weight=requested_weight_or_none(employee=e, shift=s),
             )
-            for (e, s) in itertools.product(config.employees, config.shifts)
-            if solver.value(shift_asgn[(e, s)]) == 1
+            for (e, s) in assignments
         ],
-        conflicts=[
-            models.Conflict(**json.loads(model.var_index_to_var_proto(var_index).name))
-            for var_index in solver.sufficient_assumptions_for_infeasibility()
-        ],
+        events=[*constraint_events, *bad_assignment_events, *statistic_events],
         status="optimal" if status == cp_model.OPTIMAL else "infeasible",
     )
