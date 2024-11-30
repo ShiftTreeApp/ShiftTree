@@ -69,7 +69,7 @@ export const getLogData = async (req: Request, res: Response) => {
     return;
   }
 
-  let jsonData = result.rows[0];
+  const jsonData = result.rows[0];
 
   const userIds = jsonData.data.assignments.map(
     (assignment: any) => assignment.user_id,
