@@ -45,7 +45,8 @@ class Config(BaseModel):
             },
             employees={
                 signup.user_id: Employee(
-                    requests={shift.id: Request(weight=signup.weight)}
+                    requests={shift.id: Request(weight=signup.weight)},
+                    min_shifts=request.shift_offsets.get(signup.user_id),
                 )
                 for shift in request.shifts
                 for signup in shift.signups
