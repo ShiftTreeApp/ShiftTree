@@ -11,6 +11,10 @@ export function useManagerActions(shiftTreeId: string) {
     "post",
     "/autoschedule/{scheduleId}",
   );
+  const { mutateAsync: updateRecommendedShifts } = api.useMutation(
+    "post",
+    "/schedules/{scheduleId}/recommended-shifts",
+  );
   /*
    * Takes in a shiftTreeId and generates a new code
    * Function returns the code to be used after generating
@@ -63,7 +67,34 @@ export function useManagerActions(shiftTreeId: string) {
     },
   });
 
+  async function updateRecommendedNumShifts({
+    scheduleId,
+    targetUserId,
+    numShifts,
+  }: {
+    scheduleId: string;
+    targetUserId: string;
+    numShifts: number;
+  }): Promise<void> {
+    await updateRecommendedShifts({
+      params: {
+        path: {
+          scheduleId: scheduleId,
+        },
+      },
+      body: {
+        userId: targetUserId,
+        recommendedNumShifts: numShifts,
+      },
+    });
+  }
+
   const existingCode = data?.code;
 
-  return { generate, existingCode, triggerAutoSchedule };
+  return {
+    generate,
+    existingCode,
+    triggerAutoSchedule,
+    updateRecommendedNumShifts,
+  };
 }

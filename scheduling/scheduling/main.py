@@ -13,12 +13,7 @@ app = fastapi.FastAPI()
 def generate_schedule(req: ScheduleRequest) -> ScheduleResponse:
     return schedule.solve(
         config=schedule.Config.from_request(req),
-        rules=(
-            schedule.exactly_one_shift_per_employee,
-            schedule.evenly_distribute_shifts,
-            schedule.prevent_overlapping_shifts,
-            schedule.prevent_consecutive_shifts,
-        ),
+        rules=schedule.default_rules,
     )
 
 

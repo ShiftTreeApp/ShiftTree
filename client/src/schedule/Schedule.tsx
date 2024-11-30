@@ -9,6 +9,10 @@ import {
   Box,
   Slider,
   Avatar,
+  Tooltip,
+  TooltipProps,
+  tooltipClasses,
+  styled,
 } from "@mui/material";
 import { useParams } from "react-router";
 import {
@@ -29,6 +33,18 @@ import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import theme from "@/theme";
 import { useNotifier } from "@/notifier";
+import { useShifts } from "@/hooks/useShifts";
+
+const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
+}));
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -81,43 +97,6 @@ export default function Schedule() {
     getUpdatedShiftStatuses();
   }, [empActions.signedUpShifts, empActions.assignedShifts, empActions]);
 
-  const signedUpIndicators = useMemo(
-    () =>
-      Object.fromEntries(
-        signedUpShifts.map((shiftId: string) => [shiftId, SignedUpIndicator]),
-      ),
-    [signedUpShifts],
-  );
-
-  const assignedIndicators = useMemo(
-    () =>
-      Object.fromEntries(
-        assignedShifts.map((shiftId: string) => [shiftId, AssignedIndicator]),
-      ),
-    [assignedShifts],
-  );
-
-  const userIndicators = useMemo(
-    () =>
-      Object.fromEntries(
-        empActions.allAssignments?.map(({ shiftId, user }) => [
-          shiftId,
-          () => (
-            <UserIndicators
-              name={user?.displayName ?? ""}
-              id={user?.id ?? ""}
-            />
-          ),
-        ]) ?? [],
-      ),
-    [empActions.allAssignments],
-  );
-
-  const bothIndicators = useMemo(
-    () => ({ ...signedUpIndicators, ...assignedIndicators, ...userIndicators }),
-    [signedUpIndicators, assignedIndicators, userIndicators],
-  );
-
   const { data: scheduleData } = api.useQuery(
     "get",
     "/schedules/{scheduleId}",
@@ -140,8 +119,7 @@ export default function Schedule() {
   const handleRegister = async () => {
     console.log(selectedShift);
     await empActions.signup({
-      shiftId: selectedShift ? selectedShift : "",
-      userId: "none",
+      shiftId: selectedShift ?? "",
     });
 
     empActions.refetchUserSignups();
@@ -163,6 +141,46 @@ export default function Schedule() {
     [selectedShift, signedUpShifts],
   );
 
+  function ManagerPerShiftStackContent(props: { shiftIds: string[] }) {
+    const shiftIds = useMemo(() => new Set(props.shiftIds), [props.shiftIds]);
+    const assignedUsers = useMemo(
+      () =>
+        empActions.allAssignments
+          ?.filter(asgn => asgn.shiftId && shiftIds.has(asgn.shiftId))
+          .map(asgn => asgn.user)
+          .filter(u => u !== undefined) ?? [],
+      [shiftIds],
+    );
+
+    return (
+      <>
+        {assignedUsers.map(user => (
+          <UserIndicators key={user.id} name={user.displayName} id={user.id} />
+        ))}
+      </>
+    );
+  }
+
+  function MemberPerShiftStackContent(props: { shiftIds: string[] }) {
+    const isRegistered = useMemo(
+      () => props.shiftIds.some(id => signedUpShifts.includes(id)),
+      [props.shiftIds],
+    );
+
+    const isAssigned = useMemo(
+      () => props.shiftIds.some(id => assignedShifts.includes(id)),
+      [props.shiftIds],
+    );
+
+    if (isAssigned) {
+      return <AssignedIndicator />;
+    } else if (isRegistered) {
+      return <SignedUpIndicator />;
+    } else {
+      return <></>;
+    }
+  }
+
   return (
     <Grid container direction="column" spacing={1}>
       <Navbar />
@@ -177,7 +195,7 @@ export default function Schedule() {
       >
         <Paper elevation={3} sx={{ padding: 2 }}>
           <Grid container justifyContent="space-between" alignItems="center">
-            <Grid sx={{ paddingLeft: 2 }}>
+            <Grid sx={{ paddingLeft: 2, paddingBottom: 1, paddingTop: 1 }}>
               <Typography variant="h5">{scheduleData?.name}</Typography>
             </Grid>
             <Grid
@@ -225,7 +243,17 @@ export default function Schedule() {
                     gap: 1,
                   }}
                 >
-                  <Typography gutterBottom>Request Weight</Typography>
+                  <CustomTooltip
+                    title="(Note:
+                      All your weights will be averaged. i.e. A weight of 100
+                      for all registered shifts is equivalent to putting down 50
+                      for all of them)"
+                    placement="top"
+                  >
+                    <Typography gutterBottom>
+                      Request Weight: How badly do you want this shift?{" "}
+                    </Typography>
+                  </CustomTooltip>
                   <Slider
                     defaultValue={50}
                     aria-label="Request weight"
@@ -277,8 +305,12 @@ export default function Schedule() {
             startDate={dayjs(scheduleData?.startTime ?? dayjs().toISOString())}
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
-            customContentMap={bothIndicators}
             shifts={formattedShifts}
+            CustomContent={
+              isManager
+                ? ManagerPerShiftStackContent
+                : MemberPerShiftStackContent
+            }
           />
         </Paper>
       </Container>
@@ -340,13 +372,6 @@ interface UserChipsProps {
 function UserChips(props: UserChipsProps) {
   const api = useApi();
 
-  // This request is required to get the users avatars/names for the chips
-  const { data: membersData } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/members",
-    { params: { path: { scheduleId: props.scheduleId as string } } },
-  );
-
   // This request is required to get the users that are signed up in each schedule
   const { data: scheduleSignups } = api.useQuery(
     "get",
@@ -354,28 +379,31 @@ function UserChips(props: UserChipsProps) {
     { params: { path: { scheduleId: props.scheduleId as string } } },
   );
 
-  const userIds =
-    scheduleSignups
-      ?.filter((shift: any) => shift.id === props.shiftId) // Match the shiftId
-      .flatMap((shift: any) =>
-        shift.signups.map((signup: any) => signup.user.id),
-      ) || [];
+  const shifts = useShifts(props.scheduleId ?? "");
+
+  const stackShiftIds = useMemo(
+    () => new Set(shifts.matchingShifts(props.shiftId ?? "").map(s => s.id)),
+    [props.shiftId, shifts],
+  );
+
+  const users = scheduleSignups
+    ?.filter(shift => stackShiftIds.has(shift.id)) // Match the shiftId
+    .flatMap(shift => shift.signups?.map(signup => signup.user))
+    .filter(u => u !== undefined);
 
   return (
     <Box>
-      {userIds.map(userId => {
-        // Find the corresponding member data by userId
-        const member = membersData?.find((member: any) => member.id === userId);
-        return member ? (
+      {users?.map(user => {
+        return (
           <Chip
-            key={userId}
+            key={user.id}
             avatar={
-              <Avatar src={createRandomPfpUrl(member.displayName, member.id)} />
+              <Avatar src={createRandomPfpUrl(user.displayName, user.id)} />
             }
-            label={member.displayName}
+            label={user.displayName}
             variant="outlined"
           />
-        ) : null;
+        );
       })}
     </Box>
   );

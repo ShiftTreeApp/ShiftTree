@@ -1,0 +1,15 @@
+seed = 1
+
+[shifts.a1]
+start_time = "2020-01-01 09:00"
+end_time = "2020-01-01 17:00"
+
+[shifts.a2]
+start_time = "2020-01-01 09:00"
+end_time = "2020-01-01 17:00"
+
+[employees.e1.requests.a1]
+[employees.e1.requests.a2]
+
+[employees.e2.requests.a1]
+[employees.e2.requests.a2]

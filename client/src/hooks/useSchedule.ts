@@ -7,6 +7,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 import { useApi } from "@/client";
+import { useShifts } from "@/hooks/useShifts";
 
 export interface ShiftDetails {
   id: string;
@@ -14,6 +15,7 @@ export interface ShiftDetails {
   description: string;
   startTime: dayjs.Dayjs;
   endTime: dayjs.Dayjs;
+  count: number;
 }
 
 export default function useSchedule({ scheduleId }: { scheduleId: string }) {
@@ -33,14 +35,6 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
   const endTime = useMemo(
     () => (scheduleData?.endTime ? dayjs(scheduleData.endTime) : dayjs()),
     [scheduleData?.endTime],
-  );
-
-  const { data: shiftsData, refetch: refetchShifts } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/shifts",
-    {
-      params: { path: { scheduleId: scheduleId } },
-    },
   );
 
   const { refetch: refetchAssignmentsCsv } = api.useQuery(
@@ -76,20 +70,12 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     },
   );
 
-  const shifts = useMemo(
-    () =>
-      shiftsData?.map(
-        shift =>
-          ({
-            id: shift.id,
-            name: shift.name,
-            description: shift.description,
-            startTime: dayjs(shift.startTime),
-            endTime: dayjs(shift.endTime),
-          }) satisfies ShiftDetails,
-      ) ?? [],
-    [shiftsData],
-  );
+  const {
+    shifts,
+    stackedShifts,
+    matchingShifts,
+    refetch: refetchShifts,
+  } = useShifts(scheduleId);
 
   const { mutateAsync: postShift } = api.useMutation(
     "post",
@@ -138,23 +124,66 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
         endTime: shift.endTime.toISOString(),
       },
     });
+
+    if (shift.count > 1) {
+      await Promise.all(
+        new Array(shift.count - 1).fill(0).map(async () => {
+          await postShift({
+            params: { path: { scheduleId: scheduleId } },
+            body: {
+              name: shift.name,
+              startTime: shift.startTime.toISOString(),
+              endTime: shift.endTime.toISOString(),
+            },
+          });
+        }),
+      );
+    }
+
     return { id };
   }
 
   async function deleteShift({ shiftId }: { shiftId: string }) {
-    await sendDelete({ params: { path: { shiftId } } });
+    await Promise.all(
+      matchingShifts(shiftId).map(async shift => {
+        await sendDelete({ params: { path: { shiftId: shift.id } } });
+      }),
+    );
   }
 
   async function updateShift(shift: Partial<ShiftDetails> & { id: string }) {
-    await sendUpdateShift({
-      params: { path: { shiftId: shift.id } },
-      body: {
-        name: shift.name,
-        description: shift.description,
-        startTime: shift.startTime?.toISOString(),
-        endTime: shift.endTime?.toISOString(),
-      },
-    });
+    const stack = matchingShifts(shift.id);
+    if (shift.count !== undefined) {
+      if (shift.count < stack.length) {
+        const count = Math.max(shift.count, 1);
+        await Promise.all(
+          stack.slice(count).map(async shift => {
+            await sendDelete({ params: { path: { shiftId: shift.id } } });
+          }),
+        );
+      } else if (shift.count > stack.length) {
+        const numToAdd = shift.count - stack.length;
+        await createShift({
+          count: numToAdd,
+          ...stack[0],
+        });
+      }
+    }
+    await Promise.all(
+      matchingShifts(shift.id)
+        .slice(0, shift.count)
+        .map(async s => {
+          await sendUpdateShift({
+            params: { path: { shiftId: s.id } },
+            body: {
+              name: shift.name,
+              description: shift.description,
+              startTime: shift.startTime?.toISOString(),
+              endTime: shift.endTime?.toISOString(),
+            },
+          });
+        }),
+    );
   }
 
   async function getAssignmentsCsv() {
@@ -174,6 +203,8 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
   function useShift({ shiftId }: { shiftId: string }) {
     const data = useMemo(() => shifts.find(s => s.id === shiftId), [shiftId]);
 
+    const stack = useMemo(() => matchingShifts(shiftId), [shiftId]);
+
     async function delete_() {
       await deleteShift({ shiftId });
     }
@@ -182,7 +213,7 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
       await updateShift({ ...shift, id: shiftId });
     }
 
-    return { data, delete_, update };
+    return { data, stack, delete_, update };
   }
 
   async function deleteSchedule() {
@@ -196,6 +227,7 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     startTime,
     endTime,
     shifts,
+    stackedShifts,
     createShift,
     useShift,
     deleteShift,

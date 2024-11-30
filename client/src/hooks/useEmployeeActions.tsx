@@ -1,4 +1,5 @@
 import { useApi } from "@/client";
+import { useShifts } from "@/hooks/useShifts";
 import { useNotifier } from "@/notifier";
 
 export function useEmployeeActions(shiftTreeId?: string) {
@@ -54,7 +55,7 @@ export function useEmployeeActions(shiftTreeId?: string) {
     console.log("Joined");
   }
 
-  async function signup({
+  async function signupForSingle({
     shiftId,
     userId,
     weight,
@@ -80,23 +81,44 @@ export function useEmployeeActions(shiftTreeId?: string) {
     console.log("Signed up for shift");
   }
 
+  const shifts = useShifts(shiftTreeId ?? "");
+
+  async function signup({
+    shiftId,
+    weight,
+  }: {
+    shiftId: string;
+    weight?: number;
+  }) {
+    await Promise.all(
+      shifts.matchingShifts(shiftId).map(async shift => {
+        await signupForSingle({
+          shiftId: shift.id,
+          weight,
+        });
+      }),
+    );
+  }
+
   /*
    * Take shiftTreeId and scan the shifts in that schedule.
    * Return a list of the shifts that the current user signed up for
    * from that list.
    */
-  const { data: userSignups = [], refetch: refetchUserSignups } = shiftTreeId
-    ? api.useQuery("get", "/schedules/{scheduleId}/user-signups", {
-        params: {
-          path: {
-            scheduleId: shiftTreeId ? shiftTreeId : "",
-          },
+  const { data: userSignups = [], refetch: refetchUserSignups } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/user-signups",
+    {
+      params: {
+        path: {
+          scheduleId: shiftTreeId ?? "",
         },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      })
-    : { data: [], refetch: () => {} };
+      },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    },
+  );
 
   /*
    * Take shiftTreeId and scan the shifts in that schedule.
@@ -104,18 +126,16 @@ export function useEmployeeActions(shiftTreeId?: string) {
    * from that list.
    */
   const { data: userAssignedShifts = [], refetch: refetchUserAssignments } =
-    shiftTreeId
-      ? api.useQuery("get", "/schedules/{scheduleId}/user-assigned", {
-          params: {
-            path: {
-              scheduleId: shiftTreeId ? shiftTreeId : "",
-            },
-          },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        })
-      : { data: [], refetch: () => {} };
+    api.useQuery("get", "/schedules/{scheduleId}/user-assigned", {
+      params: {
+        path: {
+          scheduleId: shiftTreeId ?? "",
+        },
+      },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
 
   const { data: allAssignments } = api.useQuery(
     "get",
