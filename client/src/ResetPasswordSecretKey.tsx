@@ -37,21 +37,21 @@ export default function PasswordReset() {
     const data = new FormData(event.currentTarget);
     //const username = data.get("username") as string;
     //const email = data.get("email") as string;
-    const password = data.get("password") as string;
+    const secret_key = data.get("secret-key") as string;
 
-    // *** should authenticate the user's secret key ***
+    // *** should reset the user's password ***
 
-    //     auth
-    //       .resetPassword({ password })
-    //       .then(() => {
-    //         setErrorMessage(null);
-    //         notifier.message("Password reset!");
-    //         navigate("/");
-    //       })
-    //       .catch(e => {
-    //         console.error(e);
-    //         setErrorMessage(e.toString());
-    //       });
+    // auth
+    //   .resetPassword({ secret_key })
+    //   .then(() => {
+    //     setErrorMessage(null);
+    //     notifier.message("Password reset!");
+    //     navigate("/");
+    //   })
+    //   .catch(e => {
+    //     console.error(e);
+    //     setErrorMessage(e.toString());
+    //   });
   };
 
   return (
@@ -70,7 +70,7 @@ export default function PasswordReset() {
           src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/shiftTreeImages/shiftSprout_avatar.png?raw=true"
         />
         <Typography component="h1" variant="h5">
-          Enter new password
+          Enter secret key to reset password
         </Typography>
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
@@ -78,21 +78,10 @@ export default function PasswordReset() {
               <TextField
                 required
                 fullWidth
-                id="new-password"
-                label="New Password"
-                name="new-password"
-                autoComplete="New Password"
-              />
-            </Grid>
-            <Grid size={12}>
-              <TextField
-                required
-                fullWidth
-                name="confirm-password"
-                label="Confirm Password"
-                type="confirm-password"
-                id="confirm-password"
-                autoComplete="New Password"
+                id="secret-key"
+                label="Secret Key"
+                name="secret-key"
+                autoComplete="secret-key"
               />
             </Grid>
           </Grid>

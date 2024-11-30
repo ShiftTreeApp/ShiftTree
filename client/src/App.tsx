@@ -16,6 +16,8 @@ import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
 import { NotifierProvider } from "@/notifier.tsx";
 import SignUpConfirmation from "./SignUpConfirmation.tsx";
+import PasswordReset from "./PasswordReset.tsx";
+import ResetPasswordSecretKey from "./ResetPasswordSecretKey.tsx";
 
 export default function App() {
   return (
@@ -27,12 +29,23 @@ export default function App() {
               <Routes>
                 <Route path="/login" element={<SignIn />} />
                 <Route path="/register" element={<SignUp />} />
+
                 {/* Put authenticated routes below */}
+                <Route
+                  path="/password-reset"
+                  // must be authenticated to view this page. how will this be authenticated?
+                  element={<PasswordReset />}
+                />
+                <Route
+                  path="/enter-secret-key"
+                  element={<ResetPasswordSecretKey />}
+                />
                 <Route
                   path="/signup-confirmation"
                   // must be authenticated to view this page. just testing rn
                   element={<SignUpConfirmation />}
                 />
+
                 <Route
                   path="/"
                   element={

@@ -131,9 +131,19 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
 
   const handleCloseModal = () => {
     setModalOpen(false);
+    downloadLogData();
   };
   const managerActions = useManagerActions(props.scheduleId);
 
+  async function downloadLogData() {
+    const result = await schedule.getLogData();
+    downloadFile({
+      data: new Blob([JSON.stringify(result.data, null, "\t")], {
+        type: "application/json",
+      }),
+      filename: `${schedule.name ?? ""} - logData.json`,
+    });
+  }
   async function autogenerate() {
     await managerActions.triggerAutoSchedule({ scheduleId: props.scheduleId });
   }
@@ -267,6 +277,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             >
               <MenuItem onClick={downloadCsv}>Download CSV</MenuItem>
               <MenuItem onClick={downloadIcs}>Download ICS</MenuItem>
+              <MenuItem onClick={downloadLogData}>Download LogData</MenuItem>
             </Menu>
           </Box>
           <ShiftCalendar

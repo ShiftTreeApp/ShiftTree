@@ -53,9 +53,13 @@ export default function SignUp() {
 
     auth
       .register({ username, email, password })
-      .then(() => {
+      .then(response => {
+        // REMOVE THIS
+        console.log(response);
         setErrorMessage(null);
         notifier.message("Successfully registered!");
+        // TODO: Change this to redirect to secret-key page
+        // response.secretKey contains the secret key.
         navigate("/");
         //navigate("/signup-confirmation");
       })
