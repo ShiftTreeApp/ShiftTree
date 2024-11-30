@@ -4,7 +4,6 @@ import { z } from "zod";
 const tokenPayload = z.object({ email: z.string(), name: z.string() });
 import * as jwt from "jsonwebtoken";
 import dayjs from "dayjs";
-import { json } from "stream/consumers";
 
 async function getUserId(req: Request) {
   const token = req.headers.authorization?.split(" ")[1];
