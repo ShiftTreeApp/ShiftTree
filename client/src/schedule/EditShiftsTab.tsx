@@ -623,8 +623,8 @@ function UserIndicators(props: UserIndicatorsProps) {
           <Avatar src={createRandomPfpUrl(props.name, props.id)}></Avatar>
         }
         sx={{
-          backgroundColor: theme => theme.palette.background.paper,
-          justifyContent: "start",
+          backgroundColor: theme => theme.palette.primary.main,
+          color: "white",
         }}
         label={props.name}
         variant="outlined"
