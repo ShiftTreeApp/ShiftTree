@@ -11,11 +11,10 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router";
 import {
-  Edit as EditIcon,
   HowToReg as RegisterIcon,
   EventBusy as LeaveShiftTreeIcon,
 } from "@mui/icons-material";
-import { Link as RouterLink, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 import dayjs from "dayjs";
 
@@ -116,9 +115,6 @@ export default function Schedule() {
     clearSelectedShift();
   }
 
-  const isManager =
-    scheduleData?.role == "manager" || scheduleData?.role == "owner";
-
   const isSignedUpForSelectedShift = useMemo(
     () => selectedShift && signedUpShifts.includes(selectedShift),
     [selectedShift, signedUpShifts],
@@ -164,93 +160,72 @@ export default function Schedule() {
             <Grid
               sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}
             >
-              {isManager ? (
-                <Button
-                  variant="contained"
-                  startIcon={<EditIcon />}
-                  component={RouterLink}
-                  to={`/schedule/${scheduleId}/edit`}
-                  sx={{
-                    backgroundColor: theme => theme.palette.info.main,
-                  }}
-                >
-                  Edit mode
-                </Button>
-              ) : null}
-              {!isManager ? (
-                <Button
-                  variant="contained"
-                  startIcon={<LeaveShiftTreeIcon />}
-                  sx={{
-                    backgroundColor: theme => theme.palette.error.dark,
-                  }}
-                >
-                  <Typography>Leave Shift Tree</Typography>
-                </Button>
-              ) : null}
+              <Button
+                variant="contained"
+                startIcon={<LeaveShiftTreeIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.error.dark,
+                }}
+              >
+                <Typography>Leave Shift Tree</Typography>
+              </Button>
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
           <EditShiftDrawer
             open={drawerOpen}
             onClose={clearSelectedShift}
-            title={isManager ? "Shift Info" : "Sign-Up"}
+            title={"Sign-Up"}
           >
-            {!isManager && (
-              <>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    gap: 1,
-                  }}
-                >
-                  <CustomTooltip
-                    title="(Note:
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: 1,
+              }}
+            >
+              <CustomTooltip
+                title="(Note:
                       All your weights will be averaged. i.e. A weight of 100
                       for all registered shifts is equivalent to putting down 50
                       for all of them)"
-                    placement="top"
-                  >
-                    <Typography gutterBottom>
-                      Request Weight: How badly do you want this shift?{" "}
-                    </Typography>
-                  </CustomTooltip>
-                  <Slider
-                    defaultValue={50}
-                    aria-label="Request weight"
-                    valueLabelDisplay="auto"
-                    sx={{ width: { md: 300 } }}
-                    shiftStep={30}
-                    step={10}
-                    marks
-                    max={100}
-                    min={10}
-                  />
+                placement="top"
+              >
+                <Typography gutterBottom>
+                  Request Weight: How badly do you want this shift?{" "}
+                </Typography>
+              </CustomTooltip>
+              <Slider
+                defaultValue={50}
+                aria-label="Request weight"
+                valueLabelDisplay="auto"
+                sx={{ width: { md: 300 } }}
+                shiftStep={30}
+                step={10}
+                marks
+                max={100}
+                min={10}
+              />
 
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<RegisterIcon />}
-                    sx={{
-                      backgroundColor: theme => theme.palette.success.main,
-                      "&:hover": {
-                        backgroundColor: theme => theme.palette.success.dark,
-                      },
-                      color: "white",
-                    }}
-                    onClick={
-                      isSignedUpForSelectedShift
-                        ? handleUnregister
-                        : handleRegister
-                    }
-                  >
-                    {isSignedUpForSelectedShift ? "Unregister" : "Register"}
-                  </Button>
-                </Box>
-              </>
-            )}
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<RegisterIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.success.main,
+                  "&:hover": {
+                    backgroundColor: theme => theme.palette.success.dark,
+                  },
+                  color: "white",
+                }}
+                onClick={
+                  isSignedUpForSelectedShift ? handleUnregister : handleRegister
+                }
+              >
+                {isSignedUpForSelectedShift ? "Unregister" : "Register"}
+              </Button>
+            </Box>
           </EditShiftDrawer>
           <ShiftCalendar
             onClickShift={shiftId => setSelectedShift(shiftId)}

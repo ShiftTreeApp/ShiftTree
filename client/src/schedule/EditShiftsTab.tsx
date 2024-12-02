@@ -17,8 +17,6 @@ import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Save as SaveIcon,
-  Preview as PreviewIcon,
-  //EventRepeat as GenerateSchedule,
   AutoMode as GenerateSchedule,
   CloudDownload as DownloadIcon,
 } from "@mui/icons-material";
@@ -219,48 +217,31 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               gap: 1,
             }}
           >
-            <Button
-              variant="contained"
-              component={RouterLink}
-              to={`/schedule/${props.scheduleId}`}
-              startIcon={<PreviewIcon />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.main,
-              }}
-            >
-              <Typography>View mode</Typography>
-            </Button>
-            {schedule.data?.role == "owner" ||
-            schedule.data?.role == "manager" ? (
-              <CustomTooltip title="Create New Shift" placement="top">
-                <Button
-                  variant="contained"
-                  onClick={createNewShiftAndEdit}
-                  startIcon={<AddIcon />}
-                  sx={{
-                    backgroundColor: theme => theme.palette.info.light,
-                  }}
-                >
-                  <Typography>Add Shift</Typography>
-                </Button>
-              </CustomTooltip>
-            ) : null}
+            <CustomTooltip title="Create New Shift" placement="top">
+              <Button
+                variant="contained"
+                onClick={createNewShiftAndEdit}
+                startIcon={<AddIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.light,
+                }}
+              >
+                <Typography>Add Shift</Typography>
+              </Button>
+            </CustomTooltip>
 
-            {schedule.data?.role == "owner" ||
-            schedule.data?.role == "manager" ? (
-              <CustomTooltip title="Auto-generate Schedule" placement="top">
-                <Button
-                  variant="contained"
-                  onClick={handleOpenModal}
-                  startIcon={<GenerateSchedule />}
-                  sx={{
-                    backgroundColor: theme => theme.palette.info.dark,
-                  }}
-                >
-                  <Typography>Generate</Typography>
-                </Button>
-              </CustomTooltip>
-            ) : null}
+            <CustomTooltip title="Auto-generate Schedule" placement="top">
+              <Button
+                variant="contained"
+                onClick={handleOpenModal}
+                startIcon={<GenerateSchedule />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.dark,
+                }}
+              >
+                <Typography>Generate</Typography>
+              </Button>
+            </CustomTooltip>
 
             <GenerateShiftModal
               open={modalOpen}
