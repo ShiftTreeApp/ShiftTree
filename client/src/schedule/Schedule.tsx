@@ -62,9 +62,17 @@ export default function Schedule() {
   const { selectedShift, setSelectedShift, clearSelectedShift } =
     useSelectedShiftParam();
 
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectedShifts, setSelectedShifts] = useState<string[]>([]);
+
   const drawerOpen = selectedShift !== null;
 
   const api = useApi();
+
+  const toggleSelectionMode = () => {
+    setIsSelecting(prev => !prev);
+    setSelectedShifts([]); // Clear selections when toggling
+  };
 
   const [signedUpShifts, setSignedUpShifts] = useState(
     empActions.signedUpShifts,
@@ -107,7 +115,7 @@ export default function Schedule() {
   const handleRegister = async () => {
     console.log(selectedShift);
     await empActions.signup({
-      shiftId: selectedShift ?? "",
+      shiftId: selectedShift ? selectedShift : "",
     });
 
     empActions.refetchUserSignups();
@@ -213,6 +221,48 @@ export default function Schedule() {
               >
                 <Typography>Leave Shift Tree</Typography>
               </Button>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: theme => theme.palette.info.main }}
+                onClick={() => {
+                  if (isSelecting) {
+                    setSelectedShifts([]);
+                  }
+                  setIsSelecting(prev => !prev);
+                }}
+              >
+                {isSelecting ? "Cancel" : "Select"}
+              </Button>
+              <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={async () => {
+                    for (const shiftId of selectedShifts) {
+                      await empActions.signup({ shiftId });
+                    }
+                    notifier.message("Registered for selected shifts");
+                    empActions.refetchUserSignups();
+                  }}
+                >
+                  Register All
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: theme => theme.palette.error.dark,
+                  }}
+                  onClick={async () => {
+                    for (const shiftId of selectedShifts) {
+                      await empActions.unregister({ shiftId });
+                    }
+                    notifier.message("Unregistered from selected shifts");
+                    empActions.refetchUserSignups();
+                  }}
+                >
+                  Unregister All
+                </Button>
+              </Box>
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
@@ -272,10 +322,26 @@ export default function Schedule() {
             </Box>
           </EditShiftDrawer>
           <ShiftCalendar
-            onClickShift={shiftId => setSelectedShift(shiftId)}
+            onClickShift={shiftId => {
+              if (isSelecting) {
+                setSelectedShifts(prev =>
+                  prev.includes(shiftId)
+                    ? prev.filter(id => id !== shiftId)
+                    : [...prev, shiftId],
+                );
+              } else {
+                setSelectedShift(shiftId); // Single selection behavior
+              }
+            }}
             startDate={dayjs(scheduleData?.startTime ?? dayjs().toISOString())}
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
-            selectedShifts={selectedShift ? [selectedShift] : []}
+            selectedShifts={
+              isSelecting
+                ? selectedShifts
+                : selectedShift
+                  ? [selectedShift]
+                  : []
+            }
             shifts={formattedShifts}
             CustomContent={MemberPerShiftStackContent}
           />
