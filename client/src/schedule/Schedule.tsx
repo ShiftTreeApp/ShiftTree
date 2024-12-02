@@ -8,11 +8,17 @@ import {
   Chip,
   Box,
   Slider,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { useParams } from "react-router";
 import {
   HowToReg as RegisterIcon,
   EventBusy as LeaveShiftTreeIcon,
+  Info as InfoIcon,
 } from "@mui/icons-material";
 import { useSearchParams } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
@@ -140,6 +146,11 @@ export default function Schedule() {
     }
   }
 
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+
+  const handleOpenSTInfo = () => setInfoModalOpen(true);
+  const handleCloseSTInfo = () => setInfoModalOpen(false);
+
   return (
     <Grid container direction="column" spacing={1}>
       <Navbar />
@@ -154,8 +165,41 @@ export default function Schedule() {
       >
         <Paper elevation={3} sx={{ padding: 2 }}>
           <Grid container justifyContent="space-between" alignItems="center">
-            <Grid sx={{ paddingLeft: 2, paddingBottom: 1, paddingTop: 1 }}>
+            <Grid
+              container
+              alignItems="center"
+              display="flex"
+              sx={{ paddingLeft: 2, paddingBottom: 0, paddingTop: 1 }}
+            >
               <Typography variant="h5">{scheduleData?.name}</Typography>
+
+              <CustomTooltip
+                title="Information About This ShiftTree"
+                placement="right"
+              >
+                <IconButton onClick={handleOpenSTInfo}>
+                  <InfoIcon />
+                </IconButton>
+              </CustomTooltip>
+
+              <Dialog open={infoModalOpen} onClose={handleCloseSTInfo}>
+                <DialogTitle>{scheduleData?.name} Information</DialogTitle>
+                <DialogContent>
+                  <Typography>
+                    Manager: {scheduleData?.owner?.displayName}
+                    <br />
+                    Manager Email: {scheduleData?.owner?.email}
+                    <br />
+                    Number of Shifts: {shifts?.length}
+                    <br />
+                  </Typography>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseSTInfo} color="primary">
+                    Close
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </Grid>
             <Grid
               sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}
