@@ -217,6 +217,7 @@ export default function Schedule() {
               ) : null}
               {!isManager ? (<Button
                 variant="contained"
+                sx={{backgroundColor: theme => theme.palette.info.main}}
                 onClick={() => {
                   if (isSelecting) {
                     setSelectedShifts([]);
