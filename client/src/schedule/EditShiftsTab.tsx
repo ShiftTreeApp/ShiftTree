@@ -176,7 +176,14 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
 
     return (
       <>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            flexDirection: { md: "column" },
+            gap: 0.5,
+          }}
+        >
           {assignedUsers.map(user => (
             <UserIndicators
               key={user.id}
@@ -617,7 +624,7 @@ function UserIndicators(props: UserIndicatorsProps) {
         }
         sx={{
           backgroundColor: theme => theme.palette.background.paper,
-          justifyContent: "space-between",
+          justifyContent: "start",
         }}
         label={props.name}
         variant="outlined"
