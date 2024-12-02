@@ -9,24 +9,18 @@ import {
   Box,
   Slider,
   IconButton,
-  Avatar,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
 } from "@mui/material";
 import { useParams } from "react-router";
 import {
-  Edit as EditIcon,
   HowToReg as RegisterIcon,
   EventBusy as LeaveShiftTreeIcon,
   Info as InfoIcon,
 } from "@mui/icons-material";
-import { Link as RouterLink, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 import dayjs from "dayjs";
 
@@ -35,22 +29,10 @@ import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
 import EditShiftDrawer from "./EditShiftDrawer";
 import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
-import { createRandomPfpUrl } from "./EditMembersTab";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import theme from "@/theme";
 import { useNotifier } from "@/notifier";
-import { useShifts } from "@/hooks/useShifts";
-
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
+import { CustomTooltip } from "@/customComponents/CustomTooltip";
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -139,33 +121,10 @@ export default function Schedule() {
     clearSelectedShift();
   }
 
-  const isManager =
-    scheduleData?.role == "manager" || scheduleData?.role == "owner";
-
   const isSignedUpForSelectedShift = useMemo(
     () => selectedShift && signedUpShifts.includes(selectedShift),
     [selectedShift, signedUpShifts],
   );
-
-  function ManagerPerShiftStackContent(props: { shiftIds: string[] }) {
-    const shiftIds = useMemo(() => new Set(props.shiftIds), [props.shiftIds]);
-    const assignedUsers = useMemo(
-      () =>
-        empActions.allAssignments
-          ?.filter(asgn => asgn.shiftId && shiftIds.has(asgn.shiftId))
-          .map(asgn => asgn.user)
-          .filter(u => u !== undefined) ?? [],
-      [shiftIds],
-    );
-
-    return (
-      <>
-        {assignedUsers.map(user => (
-          <UserIndicators key={user.id} name={user.displayName} id={user.id} />
-        ))}
-      </>
-    );
-  }
 
   function MemberPerShiftStackContent(props: { shiftIds: string[] }) {
     const isRegistered = useMemo(
@@ -245,104 +204,72 @@ export default function Schedule() {
             <Grid
               sx={{ display: "flex", flexDirection: "row-reverse", gap: 1 }}
             >
-              {isManager ? (
-                <Button
-                  variant="contained"
-                  startIcon={<EditIcon />}
-                  component={RouterLink}
-                  to={`/schedule/${scheduleId}/edit`}
-                  sx={{
-                    backgroundColor: theme => theme.palette.info.main,
-                  }}
-                >
-                  Edit mode
-                </Button>
-              ) : null}
-              {!isManager ? (
-                <Button
-                  variant="contained"
-                  startIcon={<LeaveShiftTreeIcon />}
-                  sx={{
-                    backgroundColor: theme => theme.palette.error.dark,
-                  }}
-                >
-                  <Typography>Leave Shift Tree</Typography>
-                </Button>
-              ) : null}
+              <Button
+                variant="contained"
+                startIcon={<LeaveShiftTreeIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.error.dark,
+                }}
+              >
+                <Typography>Leave Shift Tree</Typography>
+              </Button>
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
           <EditShiftDrawer
             open={drawerOpen}
             onClose={clearSelectedShift}
-            title={isManager ? "Shift Info" : "Sign-Up"}
+            title={"Sign-Up"}
           >
-            {!isManager && (
-              <>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    gap: 1,
-                  }}
-                >
-                  <CustomTooltip
-                    title="(Note:
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: 1,
+              }}
+            >
+              <CustomTooltip
+                title="(Note:
                       All your weights will be averaged. i.e. A weight of 100
                       for all registered shifts is equivalent to putting down 50
                       for all of them)"
-                    placement="top"
-                  >
-                    <Typography gutterBottom>
-                      Request Weight: How badly do you want this shift?{" "}
-                    </Typography>
-                  </CustomTooltip>
-                  <Slider
-                    defaultValue={50}
-                    aria-label="Request weight"
-                    valueLabelDisplay="auto"
-                    sx={{ width: { md: 300 } }}
-                    shiftStep={30}
-                    step={10}
-                    marks
-                    max={100}
-                    min={10}
-                  />
+                placement="top"
+              >
+                <Typography gutterBottom>
+                  Request Weight: How badly do you want this shift?{" "}
+                </Typography>
+              </CustomTooltip>
+              <Slider
+                defaultValue={50}
+                aria-label="Request weight"
+                valueLabelDisplay="auto"
+                sx={{ width: { md: 300 } }}
+                shiftStep={30}
+                step={10}
+                marks
+                max={100}
+                min={10}
+              />
 
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<RegisterIcon />}
-                    sx={{
-                      backgroundColor: theme => theme.palette.success.main,
-                      "&:hover": {
-                        backgroundColor: theme => theme.palette.success.dark,
-                      },
-                      color: "white",
-                    }}
-                    onClick={
-                      isSignedUpForSelectedShift
-                        ? handleUnregister
-                        : handleRegister
-                    }
-                  >
-                    {isSignedUpForSelectedShift ? "Unregister" : "Register"}
-                  </Button>
-                </Box>
-              </>
-            )}
-            {isManager && (
-              <>
-                <Typography variant="h6">Registered Members</Typography>
-                {/* Chips for users that are signed up */}
-
-                <UserChips
-                  scheduleId={scheduleId}
-                  shiftId={selectedShift ?? undefined}
-                ></UserChips>
-              </>
-            )}
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<RegisterIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.success.main,
+                  "&:hover": {
+                    backgroundColor: theme => theme.palette.success.dark,
+                  },
+                  color: "white",
+                }}
+                onClick={
+                  isSignedUpForSelectedShift ? handleUnregister : handleRegister
+                }
+              >
+                {isSignedUpForSelectedShift ? "Unregister" : "Register"}
+              </Button>
+            </Box>
           </EditShiftDrawer>
           <ShiftCalendar
             onClickShift={shiftId => setSelectedShift(shiftId)}
@@ -350,11 +277,7 @@ export default function Schedule() {
             endDate={dayjs(scheduleData?.endTime ?? dayjs().toISOString())}
             selectedShifts={selectedShift ? [selectedShift] : []}
             shifts={formattedShifts}
-            CustomContent={
-              isManager
-                ? ManagerPerShiftStackContent
-                : MemberPerShiftStackContent
-            }
+            CustomContent={MemberPerShiftStackContent}
           />
         </Paper>
       </Container>
@@ -386,69 +309,5 @@ function AssignedIndicator() {
       label="Assigned"
       color="primary"
     />
-  );
-}
-
-interface UserIndicatorsProps {
-  name: string;
-  id: string;
-}
-
-function UserIndicators(props: UserIndicatorsProps) {
-  return (
-    <Chip
-      avatar={<Avatar src={createRandomPfpUrl(props.name, props.id)}></Avatar>}
-      sx={{
-        backgroundColor: theme.palette.primary.main,
-        color: "white",
-      }}
-      label={props.name}
-      color="primary"
-    />
-  );
-}
-
-interface UserChipsProps {
-  scheduleId?: string;
-  shiftId?: string;
-}
-
-function UserChips(props: UserChipsProps) {
-  const api = useApi();
-
-  // This request is required to get the users that are signed up in each schedule
-  const { data: scheduleSignups } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/signups",
-    { params: { path: { scheduleId: props.scheduleId as string } } },
-  );
-
-  const shifts = useShifts(props.scheduleId ?? "");
-
-  const stackShiftIds = useMemo(
-    () => new Set(shifts.matchingShifts(props.shiftId ?? "").map(s => s.id)),
-    [props.shiftId, shifts],
-  );
-
-  const users = scheduleSignups
-    ?.filter(shift => stackShiftIds.has(shift.id)) // Match the shiftId
-    .flatMap(shift => shift.signups?.map(signup => signup.user))
-    .filter(u => u !== undefined);
-
-  return (
-    <Box>
-      {users?.map(user => {
-        return (
-          <Chip
-            key={user.id}
-            avatar={
-              <Avatar src={createRandomPfpUrl(user.displayName, user.id)} />
-            }
-            label={user.displayName}
-            variant="outlined"
-          />
-        );
-      })}
-    </Box>
   );
 }

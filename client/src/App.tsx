@@ -8,14 +8,13 @@ import Home from "@/Home.tsx";
 import Create from "@/Create.tsx";
 import Profile from "@/Profile.tsx";
 //import EditProfile from "@/EditProfile.tsx"; // To be added later
-import Schedule from "@/schedule/Schedule.tsx";
-import EditTree from "@/schedule/EditTree";
 import NotFoundPage from "@/NotFound.tsx";
 
 import { ThemeProvider } from "@mui/material/styles";
 import customTheme from "./theme";
 import { NotifierProvider } from "@/notifier.tsx";
 import SignUpConfirmation from "./SignUpConfirmation.tsx";
+import ScheduleShared from "@/schedule/ScheduleShared.tsx";
 
 export default function App() {
   return (
@@ -68,18 +67,10 @@ export default function App() {
                 />
                 */}
                 <Route
-                  path="/schedule/:scheduleId/edit"
-                  element={
-                    <Authenticated>
-                      <EditTree />
-                    </Authenticated>
-                  }
-                />
-                <Route
                   path="/schedule/:scheduleId"
                   element={
                     <Authenticated>
-                      <Schedule />
+                      <ScheduleShared />
                     </Authenticated>
                   }
                 />

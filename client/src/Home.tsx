@@ -72,7 +72,7 @@ export default function Home() {
           setIsClosing,
         }}
       >
-        <Navbar />
+        <Navbar showMenu />
         <ResponsiveDrawer onDateChange={handleDateChange} />
       </LeftDrawerContext.Provider>
       <Box

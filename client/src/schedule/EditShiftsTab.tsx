@@ -8,11 +8,8 @@ import {
   Typography,
   Menu,
   MenuItem,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
-  Grid,
+  Chip,
+  Avatar,
 } from "@mui/material";
 import React from "react";
 import dayjs from "dayjs";
@@ -20,8 +17,6 @@ import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Save as SaveIcon,
-  Preview as PreviewIcon,
-  //EventRepeat as GenerateSchedule,
   AutoMode as GenerateSchedule,
   CloudDownload as DownloadIcon,
 } from "@mui/icons-material";
@@ -44,23 +39,18 @@ import { useNotifier } from "@/notifier";
 import useSchedule from "@/hooks/useSchedule";
 import { useManagerActions } from "@/hooks/useManagerActions";
 import { downloadFile } from "@/utils";
+import { useEmployeeActions } from "@/hooks/useEmployeeActions";
+import { useApi } from "@/client";
+import { useShifts } from "@/hooks/useShifts";
+import { createRandomPfpUrl } from "@/schedule/EditMembersTab";
+import { CustomTooltip } from "@/customComponents/CustomTooltip";
 
 interface EditShiftsTabProps {
   scheduleId: string;
 }
 
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
-
 export default function EditShiftsTab(props: EditShiftsTabProps) {
+  const { scheduleId } = props;
   const [currentlyEditing, setCurrentlyEditing] = useSearchParam("shift");
 
   //const navigate = useNavigate();
@@ -171,6 +161,42 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     setAnchorEl(null);
   };
 
+  const empActions = useEmployeeActions(scheduleId);
+
+  function ManagerPerShiftStackContent(props: { shiftIds: string[] }) {
+    const shiftIds = useMemo(() => new Set(props.shiftIds), [props.shiftIds]);
+    const assignedUsers = useMemo(
+      () =>
+        empActions.allAssignments
+          ?.filter(asgn => asgn.shiftId && shiftIds.has(asgn.shiftId))
+          .map(asgn => asgn.user)
+          .filter(u => u !== undefined) ?? [],
+      [shiftIds],
+    );
+
+    return (
+      <>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            flexDirection: { md: "column" },
+            gap: 0.5,
+          }}
+        >
+          {assignedUsers.map(user => (
+            <UserIndicators
+              key={user.id}
+              name={user.displayName}
+              id={user.id}
+              email={user.email}
+            />
+          ))}
+        </Box>
+      </>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -198,48 +224,31 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               gap: 1,
             }}
           >
-            <Button
-              variant="contained"
-              component={RouterLink}
-              to={`/schedule/${props.scheduleId}`}
-              startIcon={<PreviewIcon />}
-              sx={{
-                backgroundColor: theme => theme.palette.info.main,
-              }}
-            >
-              <Typography>View mode</Typography>
-            </Button>
-            {schedule.data?.role == "owner" ||
-            schedule.data?.role == "manager" ? (
-              <CustomTooltip title="Create New Shift" placement="top">
-                <Button
-                  variant="contained"
-                  onClick={createNewShiftAndEdit}
-                  startIcon={<AddIcon />}
-                  sx={{
-                    backgroundColor: theme => theme.palette.info.light,
-                  }}
-                >
-                  <Typography>Add Shift</Typography>
-                </Button>
-              </CustomTooltip>
-            ) : null}
+            <CustomTooltip title="Create New Shift" placement="top">
+              <Button
+                variant="contained"
+                onClick={createNewShiftAndEdit}
+                startIcon={<AddIcon />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.light,
+                }}
+              >
+                <Typography>Add Shift</Typography>
+              </Button>
+            </CustomTooltip>
 
-            {schedule.data?.role == "owner" ||
-            schedule.data?.role == "manager" ? (
-              <CustomTooltip title="Auto-generate Schedule" placement="top">
-                <Button
-                  variant="contained"
-                  onClick={handleOpenModal}
-                  startIcon={<GenerateSchedule />}
-                  sx={{
-                    backgroundColor: theme => theme.palette.info.dark,
-                  }}
-                >
-                  <Typography>Generate</Typography>
-                </Button>
-              </CustomTooltip>
-            ) : null}
+            <CustomTooltip title="Auto-generate Schedule" placement="top">
+              <Button
+                variant="contained"
+                onClick={handleOpenModal}
+                startIcon={<GenerateSchedule />}
+                sx={{
+                  backgroundColor: theme => theme.palette.info.dark,
+                }}
+              >
+                <Typography>Generate</Typography>
+              </Button>
+            </CustomTooltip>
 
             <GenerateShiftModal
               open={modalOpen}
@@ -275,13 +284,14 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             endDate={schedule.endTime}
             onClickShift={shiftId => setCurrentlyEditing(shiftId)}
             selectedShifts={currentlyEditing ? [currentlyEditing] : []}
+            CustomContent={ManagerPerShiftStackContent}
           />
         </>
       )}
       <EditShiftDrawer
         open={currentlyEditing != null}
         onClose={() => setCurrentlyEditing(null)}
-        title={"Edit shift"}
+        title={"Shift Details"}
       >
         {currentlyEditing && (
           <EditShift
@@ -422,6 +432,11 @@ function EditShift(props: EditShiftProps) {
 
   return (
     <>
+      <Typography sx={{ fontWeight: "bold" }}>Registered Members</Typography>
+      {/* Chips for users that are signed up */}
+      <UserChips scheduleId={props.scheduleId} shiftId={props.shiftId} />
+      <Divider sx={{ paddingTop: 1, paddingBottom: 1 }} />
+      <Typography sx={{ fontWeight: "bold" }}>Edit Shift</Typography>
       <Box sx={{ display: "flex", gap: 1 }}>
         <TextField
           id="name"
@@ -509,6 +524,7 @@ function EditShift(props: EditShiftProps) {
         </Button>
       </Box>
       <Divider sx={{ paddingTop: 1, paddingBottom: 1 }} />
+      <Typography sx={{ fontWeight: "bold" }}>Copy Shift</Typography>
       <Box
         sx={{
           display: "flex",
@@ -544,5 +560,75 @@ function EditShift(props: EditShiftProps) {
         </Box>
       </Box>
     </>
+  );
+}
+
+interface UserChipsProps {
+  scheduleId?: string;
+  shiftId?: string;
+}
+
+function UserChips(props: UserChipsProps) {
+  const api = useApi();
+
+  // This request is required to get the users that are signed up in each schedule
+  const { data: scheduleSignups } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/signups",
+    { params: { path: { scheduleId: props.scheduleId as string } } },
+  );
+
+  const shifts = useShifts(props.scheduleId ?? "");
+
+  const stackShiftIds = useMemo(
+    () => new Set(shifts.matchingShifts(props.shiftId ?? "").map(s => s.id)),
+    [props.shiftId, shifts],
+  );
+
+  const users = scheduleSignups
+    ?.filter(shift => stackShiftIds.has(shift.id)) // Match the shiftId
+    .flatMap(shift => shift.signups?.map(signup => signup.user))
+    .filter(u => u !== undefined);
+
+  return (
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+      {users?.map(user => {
+        return (
+          <CustomTooltip key={user.id} title={user.email}>
+            <Chip
+              avatar={
+                <Avatar src={createRandomPfpUrl(user.displayName, user.id)} />
+              }
+              label={user.displayName}
+              variant="outlined"
+            />
+          </CustomTooltip>
+        );
+      })}
+    </Box>
+  );
+}
+
+interface UserIndicatorsProps {
+  name: string;
+  id: string;
+  email: string;
+}
+
+function UserIndicators(props: UserIndicatorsProps) {
+  return (
+    <CustomTooltip title={props.email}>
+      <Chip
+        avatar={
+          <Avatar src={createRandomPfpUrl(props.name, props.id)}></Avatar>
+        }
+        sx={{
+          backgroundColor: theme => theme.palette.background.paper,
+          justifyContent: "start",
+        }}
+        label={props.name}
+        variant="outlined"
+      />
+    </CustomTooltip>
   );
 }
