@@ -44,6 +44,21 @@ const scheduleResponse = z.object({
 
 type ScheduleResponse = z.infer<typeof scheduleResponse>;
 
+async function getOffsets(scheduleId: string): Promise<Record<string, number>> {
+  const result = await pool.query({
+    text: /* sql */ `
+      select usm.user_id, usm.shift_count_offset
+      from user_schedule_membership as usm
+      where usm.schedule_id = $1
+    `,
+    values: [scheduleId],
+  });
+
+  return Object.fromEntries(
+    result.rows.map(row => [row.user_id, row.shift_count_offset]),
+  );
+}
+
 export async function sendShifts(req: Request, res: Response) {
   const userId = await getUserId(req);
   const scheduleId = req.params.scheduleId as string;
@@ -101,7 +116,10 @@ export async function sendShifts(req: Request, res: Response) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ shifts: results.rows[0].json }),
+    body: JSON.stringify({
+      shifts: results.rows[0].json,
+      shift_offsets: await getOffsets(scheduleId),
+    }),
   });
   const responseData: ScheduleResponse = (await result.json()) as any;
   console.log(responseData);

@@ -1,10 +1,7 @@
-import { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
@@ -25,8 +22,6 @@ export default function SignIn() {
 
   const auth = useAuth();
   const notifier = useNotifier();
-
-  const [remember, setRemember] = useState(false);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -54,7 +49,7 @@ export default function SignIn() {
       >
         <Avatar
           sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
-          src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/icons/shiftTree_avatar.png?raw=true"
+          src="/icons/shiftTree_avatar.png"
         />
         <Typography component="h1" variant="h5">
           Sign in
@@ -85,17 +80,6 @@ export default function SignIn() {
             type="password"
             id="password"
             autoComplete="current-password"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                onChange={e => setRemember(e.target.checked)}
-                checked={remember}
-                value="remember"
-                color="primary"
-              />
-            }
-            label="Remember me"
           />
           <Button type="submit" fullWidth variant="contained">
             Sign In

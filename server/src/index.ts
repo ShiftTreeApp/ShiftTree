@@ -104,6 +104,12 @@ app.get(
   schedules.getUserAssignments,
 );
 
+app.post(
+  "/schedules/:scheduleId/recommended-shifts",
+  auth.authorizationCheck,
+  schedules.modifyRecommendedShifts,
+);
+
 app.get(
   "/shiftTreeCodeExisting",
   auth.authorizationCheck,

@@ -15,10 +15,13 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { Fragment, useState, useEffect } from "react";
-import EditMembersDrawer from "./EditMembersDrawer";
-import { useApi } from "@/client";
 import dayjs from "dayjs";
+
+import { useApi } from "@/client";
 import { useManagerActions } from "@/hooks/useManagerActions";
+import { useNotifier } from "@/notifier";
+import EditMembersDrawer from "./EditMembersDrawer";
+import CompactNumberInput from "@/customComponents/CompactNumberInput";
 
 interface EditMembersTabProps {
   scheduleId: string;
@@ -27,6 +30,7 @@ interface EditMembersTabProps {
 export default function EditMembersTab(props: EditMembersTabProps) {
   const api = useApi();
   const managerActions = useManagerActions(props.scheduleId);
+  const notifier = useNotifier();
 
   const { data: scheduleData } = api.useQuery(
     "get",
@@ -42,6 +46,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
 
   // TODO: Add the base url as an environment variable so it can be set during build
   const [inviteCode, setInviteCode] = useState<string>("");
+
   useEffect(() => {
     if (managerActions.existingCode) {
       setInviteCode(managerActions.existingCode);
@@ -82,6 +87,52 @@ export default function EditMembersTab(props: EditMembersTabProps) {
       },
     });
   }
+
+  const [suggestedShifts, setSuggestedShifts] = useState<{
+    [key: string]: number;
+  }>({});
+
+  const [lastSubmittedSuggestions, setLastSubmittedSuggestions] = useState<{
+    [key: string]: number;
+  }>({});
+
+  useEffect(() => {
+    if (membersData) {
+      const suggestedShiftsFromDB: { [key: string]: number } = {};
+      for (const member of membersData) {
+        suggestedShiftsFromDB[member.id] = member.suggestedShifts ?? -100;
+      }
+      setSuggestedShifts(suggestedShiftsFromDB);
+      setLastSubmittedSuggestions(suggestedShiftsFromDB);
+    }
+  }, [membersData]);
+
+  const handleSuggestedChange = (userId: string, value: number | null) => {
+    const checkValue = value ?? 0;
+    setSuggestedShifts(prevState => ({
+      ...prevState,
+      [userId]: checkValue,
+    }));
+  };
+
+  const handleSuggestionsSubmit = async () => {
+    for (const [userId, numShifts] of Object.entries(suggestedShifts)) {
+      await managerActions.updateRecommendedNumShifts({
+        scheduleId: props.scheduleId,
+        targetUserId: userId,
+        numShifts: numShifts,
+      });
+    }
+    notifier.message("Updated Recommended Shifts for Employees");
+    setLastSubmittedSuggestions(suggestedShifts);
+  };
+
+  const unsubmittedRecommendationChanges = () => {
+    return (
+      JSON.stringify(suggestedShifts) !==
+      JSON.stringify(lastSubmittedSuggestions)
+    );
+  };
 
   return (
     <Box
@@ -143,8 +194,47 @@ export default function EditMembersTab(props: EditMembersTabProps) {
             )}
             onKick={() => setUserToKick(member)}
           />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+            }}
+          >
+            <Typography variant="body2">User Options:</Typography>
+            <CompactNumberInput
+              suggestedShifts={suggestedShifts[member.id] ?? 0}
+              onChange={newValue => handleSuggestedChange(member.id, newValue)}
+            />
+          </Box>
         </Fragment>
       ))}
+      <Divider />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+        }}
+      >
+        <Typography variant="h5">Confirm Options:</Typography>
+        <Button
+          variant="contained"
+          onClick={handleSuggestionsSubmit}
+          disabled={!unsubmittedRecommendationChanges()}
+          sx={{
+            backgroundColor: theme => theme.palette.info.light,
+            "&.Mui-disabled": {
+              opacity: 0.4,
+              backgroundColor: theme =>
+                theme.palette.info.light + " !important",
+              color: "#FFFFFF",
+            },
+          }}
+        >
+          Submit Suggested Shifts
+        </Button>
+      </Box>
     </Box>
   );
 }
@@ -223,6 +313,7 @@ function MemberItem(props: MemberItemProps) {
             <br></br>
           </Typography>
           <Divider sx={{ borderColor: "blue" }} />
+
           {drawerOpen && (
             <ShiftDisplay userId={props.userId} scheduleId={props.scheduleId} />
           )}

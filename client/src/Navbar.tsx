@@ -55,7 +55,11 @@ export const ModalContext = React.createContext<ModalContextType>({
   setModalOpen: () => {},
 });
 
-export default function Navbar() {
+export interface NavbarProps {
+  showMenu?: boolean | undefined;
+}
+
+export default function Navbar({ showMenu }: NavbarProps) {
   const auth = useAuth();
   const navigate = useNavigate();
   const LDC = React.useContext(LeftDrawerContext);
@@ -112,15 +116,17 @@ export default function Navbar() {
                 backgroundColor: "primary",
               }}
             >
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                edge="start"
-                onClick={handleDrawerToggle}
-                sx={{ mr: 2, display: { md: "none" } }}
-              >
-                <MenuIcon />
-              </IconButton>
+              {showMenu && (
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  edge="start"
+                  onClick={handleDrawerToggle}
+                  sx={{ mr: 2, display: { md: "none" } }}
+                >
+                  <MenuIcon />
+                </IconButton>
+              )}
               <Link component={RouterLink} to="/">
                 <Typography fontSize={24} color={"white"}>
                   ShiftTree
