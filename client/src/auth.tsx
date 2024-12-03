@@ -35,11 +35,12 @@ function useAuthInner() {
       username: string;
       email: string;
       password: string;
-    }): Promise<void> {
-      await submitRegistration({
+    }): Promise<{ message?: string; secretKey?: string }> {
+      const res = await submitRegistration({
         body: { username, email, password },
       });
       console.log("Registered User");
+      return res;
     },
 
     logout() {

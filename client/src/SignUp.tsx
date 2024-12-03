@@ -39,11 +39,13 @@ export default function SignUp() {
     return emailRegex.test(email);
   };
 
+  const [secretKey, setSecretKey] = useState<string | null>(null);
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const username = data.get("username") as string;
-    //const email = data.get("email") as string;
+    const email = data.get("email") as string;
     const password = data.get("password") as string;
 
     if (!validateEmail(email)) {
@@ -54,13 +56,11 @@ export default function SignUp() {
     auth
       .register({ username, email, password })
       .then(response => {
-        // REMOVE THIS
-        console.log(response);
         setErrorMessage(null);
         notifier.message("Successfully registered!");
-        // TODO: Change this to redirect to secret-key page
-        // response.secretKey contains the secret key.
-        navigate("/signup-confirmation");
+        const { secretKey } = response;
+        setSecretKey(secretKey || null);
+        navigate("/signup-confirmation", { state: { secretKey } });
       })
       .catch(e => {
         console.error(e);
