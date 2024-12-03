@@ -3,6 +3,7 @@ import { z } from "zod";
 import * as jwt from "jsonwebtoken";
 
 import { pool } from "@/pool";
+import { INSPECT_MAX_BYTES } from "node:buffer";
 
 const host = process.env.SHIFTTREE_PYTHON_HOST;
 if (!host) {
@@ -111,6 +112,7 @@ export async function sendShifts(req: Request, res: Response) {
     values: [scheduleId],
   });
   // console.log(results.rows[0].json);
+  const seed = parseInt(scheduleId.substring(0, 4), 16);
   const result = await fetch(`http://${host}/shifts`, {
     method: "POST",
     headers: {
@@ -119,6 +121,7 @@ export async function sendShifts(req: Request, res: Response) {
     body: JSON.stringify({
       shifts: results.rows[0].json,
       shift_offsets: await getOffsets(scheduleId),
+      seed: seed,
     }),
   });
   const responseData: ScheduleResponse = (await result.json()) as any;
