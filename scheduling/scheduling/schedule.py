@@ -38,19 +38,24 @@ class Config(BaseModel):
 
     @classmethod
     def from_request(cls, request: models.ScheduleRequest) -> Self:
+        employees_from_shifts = {
+            signup.user_id: Employee(
+                requests={shift.id: Request(weight=signup.weight)},
+                min_shifts=request.shift_offsets.get(signup.user_id),
+            )
+            for shift in request.shifts
+            for signup in shift.signups
+        }
+        extra_employees = {
+            user_id: Employee()
+            for user_id in request.all_user_ids - set(employees_from_shifts.keys())
+        }
         return cls(
             shifts={
                 s.id: Shift(start_time=s.start_time, end_time=s.end_time)
                 for s in request.shifts
             },
-            employees={
-                signup.user_id: Employee(
-                    requests={shift.id: Request(weight=signup.weight)},
-                    min_shifts=request.shift_offsets.get(signup.user_id),
-                )
-                for shift in request.shifts
-                for signup in shift.signups
-            },
+            employees=employees_from_shifts | extra_employees,
             seed=request.seed,
         )
 
