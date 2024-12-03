@@ -9,6 +9,7 @@ from st.api.default import (
     get_shift_tree_code_existing,
     put_join_shift_tree,
     get_schedules_schedule_id_members,
+    delete_remove_user_schedule_id,
 )
 
 
@@ -92,6 +93,7 @@ async def test_only_owner_allowed_to_generate_code():
 async def test_only_owner_allowed_to_kick_members():
     client1, _ = await utils.create_account_and_login()
     client2, user_2_email = await utils.create_account_and_login()
+    client3, user_3_email = await utils.create_account_and_login()
 
     schedule = await post_schedules.asyncio(
         client=client1,
@@ -107,7 +109,12 @@ async def test_only_owner_allowed_to_kick_members():
     assert invite_code is not None
 
     await put_join_shift_tree.asyncio_detailed(
-        client=client2, join_code=invite_code.code
+        client=client2,
+        join_code=invite_code.code,
+    )
+    await put_join_shift_tree.asyncio_detailed(
+        client=client3,
+        join_code=invite_code.code,
     )
 
     members = await get_schedules_schedule_id_members.asyncio(
@@ -115,13 +122,14 @@ async def test_only_owner_allowed_to_kick_members():
         schedule_id=schedule_id,
     )
     assert isinstance(members, Sequence)
+    assert {m.email for m in members} == {user_2_email, user_3_email}
 
-    assert len(members) == 1
-    assert members[0].email == user_2_email
+    user_to_remove = next(m for m in members if m.email == user_3_email)
 
-    kick_result = await put_join_shift_tree.asyncio_detailed(
+    kick_result = await delete_remove_user_schedule_id.asyncio_detailed(
         client=client2,
-        join_code=invite_code.code,
+        schedule_id=schedule_id,
+        user_id=user_to_remove.id,
     )
     assert kick_result.status_code.value == 403
 
