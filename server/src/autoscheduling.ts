@@ -110,7 +110,7 @@ export async function sendShifts(req: Request, res: Response) {
       `,
     values: [scheduleId],
   });
-  console.log(results.rows[0].json);
+  // console.log(results.rows[0].json);
 
   const results2 = await pool.query({
     text: /* sql */ `
@@ -153,6 +153,11 @@ export async function sendShifts(req: Request, res: Response) {
       ],
     });
   }
-
-  res.status(204).send();
+  const storeLogData = `
+  UPDATE schedule SET data = $1 WHERE id = $2`;
+  await pool.query({
+    text: storeLogData,
+    values: [responseData, scheduleId],
+  });
+  res.status(204).json({ responseData: JSON.stringify(responseData) });
 }
