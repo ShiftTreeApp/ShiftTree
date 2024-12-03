@@ -58,7 +58,7 @@ export const authorizationCheck = (
     res.sendStatus(401).json({ error: "Missing token" });
     return;
   }
-  jwt.verify(token, "ShiftTree", (err, user) => {
+  jwt.verify(token, jwtKey, (err, user) => {
     if (err) {
       res.sendStatus(401).json({ error: "Invalid token" });
     }
