@@ -60,8 +60,7 @@ export default function SignUp() {
         notifier.message("Successfully registered!");
         // TODO: Change this to redirect to secret-key page
         // response.secretKey contains the secret key.
-        navigate("/");
-        //navigate("/signup-confirmation");
+        navigate("/signup-confirmation");
       })
       .catch(e => {
         console.error(e);
