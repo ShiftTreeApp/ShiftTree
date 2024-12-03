@@ -103,7 +103,10 @@ export default function ShiftTreeCard(props: ShiftTreeCardProps) {
                 ></Chip>
               )}
               {props.status == "closed" && (
-                <Chip label="Closed" sx={{ bgcolor: "salmon" }}></Chip>
+                <Chip
+                  label="Closed"
+                  sx={{ bgcolor: theme.palette.error.main }}
+                ></Chip>
               )}
             </Box>
           </Grid>
