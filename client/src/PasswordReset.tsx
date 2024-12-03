@@ -46,13 +46,14 @@ export default function PasswordReset() {
     auth
       .changePassword({ resetCode, newPassword })
       .then(() => {
+        notifier.message("Password has been changed successfully!");
         navigate("/");
       })
       .catch(notifier.error);
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" sx={{ paddingTop: 8 }}>
       <CssBaseline />
       <InputBox>
         <Avatar
