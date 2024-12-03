@@ -695,6 +695,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - Bearer: []
+      summary: Delete all schedule assignees
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Successful
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: User does not have permission to view the assignments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /autoschedule/{scheduleId}:
     post:

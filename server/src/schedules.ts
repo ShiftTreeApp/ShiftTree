@@ -998,3 +998,49 @@ export async function modifyRecommendedShifts(req: Request, res: Response) {
 
   res.status(204).send();
 }
+
+export async function deleteAllAssignments(req: Request, res: Response) {
+  const userId = await getUserId(req);
+  const scheduleId = req.params.scheduleId;
+
+  console.log("delete assignments", scheduleId);
+
+  // Ensure that user exists and has perms to manage the schedule
+  {
+    const results = await pool.query({
+      text: /* sql */ `
+          select *
+          from schedule_info as info
+          where info.user_id = $1 and info.schedule_id = $2
+        `,
+      values: [userId, scheduleId],
+    });
+
+    if (results.rows.length < 1) {
+      res.status(404).json({
+        error: "Schedule not found or user does not exist",
+      });
+      return;
+    }
+
+    const role = results.rows[0].user_role;
+    if (!(role == "owner" || role == "manager")) {
+      res.status(403).json({
+        error:
+          "You do not have permission to modify the recommended shifts for a user",
+      });
+      return;
+    }
+  }
+
+  await pool.query({
+    text: /* sql */ `
+      delete from user_shift_assignment as usa
+      using shift as s
+      where s.schedule_id = $1 and usa.shift_id = s.id
+    `,
+    values: [scheduleId],
+  });
+
+  res.status(204).send();
+}

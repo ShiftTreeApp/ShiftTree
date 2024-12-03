@@ -1109,7 +1109,45 @@ export interface paths {
         };
         put?: never;
         post?: never;
-        delete?: never;
+        /** Delete all schedule assignees */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    scheduleId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successful */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description User does not have permission to view the assignments */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Schedule with specified ID does not exist, or user does not have access to it */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
