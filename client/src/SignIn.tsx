@@ -11,6 +11,7 @@ import { useNavigate, useParams } from "react-router";
 
 import { useAuth } from "@/auth";
 import { useNotifier } from "@/notifier";
+import theme from "@/theme";
 
 export type SignInParams = {
   from: string;
@@ -37,67 +38,83 @@ export default function SignIn() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Avatar
-          sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
-          src="/icons/shiftTree_avatar.png"
-        />
-        <Typography component="h1" variant="h5">
-          Sign in
-        </Typography>
-        <Grid
-          container
-          spacing={2}
-          direction="column"
-          component="form"
-          onSubmit={handleSubmit}
-          noValidate
-          sx={{ mt: 4 }}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        margin: 0,
+        background: `linear-gradient(45deg, #accaab, ${theme.palette.background.default})`,
+        paddingTop: 8,
+      }}
+    >
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 6,
+            padding: 4,
+            boxShadow: `0px 4px 15px ${theme.palette.primary.light}`,
+          }}
         >
-          <TextField
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
+          <Avatar
+            sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
+            src="/icons/shiftTree_avatar.png"
           />
-          <TextField
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-          />
-          <Button type="submit" fullWidth variant="contained">
-            Sign In
-          </Button>
-          <Grid container spacing={2} sx={{ justifyContent: "space-between" }}>
-            <Grid>
-              <Link href="/enter-secret-key" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
-            <Grid>
-              <Link href="/register" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
+          <Typography component="h1" variant="h5">
+            Sign in to ShiftTree
+          </Typography>
+          <Grid
+            container
+            spacing={2}
+            direction="column"
+            component="form"
+            onSubmit={handleSubmit}
+            noValidate
+            sx={{ mt: 4 }}
+          >
+            <TextField
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+            />
+            <TextField
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+            />
+            <Button type="submit" fullWidth variant="contained">
+              Sign In
+            </Button>
+            <Grid
+              container
+              spacing={2}
+              sx={{ justifyContent: "space-between" }}
+            >
+              <Grid>
+                <Link href="/enter-secret-key" variant="body2">
+                  Forgot password?
+                </Link>
+              </Grid>
+              <Grid>
+                <Link href="/register" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
-      </Box>
-    </Container>
+        </Box>
+      </Container>
+    </Box>
   );
 }
