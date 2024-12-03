@@ -1,4 +1,4 @@
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, Sequence, Set
 from datetime import datetime
 from typing import Any, Literal
 
@@ -24,6 +24,7 @@ class Shift(BaseModel):
 
 class ScheduleRequest(BaseModel):
     shifts: Sequence[Shift]
+    all_user_ids: Set[UserId]
     shift_offsets: Mapping[UserId, int]
     seed: int | None = None
 

@@ -111,6 +111,17 @@ export async function sendShifts(req: Request, res: Response) {
     values: [scheduleId],
   });
   console.log(results.rows[0].json);
+
+  const results2 = await pool.query({
+    text: /* sql */ `
+      select ua.id
+      from user_account as ua
+      join user_schedule_membership as usm on ua.id = usm.user_id
+      where usm.schedule_id = $1
+    `,
+    values: [scheduleId],
+  });
+
   const result = await fetch(`http://${host}/shifts`, {
     method: "POST",
     headers: {
@@ -119,6 +130,7 @@ export async function sendShifts(req: Request, res: Response) {
     body: JSON.stringify({
       shifts: results.rows[0].json,
       shift_offsets: await getOffsets(scheduleId),
+      all_user_ids: results2.rows.map(row => row.id),
     }),
   });
   const responseData: ScheduleResponse = (await result.json()) as any;
