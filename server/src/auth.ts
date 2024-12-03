@@ -25,7 +25,7 @@ export const login = async (req: Request, res: Response) => {
   const { rows } = await pool.query(query);
   console.log(rows);
   if (rows.length == 0) {
-    res.status(401).send("Invalid Gmail Or Password");
+    res.status(401).send("Invalid Email Or Password");
     return;
   }
   if (rows[0]) {
