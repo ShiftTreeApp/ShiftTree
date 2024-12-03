@@ -19,7 +19,7 @@ export type SignUpParams = {
   from: string;
 };
 
-export default function SignUp() {
+export default function PasswordReset() {
   const navigate = useNavigate();
   const notifier = useNotifier();
   const auth = useAuth();
@@ -32,40 +32,26 @@ export default function SignUp() {
     }
   }, [auth, navigate]);
 
-  const [email, setEmail] = useState("");
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    return emailRegex.test(email);
-  };
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const username = data.get("username") as string;
+    //const username = data.get("username") as string;
     //const email = data.get("email") as string;
-    const password = data.get("password") as string;
+    const secret_key = data.get("secret-key") as string;
 
-    if (!validateEmail(email)) {
-      notifier.error("Invalid email address");
-      return;
-    }
+    // *** should reset the user's password ***
 
-    auth
-      .register({ username, email, password })
-      .then(response => {
-        // REMOVE THIS
-        console.log(response);
-        setErrorMessage(null);
-        notifier.message("Successfully registered!");
-        // TODO: Change this to redirect to secret-key page
-        // response.secretKey contains the secret key.
-        navigate("/signup-confirmation");
-      })
-      .catch(e => {
-        console.error(e);
-        setErrorMessage(e.toString());
-      });
+    // auth
+    //   .resetPassword({ secret_key })
+    //   .then(() => {
+    //     setErrorMessage(null);
+    //     notifier.message("Password reset!");
+    //     navigate("/");
+    //   })
+    //   .catch(e => {
+    //     console.error(e);
+    //     setErrorMessage(e.toString());
+    //   });
   };
 
   return (
@@ -81,44 +67,21 @@ export default function SignUp() {
       >
         <Avatar
           sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
-          src="/icons/shiftSprout_avatar.png"
+          src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/shiftTreeImages/shiftSprout_avatar.png?raw=true"
         />
         <Typography component="h1" variant="h5">
-          Register for ShiftTree
+          Enter secret key to reset password
         </Typography>
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid size={12}>
               <TextField
-                name="username"
                 required
                 fullWidth
-                id="username"
-                label="Display Name"
-                autoFocus
-              />
-            </Grid>
-            <Grid size={12}>
-              <TextField
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-              />
-            </Grid>
-            <Grid size={12}>
-              <TextField
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="new-password"
+                id="secret-key"
+                label="Secret Key"
+                name="secret-key"
+                autoComplete="secret-key"
               />
             </Grid>
           </Grid>
@@ -128,20 +91,13 @@ export default function SignUp() {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign Up
+            Reset Password
           </Button>
           <Box>
             {errorMessage && (
               <Typography color="error">{errorMessage}</Typography>
             )}
           </Box>
-          <Grid container justifyContent="flex-center">
-            <Grid>
-              <Link href="/login" variant="body2">
-                Already have an account? Sign in
-              </Link>
-            </Grid>
-          </Grid>
         </Box>
       </Box>
     </Container>

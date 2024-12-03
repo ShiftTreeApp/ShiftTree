@@ -20,12 +20,12 @@ const DeleteShiftTreeModal: React.FC<DeleteShiftTreeModalProps> = ({
   onConfirm,
 }) => {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Delete ShiftTree</DialogTitle>
+    <Dialog open={open} onClose={onClose} color="black">
+      <DialogTitle>Warning!</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Have you stored your key in a safe place? You can also view this
-          secret key in the profile page.
+          Have you stored your key in a safe place? This is the last time you
+          will be able to see your secret key!
           {/* Havent implemented yet */}
         </DialogContentText>
       </DialogContent>
