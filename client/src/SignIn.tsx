@@ -86,7 +86,7 @@ export default function SignIn() {
           </Button>
           <Grid container spacing={2} sx={{ justifyContent: "space-between" }}>
             <Grid>
-              <Link href="/reset" variant="body2">
+              <Link href="/enter-secret-key" variant="body2">
                 Forgot password?
               </Link>
             </Grid>

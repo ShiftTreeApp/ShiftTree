@@ -16,6 +16,8 @@ import * as schedules from "@/schedules";
 import * as invites from "@/invites";
 import * as autoschedule from "@/autoscheduling";
 import * as ICS from "@/ICSFile";
+import * as reset from "@/passwordResets";
+import * as logData from "@/logDataRetrieval";
 
 //Setup
 const app = express();
@@ -46,6 +48,8 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 // app.REQUESTTYPE('endpoint',{put middleware(authentication) here}, file.FunctionName)
 app.post("/login", auth.login);
 app.post("/register", registration.registerUser);
+app.get("/confirmResetCodeValid", reset.confirmResetCodeValid);
+app.post("/resetPassword", reset.resetPassword);
 app.post("/schedules", auth.authorizationCheck, schedules.create);
 app.get("/schedules", auth.authorizationCheck, schedules.list);
 app.get(
@@ -137,6 +141,16 @@ app.get(
   schedules.getCsv,
 );
 app.get("/schedules/:scheduleId/ics", auth.authorizationCheck, ICS.getICSFile);
+app.get(
+  "/schedules/:scheduleId/logData",
+  auth.authorizationCheck,
+  logData.getLogData,
+);
+app.delete(
+  "/schedules/:scheduleId/assignments",
+  auth.authorizationCheck,
+  schedules.deleteAllAssignments,
+);
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);

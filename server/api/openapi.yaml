@@ -57,6 +57,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnexpectedError"
+
+  /confirmResetCodeValid:
+    get:
+      description: Confirms that a given users reset_code is valid
+      parameters:
+        - name: resetCode
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Valid Reset Code
+        401:
+          description: Invalid Reset Code or Gmail
+  /resetPassword:
+    post:
+      description: Resets users password given their gmail and secret key
+      parameters:
+        - name: resetCode
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+        - name: newPassword
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: Succesfully Reset Password
+        500:
+          description: Unexpected Error
   /schedules:
     post:
       description: Create a new schedule
@@ -656,6 +695,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - Bearer: []
+      summary: Delete all schedule assignees
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Successful
+        404:
+          description: Schedule with specified ID does not exist, or user does not have access to it
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: User does not have permission to view the assignments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /autoschedule/{scheduleId}:
     post:
@@ -672,7 +737,13 @@ paths:
       responses:
         204:
           description: Successful
-
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responseData:
+                    type: string
   /schedules/{scheduleId}/user-signups:
     get:
       security:
@@ -707,7 +778,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
+  /schedules/{scheduleId}/logData:
+    get:
+      summary: Get log data for a specific schedule
+      description: Retrieve the JSONB log data for the specified schedule.
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful response with log data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logData:
+                    type: object
+                    additionalProperties: true
+        400:
+          description: Invalid scheduleId supplied
+        404:
+          description: Schedule not found
   /schedules/{scheduleId}/user-assigned:
     get:
       security:

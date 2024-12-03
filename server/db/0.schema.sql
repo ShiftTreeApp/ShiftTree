@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Drop tables if they exist
 DROP TABLE IF EXISTS user_account;
 DROP TABLE IF EXISTS schedule;
@@ -20,6 +22,7 @@ CREATE TABLE user_account
 , username VARCHAR(64) NOT NULL
 , email VARCHAR(64) NOT NULL UNIQUE
 , password_hash VARCHAR(255) NOT NULL
+, reset_code VARCHAR(255) NOT NULL DEFAULT encode(digest(gen_random_uuid()::text, 'sha256'), 'hex')
 );
 
 CREATE TABLE schedule
@@ -29,6 +32,7 @@ CREATE TABLE schedule
 , schedule_name VARCHAR(64) NOT NULL DEFAULT ''
 , schedule_description VARCHAR(255) NOT NULL DEFAULT ''
 , code UUID DEFAULT gen_random_uuid()
+, data jsonb DEFAULT NULL
 );
 
 CREATE TABLE user_schedule_membership

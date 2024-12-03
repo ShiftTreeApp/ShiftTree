@@ -19,7 +19,7 @@ services:
       SHIFTTREE_PG_HOST: database
       SHIFTTREE_PG_PORT: "5432"
       SHIFTTREE_PG_DATABASE: dev
-      SHIFTTREE_JWT_PK: ShiftTree
+      SHIFTTREE_JWT_PK: ${SHIFTTREE_JWT_PK}
       SHIFTTREE_PYTHON_HOST: scheduler:8080
   scheduler:
     image: ghcr.io/shifttreeapp/scheduler:latest

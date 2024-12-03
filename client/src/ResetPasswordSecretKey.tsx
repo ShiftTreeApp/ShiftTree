@@ -3,11 +3,14 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
+//import FormControlLabel from "@mui/material/FormControlLabel";
+//import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
 import { Grid2 as Grid } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
 import { useNotifier } from "./notifier";
 
 import { useAuth } from "@/auth";
@@ -20,7 +23,6 @@ export default function PasswordReset() {
   const navigate = useNavigate();
   const notifier = useNotifier();
   const auth = useAuth();
-  const location = useLocation();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -33,21 +35,18 @@ export default function PasswordReset() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const newPassword = data.get("new-password") as string;
-    const confirmPassword = data.get("confirm-password") as string;
-    const { resetCode } = location.state || {};
-
-    if (newPassword !== confirmPassword) {
-      notifier.error("Passwords do not match");
-      return;
-    }
+    const email = data.get("email") as string;
+    const resetCode = data.get("secret-key") as string;
 
     auth
-      .changePassword({ resetCode, newPassword })
+      .confirmSecretKey({ email, resetCode })
       .then(() => {
-        navigate("/");
+        navigate("/password-reset", { state: { resetCode } });
       })
-      .catch(notifier.error);
+      .catch(error => {
+        console.log(error);
+        notifier.error("Invalid Secret Key");
+      });
   };
 
   return (
@@ -66,7 +65,7 @@ export default function PasswordReset() {
           src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/shiftTreeImages/shiftSprout_avatar.png?raw=true"
         />
         <Typography component="h1" variant="h5">
-          Enter new password
+          Enter Info to Reset Password
         </Typography>
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
@@ -74,22 +73,20 @@ export default function PasswordReset() {
               <TextField
                 required
                 fullWidth
-                id="new-password"
-                type="password"
-                label="New Password"
-                name="new-password"
-                autoComplete="New Password"
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
               />
             </Grid>
             <Grid size={12}>
               <TextField
                 required
                 fullWidth
-                name="confirm-password"
-                label="Confirm Password"
-                type="password"
-                id="confirm-password"
-                autoComplete="New Password"
+                id="secret-key"
+                label="Secret Key"
+                name="secret-key"
+                autoComplete="secret-key"
               />
             </Grid>
           </Grid>
