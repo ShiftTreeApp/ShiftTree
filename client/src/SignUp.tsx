@@ -47,9 +47,15 @@ export default function SignUp() {
     const username = data.get("username") as string;
     const email = data.get("email") as string;
     const password = data.get("password") as string;
+    const confirmPassword = data.get("confirm-password") as string;
 
     if (!validateEmail(email)) {
       notifier.error("Invalid email address");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      notifier.error("Passwords do not match");
       return;
     }
 
@@ -119,6 +125,17 @@ export default function SignUp() {
                 type="password"
                 id="password"
                 autoComplete="new-password"
+              />
+            </Grid>
+            <Grid size={12}>
+              <TextField
+                required
+                fullWidth
+                name="confirm-password"
+                label="Confirm Password"
+                type="password"
+                id="confirm-password"
+                autoComplete="confirm-password"
               />
             </Grid>
           </Grid>
