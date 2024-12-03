@@ -603,6 +603,7 @@ function UserChips(props: UserChipsProps) {
 
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+      {users?.length === 0 && <Typography>No registered users</Typography>}
       {users?.map(user => {
         return (
           <CustomTooltip key={user.id} title={user.email}>

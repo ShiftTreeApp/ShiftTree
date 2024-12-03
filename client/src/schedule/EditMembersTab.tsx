@@ -55,6 +55,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
 
   function copyInviteCode() {
     navigator.clipboard.writeText(inviteCode);
+    notifier.message("Invite code copied to clipboard");
   }
 
   const [userToKick, setUserToKick] = useState<
