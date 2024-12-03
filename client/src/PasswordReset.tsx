@@ -3,14 +3,11 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-//import FormControlLabel from "@mui/material/FormControlLabel";
-//import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import { Grid2 as Grid } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useNotifier } from "./notifier";
 
 import { useAuth } from "@/auth";
@@ -23,6 +20,7 @@ export default function PasswordReset() {
   const navigate = useNavigate();
   const notifier = useNotifier();
   const auth = useAuth();
+  const location = useLocation();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -35,23 +33,21 @@ export default function PasswordReset() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    //const username = data.get("username") as string;
-    //const email = data.get("email") as string;
-    const password = data.get("password") as string;
+    const newPassword = data.get("new-password") as string;
+    const confirmPassword = data.get("confirm-password") as string;
+    const { resetCode } = location.state || {};
 
-    // *** should authenticate the user's secret key ***
+    if (newPassword !== confirmPassword) {
+      notifier.error("Passwords do not match");
+      return;
+    }
 
-    //     auth
-    //       .resetPassword({ password })
-    //       .then(() => {
-    //         setErrorMessage(null);
-    //         notifier.message("Password reset!");
-    //         navigate("/");
-    //       })
-    //       .catch(e => {
-    //         console.error(e);
-    //         setErrorMessage(e.toString());
-    //       });
+    auth
+      .changePassword({ resetCode, newPassword })
+      .then(() => {
+        navigate("/");
+      })
+      .catch(notifier.error);
   };
 
   return (
@@ -79,6 +75,7 @@ export default function PasswordReset() {
                 required
                 fullWidth
                 id="new-password"
+                type="password"
                 label="New Password"
                 name="new-password"
                 autoComplete="New Password"
@@ -90,7 +87,7 @@ export default function PasswordReset() {
                 fullWidth
                 name="confirm-password"
                 label="Confirm Password"
-                type="confirm-password"
+                type="password"
                 id="confirm-password"
                 autoComplete="New Password"
               />

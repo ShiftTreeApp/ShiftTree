@@ -35,23 +35,18 @@ export default function PasswordReset() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    //const username = data.get("username") as string;
-    //const email = data.get("email") as string;
-    const secret_key = data.get("secret-key") as string;
+    const email = data.get("email") as string;
+    const resetCode = data.get("secret-key") as string;
 
-    // *** should reset the user's password ***
-
-    // auth
-    //   .resetPassword({ secret_key })
-    //   .then(() => {
-    //     setErrorMessage(null);
-    //     notifier.message("Password reset!");
-    //     navigate("/");
-    //   })
-    //   .catch(e => {
-    //     console.error(e);
-    //     setErrorMessage(e.toString());
-    //   });
+    auth
+      .confirmSecretKey({ email, resetCode })
+      .then(() => {
+        navigate("/password-reset", { state: { resetCode } });
+      })
+      .catch(error => {
+        console.log(error);
+        notifier.error("Invalid Secret Key");
+      });
   };
 
   return (
@@ -70,10 +65,20 @@ export default function PasswordReset() {
           src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/shiftTreeImages/shiftSprout_avatar.png?raw=true"
         />
         <Typography component="h1" variant="h5">
-          Enter secret key to reset password
+          Enter Info to Reset Password
         </Typography>
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
+            <Grid size={12}>
+              <TextField
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+              />
+            </Grid>
             <Grid size={12}>
               <TextField
                 required

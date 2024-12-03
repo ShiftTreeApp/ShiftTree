@@ -13,11 +13,9 @@ import {
   Box,
   Container,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
-import { useNavigate, useParams } from "react-router";
+import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router";
 import SecretKeyConfirmModal from "./SecretKeyConfirmModal";
-
-import { useAuth } from "@/auth";
 
 const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -31,11 +29,10 @@ const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
 }));
 
 export default function SignUpConfirmation() {
+  const location = useLocation();
   const navigate = useNavigate();
+  const { secretKey } = location.state || {};
   const [isFocused, setIsFocused] = useState(false);
-
-  const auth = useAuth();
-
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const handleLogInShiftTreeClick = () => {
@@ -90,7 +87,7 @@ export default function SignUpConfirmation() {
                 id="secret-key"
                 label="Secret Key"
                 name="secret-key"
-                value={"123456"}
+                value={secretKey}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ readOnly: true }}
                 onFocus={() => setIsFocused(true)}
