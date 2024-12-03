@@ -11,6 +11,14 @@ function useAuthInner() {
     "post",
     "/register",
   );
+  const { mutateAsync: submitPasswordChange } = api.useMutation(
+    "post",
+    "/resetPassword",
+  );
+  const { mutateAsync: submitSecretKey } = api.useMutation(
+    "get",
+    "/confirmResetCodeValid",
+  );
 
   return {
     async login({
@@ -41,6 +49,40 @@ function useAuthInner() {
       });
       console.log("Registered User");
       return res;
+    },
+
+    async confirmSecretKey({
+      resetCode,
+      email,
+    }: {
+      resetCode: string;
+      email: string;
+    }): Promise<void> {
+      await submitSecretKey({
+        params: {
+          query: {
+            resetCode,
+            email,
+          },
+        },
+      });
+    },
+
+    async changePassword({
+      resetCode,
+      newPassword,
+    }: {
+      resetCode: string;
+      newPassword: string;
+    }): Promise<void> {
+      await submitPasswordChange({
+        params: {
+          query: {
+            resetCode,
+            newPassword,
+          },
+        },
+      });
     },
 
     logout() {
