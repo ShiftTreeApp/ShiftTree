@@ -3,9 +3,6 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-//import FormControlLabel from "@mui/material/FormControlLabel";
-//import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import { Grid2 as Grid } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -14,6 +11,7 @@ import { useNavigate } from "react-router";
 import { useNotifier } from "./notifier";
 
 import { useAuth } from "@/auth";
+import InputBox from "@/customComponents/InputBox";
 
 export type SignUpParams = {
   from: string;
@@ -50,16 +48,9 @@ export default function PasswordReset() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" sx={{ paddingTop: 8 }}>
       <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+      <InputBox>
         <Avatar
           sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
           src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/icons/shiftSprout_avatar.png?raw=true"
@@ -104,7 +95,7 @@ export default function PasswordReset() {
             )}
           </Box>
         </Box>
-      </Box>
+      </InputBox>
     </Container>
   );
 }

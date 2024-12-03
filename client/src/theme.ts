@@ -54,12 +54,25 @@ const customTheme = createTheme({
       paper: "#f3f7e2", // Background for Paper components (lighter shade)
     },
   },
+  shape: {
+    borderRadius: 6,
+  },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
           textTransform: "none", // No all-caps
           fontWeight: "medium", // Medium font weight
+          borderRadius: 20, // Rounded corners
+        },
+      },
+    },
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          background: "linear-gradient(45deg, #accaab, #eaf2ea)",
+          minHeight: "100vh",
+          margin: 0,
         },
       },
     },
