@@ -146,6 +146,11 @@ app.get(
   auth.authorizationCheck,
   logData.getLogData,
 );
+app.delete(
+  "/schedules/:scheduleId/assignments",
+  auth.authorizationCheck,
+  schedules.deleteAllAssignments,
+);
 
 app.use((err: Error, _rq: Request, res: Response, _next: NextFunction) => {
   console.error(err);

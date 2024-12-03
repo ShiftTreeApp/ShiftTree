@@ -6,10 +6,20 @@ import {
   TooltipProps,
   tooltipClasses,
   styled,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  DialogTitle,
+  Breadcrumbs,
+  Link,
 } from "@mui/material";
-import { DeleteForever as DeleteShiftTreeIcon } from "@mui/icons-material";
+import {
+  DeleteForever as DeleteShiftTreeIcon,
+  RotateLeft as ResetIcon,
+} from "@mui/icons-material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 
 import useSchedule from "@/hooks/useSchedule";
@@ -47,28 +57,100 @@ export default function ShiftTreeSettings(props: ShiftTreeSettingsProps) {
     navigate("/");
   };
 
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+
+  const handleResetShiftTreeClick = () => {
+    setResetModalOpen(true);
+  };
+  const handleResetConfirm = async () => {
+    await schedule.deleteAllAssignments().catch(notifier.error);
+    notifier.message("Assignments reset");
+    setResetModalOpen(false);
+  };
+
   return (
-    <Grid>
-      <h1>ShiftTreeSettings</h1>
-      {schedule.data?.role == "owner" || schedule.data?.role == "manager" ? (
-        <CustomTooltip title="Delete Entire ShiftTree" placement="top">
-          <Button
-            variant="contained"
-            startIcon={<DeleteShiftTreeIcon />}
-            onClick={handleDeleteShiftTreeClick}
-            sx={{
-              backgroundColor: theme => theme.palette.error.dark,
-            }}
-          >
-            <Typography>Delete ShiftTree</Typography>
-          </Button>
-        </CustomTooltip>
-      ) : null}
+    <Grid
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        alignItems: "start",
+      }}
+    >
+      <Breadcrumbs>
+        <Link component={RouterLink} to={`/schedule/${props.scheduleId}`}>
+          {schedule.name ?? "Schedule"}
+        </Link>
+        <Typography>Settings</Typography>
+      </Breadcrumbs>
+      <Typography variant="h5">
+        <strong>Danger Zone</strong>
+      </Typography>
+      <CustomTooltip title="Reset All Assignments" placement="top">
+        <Button
+          variant="contained"
+          startIcon={<ResetIcon />}
+          onClick={handleResetShiftTreeClick}
+          sx={{
+            backgroundColor: theme => theme.palette.error.dark,
+          }}
+        >
+          <Typography>Reset Assignments</Typography>
+        </Button>
+      </CustomTooltip>
+      <CustomTooltip title="Delete Entire ShiftTree" placement="top">
+        <Button
+          variant="contained"
+          startIcon={<DeleteShiftTreeIcon />}
+          onClick={handleDeleteShiftTreeClick}
+          sx={{
+            backgroundColor: theme => theme.palette.error.dark,
+          }}
+        >
+          <Typography>Delete ShiftTree</Typography>
+        </Button>
+      </CustomTooltip>
       <DeleteShiftTreeModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleDeleteConfirm}
       />
+      <ResetModal
+        open={resetModalOpen}
+        onClose={() => setResetModalOpen(false)}
+        onConfirm={handleResetConfirm}
+      />
     </Grid>
   );
 }
+
+interface ResetModalProps {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+const ResetModal: React.FC<ResetModalProps> = ({
+  open,
+  onClose,
+  onConfirm,
+}) => {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Reset Assignments</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          {
+            "Are you sure you want to reset all assignments? This cannot be undone."
+          }
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onConfirm} color="primary">
+          Reset
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};

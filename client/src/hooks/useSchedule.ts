@@ -220,6 +220,20 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     await sendDeleteSchedule({ params: { path: { scheduleId } } });
   }
 
+  const { mutateAsync: sendDeleteAllAssignments } = api.useMutation(
+    "delete",
+    "/schedules/{scheduleId}/assignments",
+    {
+      onSuccess: async () => {
+        await refetchSchedule();
+      },
+    },
+  );
+
+  async function deleteAllAssignments() {
+    await sendDeleteAllAssignments({ params: { path: { scheduleId } } });
+  }
+
   return {
     name: scheduleData?.name,
     description: scheduleData?.description,
@@ -236,5 +250,6 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
     getAssignmentsCsv,
     getICS,
     getLogData,
+    deleteAllAssignments,
   };
 }
