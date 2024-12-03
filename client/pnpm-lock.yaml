@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@date-io/dayjs':
+        specifier: ^3.0.0
+        version: 3.0.0(dayjs@1.11.13)
       '@emotion/react':
         specifier: ^11.13.3
         version: 11.13.3(@types/react@18.3.11)(react@18.3.1)
@@ -215,6 +218,17 @@ packages:
   '@babel/types@7.25.8':
     resolution: {integrity: sha512-JWtuCu8VQsMladxVz/P4HzHUGCAwpuqacmowgXFs5XjxIgKuNjnLokQzuVjlTvIzODaDmpjT3oxcC48vyk9EWg==}
     engines: {node: '>=6.9.0'}
+
+  '@date-io/core@3.0.0':
+    resolution: {integrity: sha512-S3j+IAQVBYNkQzchVVhX40eBkGDreBpScy9RXwTS5j2+k07+62pMVPisQ44Gq76Rqy5AOG/EZXCwBpY/jbemvA==}
+
+  '@date-io/dayjs@3.0.0':
+    resolution: {integrity: sha512-vy7DSwoQiPA2L0stRqW3le7lcEBMjoMMEmbpCNkyoX3xXizKInFvhbnOBmCyusIQ7tL/WsNC4X5bVgdNWX0JLA==}
+    peerDependencies:
+      dayjs: ^1.8.17
+    peerDependenciesMeta:
+      dayjs:
+        optional: true
 
   '@emotion/babel-plugin@11.12.0':
     resolution: {integrity: sha512-y2WQb+oP8Jqvvclh8Q55gLUyb7UFvgv7eJfsj7td5TToBrIUtPay2kMrZi4xjq9qw2vD0ZR5fSho0yqoFgX7Rw==}
@@ -2213,6 +2227,14 @@ snapshots:
       '@babel/helper-string-parser': 7.25.7
       '@babel/helper-validator-identifier': 7.25.7
       to-fast-properties: 2.0.0
+
+  '@date-io/core@3.0.0': {}
+
+  '@date-io/dayjs@3.0.0(dayjs@1.11.13)':
+    dependencies:
+      '@date-io/core': 3.0.0
+    optionalDependencies:
+      dayjs: 1.11.13
 
   '@emotion/babel-plugin@11.12.0':
     dependencies:

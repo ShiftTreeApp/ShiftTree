@@ -233,6 +233,7 @@ export default function Schedule() {
               >
                 {isSelecting ? "Cancel" : "Select"}
               </Button>
+              {isSelecting && (
               <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
                 <Button
                   variant="contained"
@@ -263,6 +264,7 @@ export default function Schedule() {
                   Unregister All
                 </Button>
               </Box>
+            )}
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
