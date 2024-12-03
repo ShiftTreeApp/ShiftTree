@@ -27,7 +27,7 @@ export default function Create() {
     createSchedule({ body: { name, description } })
       .then(res => {
         console.log("Created");
-        navigate(`/schedule/${res.scheduleId}/edit`);
+        navigate(`/schedule/${res.scheduleId}`);
       })
       .catch(err => {
         // TODO: Show error message with a notification or something
