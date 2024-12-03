@@ -121,7 +121,7 @@ export async function sendShifts(req: Request, res: Response) {
     `,
     values: [scheduleId],
   });
-
+  const seed = parseInt(scheduleId.substring(0, 4), 16);
   const result = await fetch(`http://${host}/shifts`, {
     method: "POST",
     headers: {
@@ -131,6 +131,7 @@ export async function sendShifts(req: Request, res: Response) {
       shifts: results.rows[0].json,
       shift_offsets: await getOffsets(scheduleId),
       all_user_ids: results2.rows.map(row => row.id),
+      seed: seed,
     }),
   });
   const responseData: ScheduleResponse = (await result.json()) as any;
