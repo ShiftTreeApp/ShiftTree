@@ -234,37 +234,39 @@ export default function Schedule() {
                 {isSelecting ? "Cancel" : "Select"}
               </Button>
               {isSelecting && (
-              <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-                <Button
-                  variant="contained"
-                  color="success"
-                  onClick={async () => {
-                    for (const shiftId of selectedShifts) {
-                      await empActions.signup({ shiftId });
-                    }
-                    notifier.message("Registered for selected shifts");
-                    empActions.refetchUserSignups();
-                  }}
+                <Box
+                  sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}
                 >
-                  Register All
-                </Button>
-                <Button
-                  variant="contained"
-                  sx={{
-                    backgroundColor: theme => theme.palette.error.dark,
-                  }}
-                  onClick={async () => {
-                    for (const shiftId of selectedShifts) {
-                      await empActions.unregister({ shiftId });
-                    }
-                    notifier.message("Unregistered from selected shifts");
-                    empActions.refetchUserSignups();
-                  }}
-                >
-                  Unregister All
-                </Button>
-              </Box>
-            )}
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={async () => {
+                      for (const shiftId of selectedShifts) {
+                        await empActions.signup({ shiftId });
+                      }
+                      notifier.message("Registered for selected shifts");
+                      empActions.refetchUserSignups();
+                    }}
+                  >
+                    Register All
+                  </Button>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: theme => theme.palette.error.dark,
+                    }}
+                    onClick={async () => {
+                      for (const shiftId of selectedShifts) {
+                        await empActions.unregister({ shiftId });
+                      }
+                      notifier.message("Unregistered from selected shifts");
+                      empActions.refetchUserSignups();
+                    }}
+                  >
+                    Unregister All
+                  </Button>
+                </Box>
+              )}
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
