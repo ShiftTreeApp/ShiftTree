@@ -3,10 +3,6 @@ import {
   Grid2 as Grid,
   Typography,
   Button,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
   Avatar,
   CssBaseline,
   TextField,
@@ -16,17 +12,7 @@ import {
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router";
 import SecretKeyConfirmModal from "./SecretKeyConfirmModal";
-
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
+import { CustomTooltip } from "./customComponents/CustomTooltip";
 
 export default function SignUpConfirmation() {
   const location = useLocation();

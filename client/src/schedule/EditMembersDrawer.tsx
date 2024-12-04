@@ -1,29 +1,7 @@
-import {
-  Box,
-  Drawer,
-  Typography,
-  IconButton,
-  //Tooltip,
-  //TooltipProps,
-  //tooltipClasses,
-  //styled,
-} from "@mui/material";
+import { Box, Drawer, Typography, IconButton } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import NavbarPadding from "@/NavbarPadding";
 import { type ReactNode } from "react";
-
-/*
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
-*/
 
 export interface EditMembersDrawerProps {
   open: boolean;
