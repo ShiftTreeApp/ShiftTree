@@ -14,7 +14,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { useParams } from "react-router";
+import { Navigate, useNavigate, useParams } from "react-router";
 import {
   HowToReg as RegisterIcon,
   EventBusy as LeaveShiftTreeIcon,
@@ -54,6 +54,8 @@ function useSelectedShiftParam() {
 }
 
 export default function Schedule() {
+  const navigate = useNavigate();
+
   const { scheduleId } = useParams();
   const empActions = useEmployeeActions(scheduleId ? scheduleId : "");
   const notifier = useNotifier();
@@ -64,7 +66,7 @@ export default function Schedule() {
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedShifts, setSelectedShifts] = useState<string[]>([]);
-
+  const [weight, setWeight] = useState(5);
   const drawerOpen = selectedShift !== null;
 
   const api = useApi();
@@ -116,6 +118,7 @@ export default function Schedule() {
     console.log(selectedShift);
     await empActions.signup({
       shiftId: selectedShift ? selectedShift : "",
+      weight: weight,
     });
 
     empActions.refetchUserSignups();
@@ -218,6 +221,12 @@ export default function Schedule() {
                 sx={{
                   backgroundColor: theme => theme.palette.error.dark,
                 }}
+                onClick={async () => {
+                  await empActions.leaveSchedule({
+                    scheduleId: scheduleId ?? "",
+                  });
+                  navigate("/");
+                }}
               >
                 <Typography>Leave Shift Tree</Typography>
               </Button>
@@ -297,17 +306,18 @@ export default function Schedule() {
                 </Typography>
               </CustomTooltip>
               <Slider
-                defaultValue={50}
+                defaultValue={5}
                 aria-label="Request weight"
                 valueLabelDisplay="auto"
                 sx={{ width: { md: 300 } }}
-                shiftStep={30}
-                step={10}
+                shiftStep={3}
+                step={1}
                 marks
-                max={100}
-                min={10}
+                max={10}
+                min={1}
+                value={weight}
+                onChange={(_, newValue) => setWeight(newValue as number)}
               />
-
               <Button
                 variant="contained"
                 color="primary"

@@ -186,12 +186,12 @@ export const removeUserFromShiftTree = async (req: Request, res: Response) => {
 
   const schedule = schedulesResult.rows[0];
 
-  if (!(schedule.user_role === "owner" || schedule.user_role === "manager")) {
-    res.status(403).json({
-      error: "You do not have permission to invite users to this schedule",
-    });
-    return;
-  }
+  // if (!(schedule.user_role === "owner" || schedule.user_role === "manager")) {
+  //   res.status(403).json({
+  //     error: "You do not have permission to invite users to this schedule",
+  //   });
+  //   return;
+  // }
   // If the target user is not the current user, check if the current user is the owner
   if (targetUserId !== currentUserId) {
     const results = await pool.query({
