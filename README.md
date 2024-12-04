@@ -11,7 +11,6 @@ Hosted version 🌐: [shifttree.org](https://shifttree.org/)
 **Requirements:**
 
 - Most versions of linux. Tested on Fedora 41 and Ubuntu 24.04, but it should work on any system with Docker.
-- Docker.
 - Docker, recent versions with the embedded `docker compose` command and not `docker-compose`.
 
 **Instructions:**
