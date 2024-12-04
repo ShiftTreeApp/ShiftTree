@@ -2,10 +2,6 @@ import {
   Grid2 as Grid,
   Typography,
   Button,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
   Dialog,
   DialogContent,
   DialogActions,
@@ -24,21 +20,11 @@ import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 
 import useSchedule from "@/hooks/useSchedule";
 import { useNotifier } from "@/notifier";
+import { CustomTooltip } from "@/customComponents/CustomTooltip";
 
 interface ShiftTreeSettingsProps {
   scheduleId: string;
 }
-
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
 
 export default function ShiftTreeSettings(props: ShiftTreeSettingsProps) {
   const schedule = useSchedule({ scheduleId: props.scheduleId });
