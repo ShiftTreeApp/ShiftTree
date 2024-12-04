@@ -1,3 +1,4 @@
+import { LinkBehavior } from "@/LinkBehavior";
 import { createTheme } from "@mui/material/styles";
 import { PaletteColorOptions } from "@mui/material/styles";
 
@@ -27,32 +28,68 @@ declare module "@mui/material/styles" {
 const customTheme = createTheme({
   palette: {
     primary: {
-      main: "#2E7D32", // #008b00
-      light: "#abcbad",
-      veryLight: "#f1f8e9",
+      main: "#2E7D32", // Medium Green
+      light: "#98bd97", // Pale Green
+      veryLight: "#f1f8e9", // Offwhite
     },
     secondary: {
-      main: "#ffa000",
-      light: "#ffca70",
-      veryLight: "#ffe082",
-      light2: "#ffecb0", // used for shift cards for better contrast
+      main: "#ff6f00", // Light Orange
+      light: "#ffb300", // Pale Orange
+      veryLight: "#ffe082", // Pale Orange-Yellow
+      light2: "#ffecb0", // Orange Tint Offwhite
     },
     info: {
-      main: "#58A4B0",
-      light: "#527B6A", // used for green buttons that are not primary
-      light2: "#9BC1BC",
-      dark: "#A491D3", // purple used for generate shifts button
+      main: "#56bfb3", // Medium Cyan
+      light: "#527B6A", // Turquoise
+      light2: "#9BC1BC", // Pale Cyan
+      dark: "#A491D3", // Pale Purple
     },
     error: {
-      main: "#f26868",
-      light: "#f58686",
-      veryLight: "#f8d7da",
-      dark: "#C20114", // #F40000
+      main: "#ff5252", // Pale Red
+      light: "#f58686", // Paler Red
+      veryLight: "#f8d7da", // Pink Tint Offwhite
+      dark: "#C20114", // Deep Red
     },
     background: {
-      default: "#e0ebc9", // Default background
+      default: "#eaf2ea", // Green Tint Offwhite
       paper: "#f3f7e2", // Background for Paper components (lighter shade)
     },
+  },
+  shape: {
+    borderRadius: 6,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: "none", // No all-caps
+          fontWeight: "medium", // Medium font weight
+          borderRadius: 20, // Rounded corners
+        },
+      },
+    },
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          background: "linear-gradient(45deg, #accaab, #eaf2ea)",
+          minHeight: "100vh",
+          margin: 0,
+        },
+      },
+    },
+    MuiLink: {
+      defaultProps: {
+        component: LinkBehavior,
+      },
+    },
+    MuiButtonBase: {
+      defaultProps: {
+        LinkComponent: LinkBehavior,
+      },
+    },
+  },
+  typography: {
+    fontFamily: `"Roboto Condensed", "Roboto", "Helvetica", sans-serif`,
   },
 });
 

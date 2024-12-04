@@ -11,6 +11,7 @@ import { useNavigate, useLocation } from "react-router";
 import { useNotifier } from "./notifier";
 
 import { useAuth } from "@/auth";
+import InputBox from "@/customComponents/InputBox";
 
 export type SignUpParams = {
   from: string;
@@ -45,25 +46,19 @@ export default function PasswordReset() {
     auth
       .changePassword({ resetCode, newPassword })
       .then(() => {
+        notifier.message("Password has been changed successfully!");
         navigate("/");
       })
       .catch(notifier.error);
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" sx={{ paddingTop: 8 }}>
       <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+      <InputBox>
         <Avatar
           sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
-          src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/shiftTreeImages/shiftSprout_avatar.png?raw=true"
+          src="https://github.com/ShiftTreeApp/ShiftTree/blob/main/icons/shiftSprout_avatar.png?raw=true"
         />
         <Typography component="h1" variant="h5">
           Enter new password
@@ -107,7 +102,7 @@ export default function PasswordReset() {
             )}
           </Box>
         </Box>
-      </Box>
+      </InputBox>
     </Container>
   );
 }
