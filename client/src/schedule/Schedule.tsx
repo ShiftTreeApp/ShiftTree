@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  DialogContentText,
 } from "@mui/material";
 import { Navigate, useNavigate, useParams } from "react-router";
 import {
@@ -162,6 +163,23 @@ export default function Schedule() {
   const handleOpenSTInfo = () => setInfoModalOpen(true);
   const handleCloseSTInfo = () => setInfoModalOpen(false);
 
+  const [open, setOpen] = useState(false);
+
+  const handleLeave = async () => {
+    await empActions.leaveSchedule({
+      scheduleId: scheduleId ?? "",
+    });
+    navigate("/");
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <Grid container direction="column" spacing={1}>
       <Navbar />
@@ -221,12 +239,7 @@ export default function Schedule() {
                 sx={{
                   backgroundColor: theme => theme.palette.error.dark,
                 }}
-                onClick={async () => {
-                  await empActions.leaveSchedule({
-                    scheduleId: scheduleId ?? "",
-                  });
-                  navigate("/");
-                }}
+                onClick={handleClickOpen}
               >
                 <Typography>Leave Shift Tree</Typography>
               </Button>
@@ -280,6 +293,24 @@ export default function Schedule() {
               )}
             </Grid>
           </Grid>
+          <Dialog open={open} onClose={handleClose}>
+            <DialogTitle>{"Confirm Leave"}</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to leave this shift tree? This is
+                permanent. You will need a code to rejoin. (You can click
+                'ShiftTree' on the top left to return to dashboard)
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleLeave} color="primary" autoFocus>
+                Confirm
+              </Button>
+            </DialogActions>
+          </Dialog>
           <Divider sx={{ my: 2 }} />
           <EditShiftDrawer
             open={drawerOpen}
