@@ -35,6 +35,7 @@ class Config(BaseModel):
     employees: Mapping[EmployeeId, Employee]
     seed: int | None = Field(default=None)
     """Random seed for the solver. If not provided, the solver does not produce deterministic results."""
+    shift_gap: int = Field(default=8 * 3600)
 
     @classmethod
     def from_request(cls, request: models.ScheduleRequest) -> Self:
@@ -57,6 +58,7 @@ class Config(BaseModel):
             },
             employees=employees_from_shifts | extra_employees,
             seed=request.seed,
+            shift_gap=request.shift_separation_m * 60,
         )
 
 
@@ -144,8 +146,10 @@ def prevent_consecutive_shifts(
             shift1 = config.shifts[s1]
             shift2 = config.shifts[s2]
             if (
-                abs((shift2.start_time - shift1.end_time).total_seconds()) < 8 * 3600
-                or abs((shift1.start_time - shift2.end_time).total_seconds()) < 8 * 3600
+                abs((shift2.start_time - shift1.end_time).total_seconds())
+                < config.shift_gap
+                or abs((shift1.start_time - shift2.end_time).total_seconds())
+                < config.shift_gap
             ):
                 enforcement_var = model.new_bool_var(
                     constraint_name(
