@@ -1,3 +1,4 @@
+import { LinkBehavior } from "@/LinkBehavior";
 import { createTheme } from "@mui/material/styles";
 import { PaletteColorOptions } from "@mui/material/styles";
 
@@ -74,6 +75,16 @@ const customTheme = createTheme({
           minHeight: "100vh",
           margin: 0,
         },
+      },
+    },
+    MuiLink: {
+      defaultProps: {
+        component: LinkBehavior,
+      },
+    },
+    MuiButtonBase: {
+      defaultProps: {
+        LinkComponent: LinkBehavior,
       },
     },
   },
