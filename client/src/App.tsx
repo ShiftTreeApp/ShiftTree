@@ -17,6 +17,7 @@ import SignUpConfirmation from "./SignUpConfirmation.tsx";
 import PasswordReset from "./PasswordReset.tsx";
 import ResetPasswordSecretKey from "./ResetPasswordSecretKey.tsx";
 import ScheduleShared from "@/schedule/ScheduleShared.tsx";
+import { CssBaseline } from "@mui/material";
 
 export default function App() {
   return (
@@ -93,6 +94,7 @@ export default function App() {
           </AuthProvider>
         </ApiProvider>
       </NotifierProvider>
+      <CssBaseline />
     </ThemeProvider>
   );
 }
