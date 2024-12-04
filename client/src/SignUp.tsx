@@ -14,6 +14,8 @@ import { useNavigate } from "react-router";
 import { useNotifier } from "./notifier";
 
 import { useAuth } from "@/auth";
+import theme from "@/theme";
+import InputBox from "@/customComponents/InputBox";
 
 export type SignUpParams = {
   from: string;
@@ -75,16 +77,9 @@ export default function SignUp() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" sx={{ paddingTop: 8 }}>
       <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+      <InputBox>
         <Avatar
           sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
           src="/icons/shiftSprout_avatar.png"
@@ -160,7 +155,7 @@ export default function SignUp() {
             </Grid>
           </Grid>
         </Box>
-      </Box>
+      </InputBox>
     </Container>
   );
 }

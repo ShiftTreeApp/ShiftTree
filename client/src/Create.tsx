@@ -44,7 +44,7 @@ export default function Create() {
           <Grid container spacing={1} direction="column">
             <Typography variant="h5">Create a new ShiftTree</Typography>
             <Typography>
-              You can add shfits and invite members after creation
+              You can add shifts and invite members after creation
             </Typography>
           </Grid>
           <Grid container direction="row" spacing={2} sx={{ width: "100%" }}>

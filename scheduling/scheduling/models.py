@@ -27,6 +27,7 @@ class ScheduleRequest(BaseModel):
     all_user_ids: Set[UserId]
     shift_offsets: Mapping[UserId, int]
     seed: int | None = None
+    shift_separation_m: int = Field(default=24 * 60)
 
 
 class Assignment(BaseModel):

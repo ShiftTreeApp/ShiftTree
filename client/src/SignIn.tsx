@@ -11,6 +11,8 @@ import { useNavigate, useParams } from "react-router";
 
 import { useAuth } from "@/auth";
 import { useNotifier } from "@/notifier";
+import theme from "@/theme";
+import InputBox from "@/customComponents/InputBox";
 
 export type SignInParams = {
   from: string;
@@ -37,22 +39,15 @@ export default function SignIn() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" sx={{ paddingTop: 8 }}>
       <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+      <InputBox>
         <Avatar
           sx={{ m: 2, bgcolor: "primary.main", width: 64, height: 64 }}
           src="/icons/shiftTree_avatar.png"
         />
         <Typography component="h1" variant="h5">
-          Sign in
+          Sign in to ShiftTree
         </Typography>
         <Grid
           container
@@ -97,7 +92,7 @@ export default function SignIn() {
             </Grid>
           </Grid>
         </Grid>
-      </Box>
+      </InputBox>
     </Container>
   );
 }

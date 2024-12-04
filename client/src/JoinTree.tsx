@@ -68,7 +68,7 @@ export default function JoinTree({ joinType }: JoinTreeProps) {
             <Button
               fullWidth
               sx={{
-                backgroundColor: theme => theme.palette.secondary.main,
+                backgroundColor: theme => theme.palette.secondary.light,
                 marginTop: 2, // Spacing between TextField and Button
                 padding: "8px 16px", // Padding inside the button
                 "&:hover": {
