@@ -125,7 +125,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
   async function autogenerate() {
     if (empActions.allAssignments?.length !== 0) {
       notifier.error(
-        "Auto-scheduling only available when no assignments are present. Reset assignments to auto-schedule.",
+        "Reset assignments in settings tab if you would like to create a new schedule.",
       );
       return;
     }
@@ -137,7 +137,9 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
       console.error("Scheduling failed", logData);
       notifier.error("Scheduling failed. Check logs for more information.");
     } else {
-      notifier.message("Auto-scheduling finished.");
+      notifier.message(
+        "Schedule created! Download LogData for algorithim logs.",
+      );
     }
   }
 
@@ -255,7 +257,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               </Button>
             </CustomTooltip>
 
-            <CustomTooltip title="Download Generated Schedule" placement="top">
+            <CustomTooltip title="Download Schedule/Info" placement="top">
               <Button
                 variant="contained"
                 startIcon={<DownloadIcon />}

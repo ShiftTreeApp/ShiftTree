@@ -221,18 +221,20 @@ export default function Schedule() {
               >
                 <Typography>Leave Shift Tree</Typography>
               </Button>
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: theme => theme.palette.info.main }}
-                onClick={() => {
-                  if (isSelecting) {
-                    setSelectedShifts([]);
-                  }
-                  setIsSelecting(prev => !prev);
-                }}
-              >
-                {isSelecting ? "Cancel" : "Select"}
-              </Button>
+              <CustomTooltip title="Select multiple shifts" placement="top">
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: theme => theme.palette.info.main }}
+                  onClick={() => {
+                    if (isSelecting) {
+                      setSelectedShifts([]);
+                    }
+                    setIsSelecting(prev => !prev);
+                  }}
+                >
+                  {isSelecting ? "Cancel" : "Select"}
+                </Button>
+              </CustomTooltip>
               {isSelecting && (
                 <Box
                   sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}

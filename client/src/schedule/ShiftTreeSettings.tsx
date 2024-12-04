@@ -83,9 +83,7 @@ export default function ShiftTreeSettings(props: ShiftTreeSettingsProps) {
         </Link>
         <Typography>Settings</Typography>
       </Breadcrumbs>
-      <Typography variant="h5">
-        <strong>Danger Zone</strong>
-      </Typography>
+      <Typography variant="h5">ShiftTree Settings</Typography>
       <CustomTooltip title="Reset All Assignments" placement="top">
         <Button
           variant="contained"
@@ -141,7 +139,7 @@ const ResetModal: React.FC<ResetModalProps> = ({
       <DialogContent>
         <DialogContentText>
           {
-            "Are you sure you want to reset all assignments? This cannot be undone."
+            "Are you sure you want to reset all assignments? This will clear the generated schedule. (This cannot be undone)"
           }
         </DialogContentText>
       </DialogContent>

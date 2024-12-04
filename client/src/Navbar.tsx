@@ -34,22 +34,13 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "@/auth";
 import JoinTree from "./JoinTree";
 import { LeftDrawerContext } from "./Home";
+import { CustomTooltip } from "./customComponents/CustomTooltip";
 
 interface ModalContextType {
   modalOpen: boolean;
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
 export const ModalContext = React.createContext<ModalContextType>({
   modalOpen: false,
   setModalOpen: () => {},
@@ -127,11 +118,13 @@ export default function Navbar({ showMenu }: NavbarProps) {
                   <MenuIcon />
                 </IconButton>
               )}
-              <Link component={RouterLink} to="/">
-                <Typography fontSize={24} color={"white"}>
-                  ShiftTree
-                </Typography>
-              </Link>
+              <CustomTooltip title="Return to Dashboard" placement="bottom">
+                <Link component={RouterLink} to="/">
+                  <Typography fontSize={24} color={"white"}>
+                    ShiftTree
+                  </Typography>
+                </Link>
+              </CustomTooltip>
 
               <Grid>
                 <CustomTooltip title="Create/Join" placement="bottom">
