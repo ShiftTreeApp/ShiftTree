@@ -80,6 +80,7 @@ docker compose up -d
 
 # Install the node dependencies and run the server
 pushd server
+cp .env.example .env # Copy the example .env file
 pnpm install
 pnpm dev
 popd
