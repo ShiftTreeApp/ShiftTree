@@ -454,7 +454,7 @@ function EditShift(props: EditShiftProps) {
           type="number"
           value={newCount}
           onChange={event => setNewCount(parseInt(event.target.value))}
-          inputProps={{ min: 0, max: 100 }} // Set your desired max value here
+          inputProps={{ min: 0, max: 100 }}
         />
       </Box>
       <TextField

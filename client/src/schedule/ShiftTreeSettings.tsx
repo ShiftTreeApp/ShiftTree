@@ -2,10 +2,7 @@ import {
   Grid2 as Grid,
   Typography,
   Button,
-  Tooltip,
-  TooltipProps,
-  tooltipClasses,
-  styled,
+  TextField,
   Dialog,
   DialogContent,
   DialogActions,
@@ -24,21 +21,11 @@ import DeleteShiftTreeModal from "./DeleteShiftTreeModal";
 
 import useSchedule from "@/hooks/useSchedule";
 import { useNotifier } from "@/notifier";
+import { CustomTooltip } from "@/customComponents/CustomTooltip";
 
 interface ShiftTreeSettingsProps {
   scheduleId: string;
 }
-
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.black,
-  },
-}));
 
 export default function ShiftTreeSettings(props: ShiftTreeSettingsProps) {
   const schedule = useSchedule({ scheduleId: props.scheduleId });
@@ -68,6 +55,8 @@ export default function ShiftTreeSettings(props: ShiftTreeSettingsProps) {
     setResetModalOpen(false);
   };
 
+  const [newCount, setNewCount] = useState(24);
+
   return (
     <Grid
       sx={{
@@ -83,7 +72,25 @@ export default function ShiftTreeSettings(props: ShiftTreeSettingsProps) {
         </Link>
         <Typography>Settings</Typography>
       </Breadcrumbs>
-      <Typography variant="h5">ShiftTree Settings</Typography>
+      <Typography paddingBottom={1.5} variant="h5">
+        ShiftTree Settings
+      </Typography>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <CustomTooltip
+          title="How much time in between assigned shifts?"
+          placement="top"
+        >
+          <TextField
+            id="ShiftSeparation"
+            label="Shift Separation (in hours)"
+            type="number"
+            value={newCount}
+            onChange={event => setNewCount(parseInt(event.target.value))}
+            inputProps={{ min: 0, max: 999 }}
+            fullWidth
+          />
+        </CustomTooltip>
+      </Grid>
       <CustomTooltip title="Reset All Assignments" placement="top">
         <Button
           variant="contained"
