@@ -77,6 +77,9 @@ const customTheme = createTheme({
       },
     },
   },
+  typography: {
+    fontFamily: `"Roboto Condensed", "Roboto", "Helvetica", sans-serif`,
+  },
 });
 
 export default customTheme;
