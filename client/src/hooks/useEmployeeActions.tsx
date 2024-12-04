@@ -148,9 +148,13 @@ export function useEmployeeActions(shiftTreeId?: string) {
   }
 
   async function unregister({ shiftId }: { shiftId: string }) {
-    await unregisterFromShift({
-      params: { path: { shiftId: shiftId } },
-    });
+    await Promise.all(
+      shifts.matchingShifts(shiftId).map(async shift => {
+        await unregisterFromShift({
+          params: { path: { shiftId: shift.id } },
+        });
+      }),
+    );
   }
 
   const signedUpShifts = userSignups;
