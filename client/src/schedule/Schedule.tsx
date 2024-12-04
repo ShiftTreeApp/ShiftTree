@@ -303,10 +303,17 @@ export default function Schedule() {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleClose} color="primary">
+              <Button
+                onClick={handleClose}
+                sx={{ color: theme => theme.palette.primary.main }}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleLeave} color="primary" autoFocus>
+              <Button
+                onClick={handleLeave}
+                sx={{ color: theme => theme.palette.error.main }}
+                autoFocus
+              >
                 Confirm
               </Button>
             </DialogActions>

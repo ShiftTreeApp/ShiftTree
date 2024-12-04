@@ -34,10 +34,16 @@ const DeleteShiftTreeModal: React.FC<DeleteShiftTreeModalProps> = ({
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} color="error">
+          <Button
+            onClick={onClose}
+            sx={{ color: theme => theme.palette.primary.main }}
+          >
             Go Back
           </Button>
-          <Button onClick={onConfirm} color="primary">
+          <Button
+            onClick={onConfirm}
+            sx={{ color: theme => theme.palette.error.main }}
+          >
             Continue to log in
           </Button>
         </DialogActions>
