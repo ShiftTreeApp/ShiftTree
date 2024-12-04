@@ -62,6 +62,7 @@ async function getOffsets(scheduleId: string): Promise<Record<string, number>> {
 export async function sendShifts(req: Request, res: Response) {
   const userId = await getUserId(req);
   const scheduleId = req.params.scheduleId as string;
+  const seperation = req.query.shiftSeparation as any as number * 60;
 
   // Check that user can access the schedule
   {
@@ -131,6 +132,7 @@ export async function sendShifts(req: Request, res: Response) {
       shifts: results.rows[0].json,
       shift_offsets: await getOffsets(scheduleId),
       all_user_ids: results2.rows.map(row => row.id),
+      shift_separation_m: seperation,
       seed: seed,
     }),
   });
