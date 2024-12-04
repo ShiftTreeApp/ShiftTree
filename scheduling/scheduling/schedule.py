@@ -58,7 +58,7 @@ class Config(BaseModel):
             },
             employees=employees_from_shifts | extra_employees,
             seed=request.seed,
-            shift_gap=request.shift_separation_m * 60,
+            shift_gap=24 * 3600,
         )
 
 
@@ -189,7 +189,7 @@ def _shuffle_config(config: Config, seed: int) -> Config:
 
 
 def _normalize_weights(config: Config) -> Config:
-    config = config.model_copy()
+    config = config.model_copy(deep=True)
     for e in config.employees.values():
         if not e.requests:
             continue

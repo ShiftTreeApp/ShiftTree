@@ -1,0 +1,9 @@
+[shifts.a]
+start_time = "2024-11-23 00:00"
+end_time = "2024-11-23 04:00"
+
+[shifts.b]
+start_time = "2024-11-23 11:59"
+end_time = "2024-11-23 12:00"
+
+[employees.e1]
