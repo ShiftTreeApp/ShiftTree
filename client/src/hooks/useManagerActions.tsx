@@ -10,10 +10,20 @@ export function useManagerActions(shiftTreeId: string) {
   const { mutateAsync: autoSchedule } = api.useMutation(
     "post",
     "/autoschedule/{scheduleId}",
+    {
+      onSuccess: async () => {
+        await refetchAssignments();
+      },
+    },
   );
   const { mutateAsync: updateRecommendedShifts } = api.useMutation(
     "post",
     "/schedules/{scheduleId}/recommended-shifts",
+  );
+  const { refetch: refetchAssignments } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/assignments",
+    { params: { path: { scheduleId: shiftTreeId } } },
   );
   /*
    * Takes in a shiftTreeId and generates a new code

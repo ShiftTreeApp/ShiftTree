@@ -33,7 +33,6 @@ import { Link as RouterLink } from "react-router-dom";
 import { ShiftCalendar } from "./ShiftCalendar";
 import EditShiftDrawer from "./EditShiftDrawer";
 import { useSearchParam } from "@/useSearchParam";
-import GenerateShiftModal from "./GenerateShiftModal";
 import MultiDateCalendar from "@/schedule/MultiDateCalendar";
 import { useNotifier } from "@/notifier";
 import useSchedule from "@/hooks/useSchedule";
@@ -110,20 +109,9 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     );
   }
 
-  // generate shift modal
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const handleOpenModal = () => {
-    //Fetch backend.
-    setModalOpen(true);
-    autogenerate();
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    downloadLogData();
-  };
   const managerActions = useManagerActions(props.scheduleId);
+
+  const notifier = useNotifier();
 
   async function downloadLogData() {
     const result = await schedule.getLogData();
@@ -135,16 +123,23 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     });
   }
   async function autogenerate() {
+    if (empActions.allAssignments?.length !== 0) {
+      notifier.error(
+        "Auto-scheduling only available when no assignments are present. Reset assignments to auto-schedule.",
+      );
+      return;
+    }
     await managerActions.triggerAutoSchedule({ scheduleId: props.scheduleId });
+    const logData = (await schedule.getLogData()).data as {
+      [key: string]: any;
+    };
+    if (logData["status"] !== "optimal") {
+      console.error("Scheduling failed", logData);
+      notifier.error("Scheduling failed. Check logs for more information.");
+    } else {
+      notifier.message("Auto-scheduling finished.");
+    }
   }
-
-  const handleConfirmModal = () => {
-    // Add logic to generate the schedule here
-    // For now, we'll just close the modal after a delay to simulate loading
-    setTimeout(() => {
-      setModalOpen(false);
-    }, 2000);
-  };
 
   async function downloadCsv() {
     const csv = await schedule.getAssignmentsCsv();
@@ -250,7 +245,7 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
             <CustomTooltip title="Auto-generate Schedule" placement="top">
               <Button
                 variant="contained"
-                onClick={handleOpenModal}
+                onClick={autogenerate}
                 startIcon={<GenerateSchedule />}
                 sx={{
                   backgroundColor: theme => theme.palette.info.dark,
@@ -260,11 +255,6 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
               </Button>
             </CustomTooltip>
 
-            <GenerateShiftModal
-              open={modalOpen}
-              onClose={handleCloseModal}
-              onConfirm={handleConfirmModal}
-            />
             <CustomTooltip title="Download Generated Schedule" placement="top">
               <Button
                 variant="contained"

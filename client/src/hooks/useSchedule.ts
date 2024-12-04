@@ -197,7 +197,7 @@ export default function useSchedule({ scheduleId }: { scheduleId: string }) {
   }
   async function getLogData() {
     const res = await refetchLogData();
-    return res.data?.logData ?? "";
+    return (res.data?.logData ?? {}) as { [key: string]: any };
   }
 
   function useShift({ shiftId }: { shiftId: string }) {
