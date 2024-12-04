@@ -12,6 +12,7 @@ import {
   TextField,
   Typography,
   IconButton,
+  Paper,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { Fragment, useState, useEffect } from "react";
@@ -304,13 +305,14 @@ function MemberItem(props: MemberItemProps) {
         >
           <Avatar
             src={props.profilePictureUrl}
-            sx={{ width: "7vw", height: "7vw" }}
+            sx={{ width: 100, height: 100, alignSelf: "center" }}
           />
           <Typography variant="h6" fontWeight="bold">
             {props.displayName}
           </Typography>
           <Typography variant="body1">
             {props.email}
+            <br></br>
             <br></br>
           </Typography>
           <Divider sx={{ borderColor: "blue" }} />
@@ -319,7 +321,7 @@ function MemberItem(props: MemberItemProps) {
             <ShiftDisplay userId={props.userId} scheduleId={props.scheduleId} />
           )}
 
-          <Typography variant="body1">
+          <Typography variant="body2">
             <br></br>
             <br></br>UserID: {props.userId}
           </Typography>
@@ -406,67 +408,78 @@ function ShiftDisplay(props: ShiftDisplayProps) {
   // THIS IS INCREDIBLY CURSED ;-; //
   return (
     <Box>
-      <Typography
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontWeight: "bold",
-        }}
-      >
-        Signups:
-      </Typography>
+      {/* Signups Section */}
       {shiftDetailsArray?.length === 0 &&
-      filteredSignups !== undefined &&
-      filteredSignups.length > 0 ? (
-        filteredSignups.map((signup, index) => (
-          <Typography key={index}>
-            {signup.startTime.format("dddd")}, {signup.name} -{" "}
-            {signup.startTime.format("HH:mm")} to{" "}
-            {signup.endTime.format("HH:mm")}
+        filteredSignups !== undefined &&
+        filteredSignups.length > 0 && (
+          <>
+            <Typography
+              variant="h5"
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontWeight: "bold",
+              }}
+            >
+              Signups
+            </Typography>
+            {filteredSignups.map((signup, index) => (
+              <Paper
+                key={index}
+                sx={{
+                  padding: 1,
+                  backgroundColor: theme => theme.palette.background.default,
+                  marginBottom: 1,
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                  {dayjs(signup?.startTime).format("dddd")} (
+                  {dayjs(signup?.startTime).format("M/D")})
+                </Typography>
+                <Typography>
+                  {signup?.name} - {dayjs(signup?.startTime).format("HH:mm")} to{" "}
+                  {dayjs(signup?.endTime).format("HH:mm")}
+                </Typography>
+              </Paper>
+            ))}
+          </>
+        )}
+
+      {/* Assignments Section */}
+      {shiftDetailsArray && shiftDetailsArray.length > 0 && (
+        <>
+          <Typography
+            variant="h5"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              fontWeight: "bold",
+            }}
+          >
+            Assignments
           </Typography>
-        ))
-      ) : (
-        <Typography
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontStyle: "italic",
-          }}
-        >
-          No signups.
-        </Typography>
-      )}
-      <Typography
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontWeight: "bold",
-        }}
-      >
-        Assignments:
-      </Typography>
-      {shiftDetailsArray?.length === 0 ? (
-        <Typography
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontStyle: "italic",
-          }}
-        >
-          No assignments.
-        </Typography>
-      ) : (
-        shiftDetailsArray?.map((shift, index) => (
-          <Typography key={index}>
-            {dayjs(shift?.startTime).format("dddd")}, {shift?.name} -{" "}
-            {dayjs(shift?.startTime).format("HH:mm")} to{" "}
-            {dayjs(shift?.endTime).format("HH:mm")}
-          </Typography>
-        ))
+          {shiftDetailsArray?.map((shift, index) => (
+            <Paper
+              key={index}
+              sx={{
+                padding: 1,
+                backgroundColor: theme => theme.palette.background.default,
+                marginBottom: 1,
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                {dayjs(shift?.startTime).format("dddd")} (
+                {dayjs(shift?.startTime).format("M/D")})
+              </Typography>
+              <Typography>
+                {shift?.name} - {dayjs(shift?.startTime).format("HH:mm")} to{" "}
+                {dayjs(shift?.endTime).format("HH:mm")}
+              </Typography>
+            </Paper>
+          ))}
+        </>
       )}
     </Box>
   );
