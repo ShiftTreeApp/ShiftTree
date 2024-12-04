@@ -203,7 +203,6 @@ export default function EditMembersTab(props: EditMembersTabProps) {
               alignItems: "flex-start",
             }}
           >
-            <Typography variant="body2">User Options:</Typography>
             <CompactNumberInput
               suggestedShifts={suggestedShifts[member.id] ?? 0}
               onChange={newValue => handleSuggestedChange(member.id, newValue)}
@@ -219,7 +218,7 @@ export default function EditMembersTab(props: EditMembersTabProps) {
           alignItems: "flex-start",
         }}
       >
-        <Typography variant="h5">Confirm Options:</Typography>
+        <Typography variant="h5">Confirm</Typography>
         <Button
           variant="contained"
           onClick={handleSuggestionsSubmit}

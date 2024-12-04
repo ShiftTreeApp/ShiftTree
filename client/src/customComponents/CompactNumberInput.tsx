@@ -2,6 +2,7 @@ import * as React from "react";
 import { styled } from "@mui/system";
 import ArrowDropUpRoundedIcon from "@mui/icons-material/ArrowDropUpRounded";
 import ArrowDropDownRoundedIcon from "@mui/icons-material/ArrowDropDownRounded";
+import { Typography } from "@mui/material";
 
 interface CompactNumberInputProps {
   suggestedShifts: number | null;
@@ -63,7 +64,9 @@ export default function UseNumberInputCompact({
 }: CompactNumberInputProps) {
   return (
     <Layout>
-      <Pre>Recommended Shifts: {suggestedShifts ?? " "}</Pre>
+      <Typography variant="caption">
+        Recommended Shifts: {suggestedShifts ?? " "}
+      </Typography>
 
       <CompactNumberInput
         aria-label="Compact Suggested Shifts"
@@ -163,8 +166,4 @@ const Layout = styled("div")`
   flex-flow: row nowrap;
   align-items: center;
   column-gap: 0.65rem;
-`;
-
-const Pre = styled("pre")`
-  font-size: 0.75rem;
 `;
