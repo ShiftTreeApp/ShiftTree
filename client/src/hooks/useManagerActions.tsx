@@ -59,6 +59,10 @@ export function useManagerActions(shiftTreeId: string) {
         path: {
           scheduleId: scheduleId,
         },
+        query: {
+          // TODO: Put actual value here
+          shiftSeparation: 24 * 60,
+        },
       },
       headers: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,

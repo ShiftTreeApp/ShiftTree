@@ -1165,7 +1165,9 @@ export interface paths {
         /** Generate shift assignments given a filled out shift-tree */
         post: {
             parameters: {
-                query?: never;
+                query: {
+                    shiftSeparation: number;
+                };
                 header?: never;
                 path: {
                     scheduleId: string;
