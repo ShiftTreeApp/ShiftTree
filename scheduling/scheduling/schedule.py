@@ -206,7 +206,9 @@ def _normalize_weights(config: Config) -> Config:
                 req.weight = 1
         else:
             for req in e.requests.values():
-                req.weight = 1 + ((req.weight - avg_weight) / std_dev)
+                normalized = (req.weight - avg_weight) / std_dev
+                normalized_scaled = max((1 + normalized) / 2, 0)
+                req.weight = 1 + normalized_scaled
     return config
 
 
