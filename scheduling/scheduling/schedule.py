@@ -1,7 +1,8 @@
 import itertools
 import json
 from collections.abc import Iterable, Mapping
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from math import sqrt
 from random import Random
 from typing import Any, Protocol, Self
@@ -35,7 +36,7 @@ class Config(BaseModel):
     employees: Mapping[EmployeeId, Employee]
     seed: int | None = Field(default=None)
     """Random seed for the solver. If not provided, the solver does not produce deterministic results."""
-    shift_gap: int = Field(default=8 * 3600)
+    shift_gap: timedelta = Field(default_factory=lambda: timedelta(hours=8))
 
     @classmethod
     def from_request(cls, request: models.ScheduleRequest) -> Self:
@@ -58,7 +59,7 @@ class Config(BaseModel):
             },
             employees=employees_from_shifts | extra_employees,
             seed=request.seed,
-            shift_gap=24 * 3600,
+            shift_gap=timedelta(hours=24),
         )
 
 
@@ -135,6 +136,15 @@ def prevent_overlapping_shifts(
                 model.add_assumption(enforcement_var)
 
 
+@dataclass
+class DateRange:
+    start: datetime
+    end: datetime
+
+    def __contains__(self, other: datetime) -> bool:
+        return self.start <= other <= self.end
+
+
 def prevent_consecutive_shifts(
     model: cp_model.CpModel,
     assignments: Mapping[tuple[EmployeeId, ShiftId], cp_model.IntVar],
@@ -145,12 +155,23 @@ def prevent_consecutive_shifts(
         for s1, s2 in itertools.combinations(config.shifts, 2):
             shift1 = config.shifts[s1]
             shift2 = config.shifts[s2]
-            if (
-                abs((shift2.start_time - shift1.end_time).total_seconds())
-                < config.shift_gap
-                or abs((shift1.start_time - shift2.end_time).total_seconds())
-                < config.shift_gap
+            shift1_blockout = DateRange(
+                shift1.start_time - config.shift_gap, shift1.end_time + config.shift_gap
+            )
+            shift2_blockout = DateRange(
+                shift2.start_time - config.shift_gap, shift2.end_time + config.shift_gap
+            )
+            print(config.shift_gap.total_seconds() / 60 / 60)
+            print(shift1_blockout, shift2_blockout)
+            if any(
+                (
+                    shift1.start_time in shift2_blockout,
+                    shift1.end_time in shift2_blockout,
+                    shift2.start_time in shift1_blockout,
+                    shift2.end_time in shift1_blockout,
+                )
             ):
+                print(s1, s2)
                 enforcement_var = model.new_bool_var(
                     constraint_name(
                         "prevent_consecutive_shifts",
@@ -185,7 +206,10 @@ def _shuffle_config(config: Config, seed: int) -> Config:
     employees = {k: config.employees[k] for k in employee_keys}
     shifts = {k: config.shifts[k] for k in shift_keys}
 
-    return Config(shifts=shifts, employees=employees, seed=seed)
+    return config.model_copy(
+        update=dict(shifts=shifts, employees=employees, seed=seed),
+        deep=True,
+    )
 
 
 def _normalize_weights(config: Config) -> Config:
