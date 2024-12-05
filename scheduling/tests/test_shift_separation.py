@@ -76,3 +76,39 @@ def test_shift_separation_interleaved():
             ({"1", "3", "5"}, {"2", "4"}),
             ({"2", "4"}, {"1", "3", "5"}),
         ]
+
+
+def test_exact_boundaries():
+    config = schedule.Config(
+        **tomllib.loads("""
+        [shifts.1]
+        start_time = "2024-01-01 08:00"
+        end_time = "2024-01-01 10:00"
+
+        [shifts.2]
+        start_time = "2024-01-02 08:00"
+        end_time = "2024-01-02 10:00"
+
+        [shifts.3]
+        start_time = "2024-01-03 08:00"
+        end_time = "2024-01-03 10:00"
+
+        [employees.a]
+        """),
+        shift_gap=timedelta(hours=22),
+    )
+
+    for seed in range(100):
+        res = schedule.solve(
+            config.model_copy(update=dict(seed=seed)),
+            rules=schedule.default_rules,
+        )
+        assert res.status == "optimal"
+
+        res_changed = schedule.solve(
+            config.model_copy(
+                update=dict(seed=seed, shift_gap=timedelta(hours=22, seconds=1))
+            ),
+            rules=schedule.default_rules,
+        )
+        assert res_changed.status == "infeasible"

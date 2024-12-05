@@ -142,7 +142,7 @@ class DateRange:
     end: datetime
 
     def __contains__(self, other: datetime) -> bool:
-        return self.start <= other <= self.end
+        return self.start < other < self.end
 
 
 def prevent_consecutive_shifts(
@@ -161,8 +161,6 @@ def prevent_consecutive_shifts(
             shift2_blockout = DateRange(
                 shift2.start_time - config.shift_gap, shift2.end_time + config.shift_gap
             )
-            print(config.shift_gap.total_seconds() / 60 / 60)
-            print(shift1_blockout, shift2_blockout)
             if any(
                 (
                     shift1.start_time in shift2_blockout,
@@ -171,7 +169,6 @@ def prevent_consecutive_shifts(
                     shift2.end_time in shift1_blockout,
                 )
             ):
-                print(s1, s2)
                 enforcement_var = model.new_bool_var(
                     constraint_name(
                         "prevent_consecutive_shifts",
