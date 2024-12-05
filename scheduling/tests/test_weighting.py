@@ -127,3 +127,58 @@ def test_request_weights_are_normalized():
         )
         < 3.841
     )
+
+
+def test_large_variaion_beats_small_variation():
+    config = schedule.Config(
+        **tomllib.loads("""
+        [shifts.1]
+        start_time = "2024-01-01 08:00"
+        end_time = "2024-01-01 10:00"
+
+        [shifts.2]
+        start_time = "2024-01-02 08:00"
+        end_time = "2024-01-02 10:00"
+
+        [shifts.3]
+        start_time = "2024-01-03 08:00"
+        end_time = "2024-01-03 10:00"
+
+        [shifts.4]
+        start_time = "2024-01-04 08:00"
+        end_time = "2024-01-04 10:00"
+
+        [shifts.5]
+        start_time = "2024-01-05 08:00"
+        end_time = "2024-01-05 10:00"
+
+        [employees.a.requests.1]
+        weight = 5
+        [employees.a.requests.2]
+        weight = 0.1
+        [employees.a.requests.3]
+        weight = 0.1
+        [employees.a.requests.4]
+        weight = 0.1
+        [employees.a.requests.5]
+        weight = 0.1
+
+        [employees.b.requests.1]
+        weight = 0.7
+        [employees.b.requests.2]
+        weight = 0.1
+        [employees.b.requests.3]
+        weight = 0.2
+        [employees.b.requests.4]
+        weight = 0.3
+        [employees.b.requests.5]
+        weight = 0.4
+        """),
+    )
+
+    for seed in range(100):
+        config.seed = seed
+        res = schedule.solve(config, rules=schedule.default_rules)
+
+        a_asgn = {a.shift_id for a in res.assignments if a.user_id == "a"}
+        assert "1" in a_asgn
