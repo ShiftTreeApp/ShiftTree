@@ -863,10 +863,13 @@ async function getUserRole({
 
 export async function getCsv(req: Request, res: Response) {
   const userId = await getUserId(req);
-  const { scheduleId, type, tz } = req.params as {
+  const { scheduleId } = req.params as {
     scheduleId: string;
-    type: "shifts" | "assignments";
+  };
+
+  const { tz, type } = req.query as {
     tz: string;
+    type: "shifts" | "assignments";
   };
 
   if (type === "shifts") {
