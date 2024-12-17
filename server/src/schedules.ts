@@ -235,7 +235,8 @@ export async function getShifts(req: Request, res: Response) {
         'name', s.shift_name,
         'description', s.shift_description,
         'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
-        'endTime', (to_json(s.end_time)#>>'{}')||'Z'
+        'endTime', (to_json(s.end_time)#>>'{}')||'Z',
+        'numSlots', s.num_slots
       )), json_build_array()) as json
       from sorted as s
     `,
@@ -287,14 +288,15 @@ export async function createShift(req: Request, res: Response) {
 
   const results = await pool.query({
     text: /* sql */ `
-      insert into shift (schedule_id, start_time, end_time, shift_name, shift_description)
-      values ($1, $2, $3, $4, $5)
+      insert into shift (schedule_id, start_time, end_time, shift_name, shift_description, num_slots)
+      values ($1, $2, $3, $4, $5, $6)
       returning json_build_object(
         'id', shift.id,
         'name', shift.shift_name,
         'description', shift.shift_description,
         'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
-        'endTime', (to_json(shift.end_time)#>>'{}')||'Z'
+        'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
+        'numSlots', shift.num_slots
       ) as json
     `,
     values: [
@@ -303,6 +305,7 @@ export async function createShift(req: Request, res: Response) {
       req.body.endTime,
       req.body.name,
       req.body.description ?? "",
+      req.body.numSlots ?? 1,
     ],
   });
 
@@ -398,6 +401,7 @@ export async function getSignups(req: Request, res: Response) {
         'description', shift.shift_description,
         'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
         'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
+        'numSlots', shift.num_slots,
         'signups', (
           select coalesce(json_agg(json_build_object(
             'id', signup.id,

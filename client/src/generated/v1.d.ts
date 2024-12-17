@@ -1670,6 +1670,7 @@ export interface components {
             startTime: string;
             /** Format: date-time */
             endTime: string;
+            numSlots: number;
         };
         ShiftCreateInfo: {
             name: string;
@@ -1678,6 +1679,8 @@ export interface components {
             startTime: string;
             /** Format: date-time */
             endTime: string;
+            /** @default 1 */
+            numSlots: number;
         };
         SignupInfo: {
             user?: components["schemas"]["UserInfoPreview"];

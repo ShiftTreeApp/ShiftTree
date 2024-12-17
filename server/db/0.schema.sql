@@ -50,6 +50,7 @@ CREATE TABLE shift
 , end_time TIMESTAMP NOT NULL
 , shift_name VARCHAR(64) NOT NULL DEFAULT ''
 , shift_description VARCHAR(255) NOT NULL DEFAULT ''
+, num_slots INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE user_shift_assignment

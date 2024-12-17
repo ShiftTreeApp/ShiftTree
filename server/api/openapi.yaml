@@ -1143,6 +1143,7 @@ components:
         - description
         - startTime
         - endTime
+        - numSlots
       properties:
         id:
           type: string
@@ -1157,6 +1158,8 @@ components:
         endTime:
           type: string
           format: date-time
+        numSlots:
+          type: integer
 
     ShiftCreateInfo:
       type: object
@@ -1175,6 +1178,9 @@ components:
         endTime:
           type: string
           format: date-time
+        numSlots:
+          type: integer
+          default: 1
 
     SignupInfo:
       properties:
