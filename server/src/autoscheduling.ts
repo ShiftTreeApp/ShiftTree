@@ -59,6 +59,30 @@ async function getOffsets(scheduleId: string): Promise<Record<string, number>> {
   );
 }
 
+interface ShiftInfo {
+  id: string;
+  num_slots: number;
+}
+
+function* expandShifts(shifts: ShiftInfo[]) {
+  for (const shift of shifts) {
+    if (shift.num_slots > 1) {
+      for (let i = 0; i < shift.num_slots; i++) {
+        yield { ...shift, id: `${shift.id}[${i}]` };
+      }
+    }
+  }
+}
+
+function stripExpandedShiftIds(response: ScheduleResponse): ScheduleResponse {
+  return {
+    assignments: response.assignments.map(assignment => ({
+      ...assignment,
+      shift_id: assignment.shift_id.split("[")[0]!,
+    })),
+  };
+}
+
 export async function sendShifts(req: Request, res: Response) {
   const userId = await getUserId(req);
   const scheduleId = req.params.scheduleId as string;
@@ -94,6 +118,7 @@ export async function sendShifts(req: Request, res: Response) {
           'id', shift.id,
           'start_time', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
           'end_time', (to_json(shift.end_time)#>>'{}')||'Z',
+          'num_slots', shift.num_slots,
           'signups', (
             select coalesce(json_agg(json_build_object(
               'id', signup.id,
@@ -129,14 +154,14 @@ export async function sendShifts(req: Request, res: Response) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      shifts: results.rows[0].json,
+      shifts: Array.from(expandShifts(results.rows[0].json)),
       shift_offsets: await getOffsets(scheduleId),
       all_user_ids: results2.rows.map(row => row.id),
       shift_separation_m: seperation,
       seed: seed,
     }),
   });
-  const responseData: ScheduleResponse = (await result.json()) as any;
+  const responseData = (await result.json()) as ScheduleResponse;
   console.log(responseData);
   // Not tested, should work but realisitcally need response to make sure there won't be any bugs
   const insertQueryText = `
@@ -146,7 +171,7 @@ export async function sendShifts(req: Request, res: Response) {
   SET requested_weight = $3
   `;
 
-  for (const assignment of responseData.assignments) {
+  for (const assignment of stripExpandedShiftIds(responseData).assignments) {
     await pool.query({
       text: insertQueryText,
       values: [
