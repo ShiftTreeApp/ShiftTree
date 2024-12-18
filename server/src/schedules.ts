@@ -235,7 +235,8 @@ export async function getShifts(req: Request, res: Response) {
         'name', s.shift_name,
         'description', s.shift_description,
         'startTime', (to_json(s.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
-        'endTime', (to_json(s.end_time)#>>'{}')||'Z'
+        'endTime', (to_json(s.end_time)#>>'{}')||'Z',
+        'numSlots', s.num_slots
       )), json_build_array()) as json
       from sorted as s
     `,
@@ -287,14 +288,15 @@ export async function createShift(req: Request, res: Response) {
 
   const results = await pool.query({
     text: /* sql */ `
-      insert into shift (schedule_id, start_time, end_time, shift_name, shift_description)
-      values ($1, $2, $3, $4, $5)
+      insert into shift (schedule_id, start_time, end_time, shift_name, shift_description, num_slots)
+      values ($1, $2, $3, $4, $5, $6)
       returning json_build_object(
         'id', shift.id,
         'name', shift.shift_name,
         'description', shift.shift_description,
         'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
-        'endTime', (to_json(shift.end_time)#>>'{}')||'Z'
+        'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
+        'numSlots', shift.num_slots
       ) as json
     `,
     values: [
@@ -303,6 +305,7 @@ export async function createShift(req: Request, res: Response) {
       req.body.endTime,
       req.body.name,
       req.body.description ?? "",
+      req.body.numSlots ?? 1,
     ],
   });
 
@@ -398,6 +401,7 @@ export async function getSignups(req: Request, res: Response) {
         'description', shift.shift_description,
         'startTime', (to_json(shift.start_time)#>>'{}')||'Z', -- converting to ISO 8601 time
         'endTime', (to_json(shift.end_time)#>>'{}')||'Z',
+        'numSlots', shift.num_slots,
         'signups', (
           select coalesce(json_agg(json_build_object(
             'id', signup.id,
@@ -457,22 +461,23 @@ export async function getAssignments(req: Request, res: Response) {
     text: /* sql */ `
       select coalesce(json_agg(json_build_object(
         'shiftId', shift.id,
-        'user', json_build_object(
-          'id', ua.id,
-          'displayName', ua.username,
-          'email', ua.email,
-          'profileImageUrl', ''
+        'users', (
+          select coalesce(json_agg(json_build_object(
+            'id', ua.id,
+            'displayName', ua.username,
+            'email', ua.email,
+            'profileImageUrl', ''
+          )), json_build_array())
+          from user_shift_assignment as usa
+          join user_account as ua on usa.user_id = ua.id
+          where usa.shift_id = shift.id
         )
       )), json_array()) as json
       from shift
-      join user_shift_assignment as usa on shift.id = usa.shift_id
-      join user_account as ua on usa.user_id = ua.id
       where shift.schedule_id = $1
     `,
     values: [scheduleId],
   });
-
-  console.log(results);
 
   res.status(200).json(results.rows[0].json);
 }
@@ -565,7 +570,8 @@ export async function editShift(req: Request, res: Response) {
         start_time = coalesce($2, start_time),
         end_time = coalesce($3, end_time),
         shift_name = coalesce($4, shift_name),
-        shift_description = coalesce($5, shift_description)
+        shift_description = coalesce($5, shift_description),
+        num_slots = coalesce($6, num_slots)
       where id = $1
     `,
     values: [
@@ -574,6 +580,7 @@ export async function editShift(req: Request, res: Response) {
       req.body.endTime,
       req.body.name,
       req.body.description,
+      req.body.numSlots,
     ],
   });
 
@@ -893,7 +900,7 @@ export async function getCsv(req: Request, res: Response) {
 
   const results = await pool.query({
     text: /* sql */ `
-      select json_agg(json_build_object(
+      select coalesce(json_agg(json_build_object(
         'name', ua.username,
         'email', ua.email,
         'start_time', (to_json(s.start_time)#>>'{}')||'Z',
@@ -901,7 +908,7 @@ export async function getCsv(req: Request, res: Response) {
         'shift_name', s.shift_name,
         'multi_day', case when s.start_time::date <> s.end_time::date then 'yes' else 'no' end,
         'shift_description', s.shift_description
-      )) as json
+      )), json_build_array()) as json
       from user_shift_assignment as usa
       join shift as s on usa.shift_id = s.id
       join user_account as ua on usa.user_id = ua.id

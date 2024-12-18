@@ -15,7 +15,7 @@ import {
   DialogActions,
   DialogContentText,
 } from "@mui/material";
-import { Navigate, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   HowToReg as RegisterIcon,
   EventBusy as LeaveShiftTreeIcon,
@@ -29,11 +29,12 @@ import { useApi } from "../client";
 import Navbar from "@/Navbar";
 import NavbarPadding from "@/NavbarPadding";
 import EditShiftDrawer from "./EditShiftDrawer";
-import { ShiftCalendar, ShiftDetails } from "./ShiftCalendar";
+import { ShiftCalendar } from "./ShiftCalendar";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import theme from "@/theme";
 import { useNotifier } from "@/notifier";
 import { CustomTooltip } from "@/customComponents/CustomTooltip";
+import { useShifts } from "@/hooks/useShifts";
 
 function useSelectedShiftParam() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -72,11 +73,6 @@ export default function Schedule() {
 
   const api = useApi();
 
-  const toggleSelectionMode = () => {
-    setIsSelecting(prev => !prev);
-    setSelectedShifts([]); // Clear selections when toggling
-  };
-
   const [signedUpShifts, setSignedUpShifts] = useState(
     empActions.signedUpShifts,
   );
@@ -102,18 +98,7 @@ export default function Schedule() {
     { params: { path: { scheduleId: scheduleId as string } } },
   );
 
-  const { data: shifts } = api.useQuery(
-    "get",
-    "/schedules/{scheduleId}/shifts",
-    { params: { path: { scheduleId: scheduleId as string } } },
-  );
-
-  const formattedShifts: ShiftDetails[] = (shifts || []).map(shift => ({
-    id: shift.id,
-    name: shift.name,
-    startTime: dayjs(shift.startTime),
-    endTime: dayjs(shift.endTime),
-  }));
+  const { shifts } = useShifts(scheduleId ?? "");
 
   const handleRegister = async () => {
     console.log(selectedShift);
@@ -138,15 +123,15 @@ export default function Schedule() {
     [selectedShift, signedUpShifts],
   );
 
-  function MemberPerShiftStackContent(props: { shiftIds: string[] }) {
+  function MemberPerShiftStackContent(props: { shiftId: string }) {
     const isRegistered = useMemo(
-      () => props.shiftIds.some(id => signedUpShifts.includes(id)),
-      [props.shiftIds],
+      () => signedUpShifts.includes(props.shiftId),
+      [props.shiftId],
     );
 
     const isAssigned = useMemo(
-      () => props.shiftIds.some(id => assignedShifts.includes(id)),
-      [props.shiftIds],
+      () => assignedShifts.includes(props.shiftId),
+      [props.shiftId],
     );
 
     if (isAssigned) {
@@ -396,7 +381,7 @@ export default function Schedule() {
                   ? [selectedShift]
                   : []
             }
-            shifts={formattedShifts}
+            shifts={shifts}
             CustomContent={MemberPerShiftStackContent}
           />
         </Paper>

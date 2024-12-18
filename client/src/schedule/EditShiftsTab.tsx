@@ -40,7 +40,6 @@ import { useManagerActions } from "@/hooks/useManagerActions";
 import { downloadFile } from "@/utils";
 import { useEmployeeActions } from "@/hooks/useEmployeeActions";
 import { useApi } from "@/client";
-import { useShifts } from "@/hooks/useShifts";
 import { createRandomPfpUrl } from "@/schedule/EditMembersTab";
 import { CustomTooltip } from "@/customComponents/CustomTooltip";
 
@@ -123,7 +122,8 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
     });
   }
   async function autogenerate() {
-    if (empActions.allAssignments?.length !== 0) {
+    console.log(empActions.allAssignments);
+    if (empActions.numAssignments > 0) {
       notifier.error(
         "Reset assignments in settings tab if you would like to create a new schedule.",
       );
@@ -170,15 +170,12 @@ export default function EditShiftsTab(props: EditShiftsTabProps) {
 
   const empActions = useEmployeeActions(scheduleId);
 
-  function ManagerPerShiftStackContent(props: { shiftIds: string[] }) {
-    const shiftIds = useMemo(() => new Set(props.shiftIds), [props.shiftIds]);
+  function ManagerPerShiftStackContent(props: { shiftId: string }) {
     const assignedUsers = useMemo(
       () =>
-        empActions.allAssignments
-          ?.filter(asgn => asgn.shiftId && shiftIds.has(asgn.shiftId))
-          .map(asgn => asgn.user)
-          .filter(u => u !== undefined) ?? [],
-      [shiftIds],
+        empActions.allAssignments?.find(asgn => asgn.shiftId === props.shiftId)
+          ?.users ?? [],
+      [props.shiftId],
     );
 
     return (
@@ -338,9 +335,9 @@ function EditShift(props: EditShiftProps) {
       setNewDesc(shift.data.description);
       setNewStartTime(dayjs(shift.data.startTime));
       setNewEndTime(dayjs(shift.data.endTime));
-      setNewCount(shift.stack.length);
+      setNewCount(shift.data.count);
     }
-  }, [shift.data, shift.stack]);
+  }, [shift.data]);
 
   useEffect(() => {
     if (newStartTime.isAfter(newEndTime)) {
@@ -567,8 +564,8 @@ function EditShift(props: EditShiftProps) {
 }
 
 interface UserChipsProps {
-  scheduleId?: string;
-  shiftId?: string;
+  scheduleId: string;
+  shiftId: string;
 }
 
 function UserChips(props: UserChipsProps) {
@@ -581,15 +578,8 @@ function UserChips(props: UserChipsProps) {
     { params: { path: { scheduleId: props.scheduleId as string } } },
   );
 
-  const shifts = useShifts(props.scheduleId ?? "");
-
-  const stackShiftIds = useMemo(
-    () => new Set(shifts.matchingShifts(props.shiftId ?? "").map(s => s.id)),
-    [props.shiftId, shifts],
-  );
-
   const users = scheduleSignups
-    ?.filter(shift => stackShiftIds.has(shift.id)) // Match the shiftId
+    ?.filter(s => s.id === props.shiftId) // Match the shiftId
     .flatMap(shift => shift.signups?.map(signup => signup.user))
     .filter(u => u !== undefined);
 

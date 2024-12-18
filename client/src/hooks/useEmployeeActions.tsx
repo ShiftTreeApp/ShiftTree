@@ -1,6 +1,6 @@
 import { useApi } from "@/client";
-import { useShifts } from "@/hooks/useShifts";
 import { useNotifier } from "@/notifier";
+import { useMemo } from "react";
 
 export function useEmployeeActions(shiftTreeId?: string) {
   const api = useApi();
@@ -81,8 +81,6 @@ export function useEmployeeActions(shiftTreeId?: string) {
     console.log("Signed up for shift");
   }
 
-  const shifts = useShifts(shiftTreeId ?? "");
-
   async function signup({
     shiftId,
     weight,
@@ -90,14 +88,7 @@ export function useEmployeeActions(shiftTreeId?: string) {
     shiftId: string;
     weight?: number;
   }) {
-    await Promise.all(
-      shifts.matchingShifts(shiftId).map(async shift => {
-        await signupForSingle({
-          shiftId: shift.id,
-          weight,
-        });
-      }),
-    );
+    await signupForSingle({ shiftId, weight });
   }
 
   /*
@@ -137,10 +128,20 @@ export function useEmployeeActions(shiftTreeId?: string) {
       },
     });
 
-  const { data: allAssignments } = api.useQuery(
+  const { data: allAssignmentsData } = api.useQuery(
     "get",
     "/schedules/{scheduleId}/assignments",
     { params: { path: { scheduleId: shiftTreeId ?? "" } } },
+  );
+
+  const allAssignments = useMemo(
+    () => allAssignmentsData ?? [],
+    [allAssignmentsData],
+  );
+
+  const numAssignments = useMemo(
+    () => allAssignments.flatMap(a => a.users).length,
+    [allAssignments],
   );
 
   async function leaveSchedule({ scheduleId }: { scheduleId: string }) {
@@ -148,13 +149,9 @@ export function useEmployeeActions(shiftTreeId?: string) {
   }
 
   async function unregister({ shiftId }: { shiftId: string }) {
-    await Promise.all(
-      shifts.matchingShifts(shiftId).map(async shift => {
-        await unregisterFromShift({
-          params: { path: { shiftId: shift.id } },
-        });
-      }),
-    );
+    await unregisterFromShift({
+      params: { path: { shiftId } },
+    });
   }
 
   const signedUpShifts = userSignups;
@@ -170,5 +167,6 @@ export function useEmployeeActions(shiftTreeId?: string) {
     assignedShifts,
     unregister,
     allAssignments,
+    numAssignments,
   };
 }

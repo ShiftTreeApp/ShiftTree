@@ -677,12 +677,17 @@ paths:
                 type: array
                 items:
                   type: object
+                  required:
+                    - shiftId
+                    - users
                   properties:
                     shiftId:
                       type: string
                       format: uuid
-                    user:
-                      $ref: "#/components/schemas/UserInfoPreview"
+                    users:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/UserInfoPreview"
         404:
           description: Schedule with specified ID does not exist, or user does not have access to it
           content:
@@ -872,6 +877,8 @@ paths:
                 endTime:
                   type: string
                   format: date-time
+                numSlots:
+                  type: integer
       responses:
         204:
           description: Shift updated
@@ -1143,6 +1150,7 @@ components:
         - description
         - startTime
         - endTime
+        - numSlots
       properties:
         id:
           type: string
@@ -1157,6 +1165,8 @@ components:
         endTime:
           type: string
           format: date-time
+        numSlots:
+          type: integer
 
     ShiftCreateInfo:
       type: object
@@ -1175,6 +1185,9 @@ components:
         endTime:
           type: string
           format: date-time
+        numSlots:
+          type: integer
+          default: 1
 
     SignupInfo:
       properties:

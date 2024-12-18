@@ -15,7 +15,7 @@ import {
   Paper,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useMemo } from "react";
 import dayjs from "dayjs";
 
 import { useApi } from "@/client";
@@ -375,9 +375,13 @@ function ShiftDisplay(props: ShiftDisplayProps) {
   // Cursed solution
 
   // Gets an array of all shiftIds that they're
-  const shiftIds = scheduleAssignments
-    ?.filter(assignment => assignment.user?.id === props.userId)
-    .map(assignment => assignment.shiftId);
+  const shiftIds = useMemo(
+    () =>
+      scheduleAssignments
+        ?.filter(a => a.users.some(u => u.id === props.userId))
+        ?.map(assignment => assignment.shiftId),
+    [props.userId, scheduleAssignments],
+  );
 
   // Gets the details for an individual shift
   function getShiftDetails(shiftId: string) {
