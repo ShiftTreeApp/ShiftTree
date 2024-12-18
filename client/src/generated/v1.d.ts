@@ -1082,8 +1082,8 @@ export interface paths {
                     content: {
                         "application/json": {
                             /** Format: uuid */
-                            shiftId?: string;
-                            user?: components["schemas"]["UserInfoPreview"];
+                            shiftId: string;
+                            users: components["schemas"]["UserInfoPreview"][];
                         }[];
                     };
                 };
@@ -1393,6 +1393,7 @@ export interface paths {
                         startTime?: string;
                         /** Format: date-time */
                         endTime?: string;
+                        numSlots?: number;
                     };
                 };
             };

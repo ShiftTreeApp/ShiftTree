@@ -21,10 +21,9 @@ export interface ShiftCalendarProps {
   /** Mapping from shiftId to the color */
   colorMap?: Record<string, BackgroundColorType> | undefined;
   CustomContent?: CustomContentComponent | undefined;
-  unstackedView?: boolean | undefined;
 }
 
-export type CustomContentComponent = React.FC<{ shiftIds: string[] }>;
+export type CustomContentComponent = React.FC<{ shiftId: string }>;
 
 export type ShiftColorMap = NonNullable<ShiftCalendarProps["colorMap"]>;
 
@@ -132,7 +131,6 @@ export function ShiftCalendar(props: ShiftCalendarProps) {
                 onClickShift={props.onClickShift}
                 colorMap={props.colorMap ?? {}}
                 CustomContent={props.CustomContent ?? (() => null)}
-                unstackedView={props.unstackedView ?? false}
               />
             </Box>
           </Box>
@@ -178,7 +176,6 @@ interface WeekRowProps {
   selectedShifts: string[];
   colorMap: Record<string, BackgroundColorType>;
   CustomContent: CustomContentComponent;
-  unstackedView: boolean;
 }
 
 function WeekRow(props: WeekRowProps) {
@@ -188,44 +185,17 @@ function WeekRow(props: WeekRowProps) {
     [props.startDate],
   );
 
-  const stackedShifts = useMemo(() => {
-    if (props.unstackedView) {
-      return props.shifts.map(shift => ({
-        ...shift,
-        count: 1,
-        rest: [],
-      }));
-    }
-
-    const shifts = new Map<string, ShiftDetails[]>();
-    for (const shift of props.shifts) {
-      const key = `${shift.startTime.format("YYYYMMDDHHmm")}${shift.endTime.format("YYYYMMDDHHmm")}`;
-      if (!shifts.has(key)) {
-        shifts.set(key, []);
-      }
-      shifts.get(key)?.push(shift);
-    }
-    return Array.from(shifts.values()).map(shifts => {
-      const [first, ...rest] = shifts;
-      return {
-        ...first,
-        count: shifts.length,
-        rest,
-      };
-    });
-  }, [props.shifts, props.unstackedView]);
-
   const shiftsByDayOfWeek = useMemo(() => {
-    const shifts: { date: dayjs.Dayjs; shifts: StackedShiftDetails[] }[] = [];
+    const shifts: { date: dayjs.Dayjs; shifts: ShiftDetails[] }[] = [];
     for (const day of days) {
-      const selectedShifts = stackedShifts.filter(shift =>
+      const selectedShifts = props.shifts.filter(shift =>
         shift.startTime.isSame(day, "day"),
       );
       selectedShifts.sort((a, b) => a.startTime.unix() - b.startTime.unix());
       shifts.push({ date: day, shifts: selectedShifts });
     }
     return shifts;
-  }, [days, stackedShifts]);
+  }, [props.shifts, days]);
 
   return (
     <Grid container columns={{ xs: 1, md: 7 }} sx={{ flexGrow: 1 }}>
@@ -281,11 +251,8 @@ function WeekRow(props: WeekRowProps) {
                 onClick={() => props.onClickShift(shift.id)}
                 selected={props.selectedShifts.includes(shift.id)}
                 colorMap={props.colorMap}
-                Custom={() => (
-                  <props.CustomContent
-                    shiftIds={[shift.id, ...shift.rest.map(s => s.id)]}
-                  />
-                )}
+                count={shift.count}
+                Custom={() => <props.CustomContent shiftId={shift.id} />}
               />
             ))}
           </Box>
@@ -300,11 +267,7 @@ export interface ShiftDetails {
   name: string;
   startTime: dayjs.Dayjs;
   endTime: dayjs.Dayjs;
-}
-
-interface StackedShiftDetails extends ShiftDetails {
   count: number;
-  rest: ShiftDetails[];
 }
 
 interface ShiftCardProps extends ShiftDetails {
