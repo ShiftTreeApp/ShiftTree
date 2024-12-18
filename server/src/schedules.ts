@@ -900,7 +900,7 @@ export async function getCsv(req: Request, res: Response) {
 
   const results = await pool.query({
     text: /* sql */ `
-      select json_agg(json_build_object(
+      select coalesce(json_agg(json_build_object(
         'name', ua.username,
         'email', ua.email,
         'start_time', (to_json(s.start_time)#>>'{}')||'Z',
@@ -908,7 +908,7 @@ export async function getCsv(req: Request, res: Response) {
         'shift_name', s.shift_name,
         'multi_day', case when s.start_time::date <> s.end_time::date then 'yes' else 'no' end,
         'shift_description', s.shift_description
-      )) as json
+      )), json_build_array()) as json
       from user_shift_assignment as usa
       join shift as s on usa.shift_id = s.id
       join user_account as ua on usa.user_id = ua.id
