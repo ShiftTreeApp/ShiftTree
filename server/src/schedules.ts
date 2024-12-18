@@ -461,22 +461,23 @@ export async function getAssignments(req: Request, res: Response) {
     text: /* sql */ `
       select coalesce(json_agg(json_build_object(
         'shiftId', shift.id,
-        'user', json_build_object(
-          'id', ua.id,
-          'displayName', ua.username,
-          'email', ua.email,
-          'profileImageUrl', ''
+        'users', (
+          select coalesce(json_agg(json_build_object(
+            'id', ua.id,
+            'displayName', ua.username,
+            'email', ua.email,
+            'profileImageUrl', ''
+          )), json_build_array())
+          from user_shift_assignment as usa
+          join user_account as ua on usa.user_id = ua.id
+          where usa.shift_id = shift.id
         )
       )), json_array()) as json
       from shift
-      join user_shift_assignment as usa on shift.id = usa.shift_id
-      join user_account as ua on usa.user_id = ua.id
       where shift.schedule_id = $1
     `,
     values: [scheduleId],
   });
-
-  console.log(results);
 
   res.status(200).json(results.rows[0].json);
 }
@@ -569,7 +570,8 @@ export async function editShift(req: Request, res: Response) {
         start_time = coalesce($2, start_time),
         end_time = coalesce($3, end_time),
         shift_name = coalesce($4, shift_name),
-        shift_description = coalesce($5, shift_description)
+        shift_description = coalesce($5, shift_description),
+        num_slots = coalesce($6, num_slots)
       where id = $1
     `,
     values: [
@@ -578,6 +580,7 @@ export async function editShift(req: Request, res: Response) {
       req.body.endTime,
       req.body.name,
       req.body.description,
+      req.body.numSlots,
     ],
   });
 
