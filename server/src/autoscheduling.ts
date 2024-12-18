@@ -76,6 +76,7 @@ function* expandShifts(shifts: ShiftInfo[]) {
 
 function stripExpandedShiftIds(response: ScheduleResponse): ScheduleResponse {
   return {
+    ...response,
     assignments: response.assignments.map(assignment => ({
       ...assignment,
       shift_id: assignment.shift_id.split("[")[0]!,
@@ -161,7 +162,11 @@ export async function sendShifts(req: Request, res: Response) {
       seed: seed,
     }),
   });
-  const responseData = (await result.json()) as ScheduleResponse;
+  // TODO: The log data should probably have the [n] suffix, but something else
+  // is trying to use it as a uuid and crashing.
+  const responseData = stripExpandedShiftIds(
+    (await result.json()) as ScheduleResponse,
+  );
   console.log(responseData);
   // Not tested, should work but realisitcally need response to make sure there won't be any bugs
   const insertQueryText = `
@@ -171,7 +176,8 @@ export async function sendShifts(req: Request, res: Response) {
   SET requested_weight = $3
   `;
 
-  for (const assignment of stripExpandedShiftIds(responseData).assignments) {
+  for (const assignment of responseData.assignments) {
+    console.log("shift id", assignment.shift_id);
     await pool.query({
       text: insertQueryText,
       values: [
