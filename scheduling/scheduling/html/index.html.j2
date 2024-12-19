@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <style>
+        html,
+        body,
+        div,
+        span,
+        applet,
+        object,
+        iframe,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        blockquote,
+        pre,
+        a,
+        abbr,
+        acronym,
+        address,
+        big,
+        cite,
+        code,
+        del,
+        dfn,
+        em,
+        img,
+        ins,
+        kbd,
+        q,
+        s,
+        samp,
+        small,
+        strike,
+        strong,
+        sub,
+        sup,
+        tt,
+        var,
+        b,
+        u,
+        i,
+        center,
+        dl,
+        dt,
+        dd,
+        ol,
+        ul,
+        li,
+        fieldset,
+        form,
+        label,
+        legend,
+        table,
+        caption,
+        tbody,
+        tfoot,
+        thead,
+        tr,
+        th,
+        td,
+        article,
+        aside,
+        canvas,
+        details,
+        embed,
+        figure,
+        figcaption,
+        footer,
+        header,
+        hgroup,
+        menu,
+        nav,
+        output,
+        ruby,
+        section,
+        summary,
+        time,
+        mark,
+        audio,
+        video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+        }
+
+        /* HTML5 display-role reset for older browsers */
+        article,
+        aside,
+        details,
+        figcaption,
+        figure,
+        footer,
+        header,
+        hgroup,
+        menu,
+        nav,
+        section {
+            display: block;
+        }
+
+        body {
+            line-height: 1;
+        }
+
+        ol,
+        ul {
+            list-style: none;
+        }
+
+        blockquote,
+        q {
+            quotes: none;
+        }
+
+        blockquote:before,
+        blockquote:after,
+        q:before,
+        q:after {
+            content: '';
+            content: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        :root {
+            --bg-color: rgb(15, 15, 19);
+            --border-color: rgb(29, 30, 36);
+            --inactive-color: rgb(10, 10, 10);
+            --light-text: rgb(167, 167, 167);
+        }
+
+        body {
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-top: 8px;
+            background-color: var(--bg-color);
+            color: white;
+        }
+
+        .calendar {
+            border-top: 1px solid var(--border-color);
+            border-left: 1px solid var(--border-color);
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .cell {
+            &.cell-inactive {
+                background-color: var(--inactive-color);
+            }
+
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            .cell-date {
+                font-weight: bold;
+            }
+
+            .cell-shifts {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                padding: 4px;
+
+                .cell-shift {
+                    border: 1px solid var(--border-color);
+                    padding: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+
+                    .shift-id {
+                        &:before {
+                            content: 'shift:';
+                            font-style: italic;
+                            margin-right: 4px;
+                            color: var(--light-text);
+                        }
+                    }
+
+                    .shift-times {
+                        &:before {
+                            content: 'times:';
+                            font-style: italic;
+                            margin-right: 4px;
+                            color: var(--light-text);
+                        }
+                    }
+
+                    .shift-users {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+                        background-color: rgb(28, 35, 46);
+                        padding: 8px;
+                        padding-top: 4px;
+                        padding-bottom: 4px;
+                        border-radius: 6px;
+
+                        .shift-user {
+                            font-size: 0.8em;
+
+                            &:before {
+                                content: 'user:';
+                                font-style: italic;
+                                margin-right: 4px;
+                                color: var(--light-text);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .day-label {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+
+    <div class="calendar">
+        <div class="row">
+            {% for day in ["M", "T", "W", "Th", "F", "S", "Su"] %}
+            <div class="cell">
+                <h1 class="day-label">{{ day }}</h1>
+            </div>
+            {% endfor %}
+        </div>
+        {% for row in rows %}
+        <div class="row">
+            {% for cell in row.cells %}
+            <div class="cell {% if cell.shifts | length == 0 %}cell-inactive{% endif %}">
+                <h1 class="cell-date">{{ cell.day_number }} {{ cell.month_name }}</h1>
+                <div class="cell-shifts">
+                    {% for shift in cell.shifts %}
+                    <div class="cell-shift">
+                        <h2 class="shift-id">{{ shift.id }}</h2>
+                        <p class="shift-times">{{ shift.start }} - {{ shift.end }}</p>
+                        <ul class="shift-users">
+                            {% for user in shift.users %}
+                            <li class="shift-user">{{ user }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+
+</html>

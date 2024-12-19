@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <style>
+        html,
+        body,
+        div,
+        span,
+        applet,
+        object,
+        iframe,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        blockquote,
+        pre,
+        a,
+        abbr,
+        acronym,
+        address,
+        big,
+        cite,
+        code,
+        del,
+        dfn,
+        em,
+        img,
+        ins,
+        kbd,
+        q,
+        s,
+        samp,
+        small,
+        strike,
+        strong,
+        sub,
+        sup,
+        tt,
+        var,
+        b,
+        u,
+        i,
+        center,
+        dl,
+        dt,
+        dd,
+        ol,
+        ul,
+        li,
+        fieldset,
+        form,
+        label,
+        legend,
+        table,
+        caption,
+        tbody,
+        tfoot,
+        thead,
+        tr,
+        th,
+        td,
+        article,
+        aside,
+        canvas,
+        details,
+        embed,
+        figure,
+        figcaption,
+        footer,
+        header,
+        hgroup,
+        menu,
+        nav,
+        output,
+        ruby,
+        section,
+        summary,
+        time,
+        mark,
+        audio,
+        video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+        }
+
+        /* HTML5 display-role reset for older browsers */
+        article,
+        aside,
+        details,
+        figcaption,
+        figure,
+        footer,
+        header,
+        hgroup,
+        menu,
+        nav,
+        section {
+            display: block;
+        }
+
+        body {
+            line-height: 1;
+        }
+
+        ol,
+        ul {
+            list-style: none;
+        }
+
+        blockquote,
+        q {
+            quotes: none;
+        }
+
+        blockquote:before,
+        blockquote:after,
+        q:before,
+        q:after {
+            content: '';
+            content: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        :root {
+            --bg-color: rgb(15, 15, 19);
+            --border-color: rgb(29, 30, 36);
+            --inactive-color: rgb(10, 10, 10);
+            --light-text: rgb(167, 167, 167);
+        }
+
+        body {
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-top: 8px;
+            background-color: var(--bg-color);
+            color: white;
+        }
+
+        .calendar {
+            border-top: 1px solid var(--border-color);
+            border-left: 1px solid var(--border-color);
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .cell {
+            &.cell-inactive {
+                background-color: var(--inactive-color);
+            }
+
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            .cell-date {
+                font-weight: bold;
+            }
+
+            .cell-shifts {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                padding: 4px;
+
+                .cell-shift {
+                    border: 1px solid var(--border-color);
+                    padding: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+
+                    .shift-id {
+                        &:before {
+                            content: 'shift:';
+                            font-style: italic;
+                            margin-right: 4px;
+                            color: var(--light-text);
+                        }
+                    }
+
+                    .shift-times {
+                        &:before {
+                            content: 'times:';
+                            font-style: italic;
+                            margin-right: 4px;
+                            color: var(--light-text);
+                        }
+                    }
+
+                    .shift-users {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+                        background-color: rgb(28, 35, 46);
+                        padding: 8px;
+                        padding-top: 4px;
+                        padding-bottom: 4px;
+                        border-radius: 6px;
+
+                        .shift-user {
+                            font-size: 0.8em;
+
+                            &:before {
+                                content: 'user:';
+                                font-style: italic;
+                                margin-right: 4px;
+                                color: var(--light-text);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .day-label {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+
+    <div class="calendar">
+        <div class="row">
+            
+            <div class="cell">
+                <h1 class="day-label">M</h1>
+            </div>
+            
+            <div class="cell">
+                <h1 class="day-label">T</h1>
+            </div>
+            
+            <div class="cell">
+                <h1 class="day-label">W</h1>
+            </div>
+            
+            <div class="cell">
+                <h1 class="day-label">Th</h1>
+            </div>
+            
+            <div class="cell">
+                <h1 class="day-label">F</h1>
+            </div>
+            
+            <div class="cell">
+                <h1 class="day-label">S</h1>
+            </div>
+            
+            <div class="cell">
+                <h1 class="day-label">Su</h1>
+            </div>
+            
+        </div>
+        
+        <div class="row">
+            
+            <div class="cell cell-inactive">
+                <h1 class="cell-date">30 Dec</h1>
+                <div class="cell-shifts">
+                    
+                </div>
+            </div>
+            
+            <div class="cell cell-inactive">
+                <h1 class="cell-date">31 Dec</h1>
+                <div class="cell-shifts">
+                    
+                </div>
+            </div>
+            
+            <div class="cell ">
+                <h1 class="cell-date">1 Jan</h1>
+                <div class="cell-shifts">
+                    
+                    <div class="cell-shift">
+                        <h2 class="shift-id">a1</h2>
+                        <p class="shift-times">09:00 - 17:00</p>
+                        <ul class="shift-users">
+                            
+                            <li class="shift-user">e2</li>
+                            
+                        </ul>
+                    </div>
+                    
+                    <div class="cell-shift">
+                        <h2 class="shift-id">a2</h2>
+                        <p class="shift-times">09:00 - 17:00</p>
+                        <ul class="shift-users">
+                            
+                            <li class="shift-user">e1</li>
+                            
+                        </ul>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="cell cell-inactive">
+                <h1 class="cell-date">2 Jan</h1>
+                <div class="cell-shifts">
+                    
+                </div>
+            </div>
+            
+            <div class="cell cell-inactive">
+                <h1 class="cell-date">3 Jan</h1>
+                <div class="cell-shifts">
+                    
+                </div>
+            </div>
+            
+            <div class="cell cell-inactive">
+                <h1 class="cell-date">4 Jan</h1>
+                <div class="cell-shifts">
+                    
+                </div>
+            </div>
+            
+            <div class="cell cell-inactive">
+                <h1 class="cell-date">5 Jan</h1>
+                <div class="cell-shifts">
+                    
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+</body>
+
+</html>
