@@ -10,6 +10,12 @@ import {
   MenuItem,
   Chip,
   Avatar,
+  Checkbox,
+  ListItemAvatar,
+  ListItemText,
+  ListItemButton,
+  ListItem,
+  List,
 } from "@mui/material";
 import React from "react";
 import dayjs from "dayjs";
@@ -19,6 +25,7 @@ import {
   Save as SaveIcon,
   AutoMode as GenerateSchedule,
   CloudDownload as DownloadIcon,
+  Man,
 } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import "dayjs/locale/en";
@@ -46,6 +53,7 @@ import { CustomTooltip } from "@/customComponents/CustomTooltip";
 interface EditShiftsTabProps {
   scheduleId: string;
 }
+// Default Code
 
 export default function EditShiftsTab(props: EditShiftsTabProps) {
   const { scheduleId } = props;
@@ -314,7 +322,6 @@ interface EditShiftProps {
 
 function EditShift(props: EditShiftProps) {
   const notifier = useNotifier();
-
   const schedule = useSchedule({ scheduleId: props.scheduleId });
   const shift = schedule.useShift({ shiftId: props.shiftId });
 
@@ -435,6 +442,11 @@ function EditShift(props: EditShiftProps) {
       <Typography sx={{ fontWeight: "bold" }}>Registered Members</Typography>
       {/* Chips for users that are signed up */}
       <UserChips scheduleId={props.scheduleId} shiftId={props.shiftId} />
+      {/* CHECKBOX GOES HERE */}
+      <ManuallyAddEmployees
+        scheduleId={props.scheduleId}
+        shiftId={props.shiftId}
+      />
       <Divider sx={{ paddingTop: 1, paddingBottom: 1 }} />
       <Typography sx={{ fontWeight: "bold" }}>Edit Shift</Typography>
       <Box sx={{ display: "flex", gap: 1 }}>
@@ -600,6 +612,72 @@ function UserChips(props: UserChipsProps) {
         );
       })}
     </Box>
+  );
+}
+
+interface ManuallyAddEmployeesInterface {
+  scheduleId: string;
+  shiftId: string;
+}
+
+function ManuallyAddEmployees(props: ManuallyAddEmployeesInterface) {
+  const [checked, setChecked] = React.useState([1]);
+  const api = useApi();
+
+  // Need to fetch list of members and boolean for whether they are assigned to the shift or not.
+  const { data: scheduleSignups } = api.useQuery(
+    "get",
+    "/schedules/{scheduleId}/signups",
+    { params: { path: { scheduleId: props.scheduleId as string } } },
+  );
+
+  const handleToggle = (value: number) => () => {
+    // On toggle should either register or unregister the user
+    const currentIndex = checked.indexOf(value);
+    const newChecked = [...checked];
+
+    if (currentIndex === -1) {
+      newChecked.push(value);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+
+    setChecked(newChecked);
+  };
+
+  return (
+    <List
+      dense
+      sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+    >
+      {[0, 1, 2, 3].map(value => {
+        const labelId = `checkbox-list-secondary-label-${value}`;
+        return (
+          <ListItem
+            key={value}
+            secondaryAction={
+              <Checkbox
+                edge="end"
+                onChange={handleToggle(value)}
+                checked={checked.includes(value)}
+                inputProps={{ "aria-labelledby": labelId }}
+              />
+            }
+            disablePadding
+          >
+            <ListItemButton>
+              <ListItemAvatar>
+                <Avatar
+                  alt={`Avatar n°${value + 1}`}
+                  src={`/static/images/avatar/${value + 1}.jpg`}
+                />
+              </ListItemAvatar>
+              <ListItemText id={labelId} primary={`Line item ${value + 1}`} />
+            </ListItemButton>
+          </ListItem>
+        );
+      })}
+    </List>
   );
 }
 
