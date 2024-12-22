@@ -1,0 +1,122 @@
+shift_gap = "PT24H"
+seed = 1337
+
+[shifts.11]
+start_time = "2025-01-06 09:00"
+end_time = "2025-01-06 17:00"
+
+[shifts.12]
+start_time = "2025-01-07 09:00"
+end_time = "2025-01-07 17:00"
+
+[shifts.13]
+start_time = "2025-01-08 09:00"
+end_time = "2025-01-08 17:00"
+
+[shifts.14]
+start_time = "2025-01-09 09:00"
+end_time = "2025-01-09 17:00"
+
+[shifts.15]
+start_time = "2025-01-10 09:00"
+end_time = "2025-01-10 17:00"
+
+
+[shifts.21]
+start_time = "2025-01-13 09:00"
+end_time = "2025-01-13 17:00"
+
+[shifts.22]
+start_time = "2025-01-14 09:00"
+end_time = "2025-01-14 17:00"
+
+[shifts.23]
+start_time = "2025-01-15 09:00"
+end_time = "2025-01-15 17:00"
+
+[shifts.24]
+start_time = "2025-01-16 09:00"
+end_time = "2025-01-16 17:00"
+
+[shifts.25]
+start_time = "2025-01-17 09:00"
+end_time = "2025-01-17 17:00"
+
+[shifts.31]
+start_time = "2025-01-20 09:00"
+end_time = "2025-01-20 17:00"
+
+[shifts.32]
+start_time = "2025-01-21 09:00"
+end_time = "2025-01-21 17:00"
+
+[shifts.33]
+start_time = "2025-01-22 09:00"
+end_time = "2025-01-22 17:00"
+
+[shifts.34]
+start_time = "2025-01-23 09:00"
+end_time = "2025-01-23 17:00"
+
+[shifts.35]
+start_time = "2025-01-24 09:00"
+end_time = "2025-01-24 17:00"
+
+[shifts.41]
+start_time = "2025-01-27 09:00"
+end_time = "2025-01-27 17:00"
+
+[shifts.42]
+start_time = "2025-01-28 09:00"
+end_time = "2025-01-28 17:00"
+
+[shifts.43]
+start_time = "2025-01-29 09:00"
+end_time = "2025-01-29 17:00"
+
+[shifts.44]
+start_time = "2025-01-30 09:00"
+end_time = "2025-01-30 17:00"
+
+[shifts.45]
+start_time = "2025-01-31 09:00"
+end_time = "2025-01-31 17:00"
+
+[employees.a.requests.11]
+[employees.a.requests.21]
+[employees.a.requests.31]
+[employees.a.requests.43]
+
+[employees.b.requests.11]
+[employees.b.requests.22]
+[employees.b.requests.32]
+[employees.b.requests.42]
+
+[employees.c.requests.13]
+[employees.c.requests.23]
+
+[employees.d.requests.33]
+[employees.d.requests.43]
+
+[employees.e.requests.14]
+[employees.e.requests.24]
+[employees.e.requests.34]
+
+[employees.f.requests.15]
+[employees.f.requests.25]
+
+[employees.g.requests.35]
+[employees.g.requests.44]
+[employees.g.requests.45]
+
+[employees.h.requests.24]
+[employees.h.requests.34]
+
+[employees.i.requests.11]
+
+[employees.j.requests.12]
+
+[employees.k.requests.44]
+
+[employees.l.requests.15]
+[employees.l.requests.25]
