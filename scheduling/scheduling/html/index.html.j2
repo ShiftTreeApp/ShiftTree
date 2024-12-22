@@ -241,6 +241,23 @@
             font-size: 1.2em;
             font-weight: bold;
         }
+
+        .chosen-user {
+            background-color: rgba(124, 71, 108, 0.45)
+        }
+
+        .requester-list {
+            &:before {
+                content: 'requested by:';
+                font-style: italic;
+                margin-right: 4px;
+                color: var(--light-text);
+            }
+
+            span {
+                font-family: monospace;
+            }
+        }
     </style>
 
     <div class="calendar">
@@ -266,6 +283,11 @@
                             <li class="shift-user">{{ user }}</li>
                             {% endfor %}
                         </ul>
+                        <p class="requester-list">
+                            {% for user_id in shift.requested_by | join(", ") %}
+                            <span {% if user_id in shift.users %}class="chosen-user" {% endif %}>{{ user_id }}</span>
+                            {% endfor %}
+                        </p>
                     </div>
                     {% endfor %}
                 </div>

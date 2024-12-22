@@ -25,6 +25,7 @@ class ShiftEvent(BaseModel):
     end: str
     end_day: str | None
     users: Sequence[str]
+    requested_by: list[str]
 
 
 class CalendarCell(BaseModel):
@@ -75,6 +76,16 @@ def render_schedule(
                 users=[
                     a.user_id for a in response.assignments if a.shift_id == shift_id
                 ],
+                requested_by=list(
+                    set(
+                        [
+                            eid
+                            for eid, e in request.employees.items()
+                            for r_shift_id in e.requests
+                            if r_shift_id == shift_id
+                        ]
+                    )
+                ),
             )
             for shift_ymd, shift_id, shift, dt in shifts_with_day
             if shift_ymd == ymd
